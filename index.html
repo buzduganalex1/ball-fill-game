@@ -5973,13 +5973,6 @@ body.packOpen{overflow:hidden!important}
     };
   }
 
-  function pointerLift(ev){
-    const rect=canvas.getBoundingClientRect();
-    const isTouch=ev.pointerType==='touch' || !!ev.touches;
-    const cssLift=isTouch ? 82 : 20;
-    return cssLift*H/rect.height;
-  }
-
   function startBall(ev){
     if(state?.tutorialActive){
       dismissLevelOneTutorial();
@@ -5992,7 +5985,6 @@ body.packOpen{overflow:hidden!important}
     {
       const typeData=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
       const startR=BALL_MIN*(typeData.startSizeMult || 1);
-      const lift=pointerLift(ev);
       const isTouch=ev.pointerType==='touch' || !!ev.touches;
       const startX=Math.max(startR,Math.min(W-startR,p.x));
       const startY=Math.max(startR,Math.min(H-startR,p.y));
@@ -6003,14 +5995,9 @@ body.packOpen{overflow:hidden!important}
         pointerTargetY:startY,
         pointerStartX:startX,
         pointerStartY:startY,
-        pointerLift:lift,
         pointerMoveThreshold:6*H/canvas.getBoundingClientRect().height,
-        pointerLiftActive:false,
-        pointerFollowAge:0,
-        followStartRate:isTouch ? 38 : 16,
-        followEndRate:isTouch ? 7.5 : 16,
-        followBlendDuration:isTouch ? .7 : .12,
-        liftBlendDuration:isTouch ? .42 : .12,
+        pointerFollowActive:false,
+        followRate:isTouch ? 20 : 24,
         r:startR,
         startR,
         alive:true,
@@ -6060,26 +6047,19 @@ body.packOpen{overflow:hidden!important}
     ev.preventDefault();
     const p=pointerPos(ev);
     const b=state.active;
-    if(!b.pointerLiftActive){
-      b.pointerLiftActive=dist(p.x,p.y,b.pointerStartX,b.pointerStartY)>=b.pointerMoveThreshold;
-      if(b.pointerLiftActive) b.pointerFollowAge=0;
+    if(!b.pointerFollowActive){
+      b.pointerFollowActive=dist(p.x,p.y,b.pointerStartX,b.pointerStartY)>=b.pointerMoveThreshold;
     }
     b.pointerTargetX=p.x;
     b.pointerTargetY=p.y;
   }
 
   function followPointerTarget(ball,dt){
-    if(!ball.pointerLiftActive) return;
+    if(!ball.pointerFollowActive) return;
 
-    ball.pointerFollowAge=(ball.pointerFollowAge||0)+dt;
-    const followProgress=Math.min(1,ball.pointerFollowAge/(ball.followBlendDuration||.7));
-    const liftProgress=Math.min(1,ball.pointerFollowAge/(ball.liftBlendDuration||.42));
-    const followBlend=followProgress*followProgress*(3-2*followProgress);
-    const liftBlend=liftProgress*liftProgress*(3-2*liftProgress);
-    const followRate=(ball.followStartRate||16)+((ball.followEndRate||7.5)-(ball.followStartRate||16))*followBlend;
     const targetX=Math.max(ball.r,Math.min(W-ball.r,ball.pointerTargetX));
-    const targetY=Math.max(ball.r,Math.min(H-ball.r,ball.pointerTargetY-ball.pointerLift*liftBlend));
-    const follow=1-Math.exp(-followRate*dt);
+    const targetY=Math.max(ball.r,Math.min(H-ball.r,ball.pointerTargetY));
+    const follow=1-Math.exp(-(ball.followRate||20)*dt);
     const nextX=ball.x+(targetX-ball.x)*follow;
     const nextY=ball.y+(targetY-ball.y)*follow;
 
