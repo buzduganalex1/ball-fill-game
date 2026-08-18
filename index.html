@@ -6264,6 +6264,198 @@ body:has(#collectionScreen.active) #quickCollection.active{
   58%{opacity:1;transform:translateY(-.2rem) scale(1.015)}
   100%{opacity:1;transform:translateY(0) scale(1)}
 }
+
+/* Collection-style reward card inside the pack-opening room. */
+.packModal:has(.rewardReveal.show){
+  justify-content:flex-start;
+  gap:.45rem;
+  padding:1rem;
+  background:linear-gradient(180deg,#f8fbfc,#edf3f5);
+}
+.packModal:has(.rewardReveal.show) .packTitle{
+  margin:.2rem 0 0;
+  color:#314840;
+  font-size:1.75rem;
+  line-height:1;
+}
+.packModal:has(.rewardReveal.show) .packSub{
+  margin:0 0 .15rem;
+}
+.rewardReveal.show{
+  --reward-accent:#85a9ba;
+  position:relative;
+  isolation:isolate;
+  flex:1 1 auto;
+  width:100%;
+  max-width:22rem;
+  min-height:0;
+  padding:.85rem;
+  gap:.48rem;
+  justify-content:center;
+  overflow:visible;
+  border:.18rem solid var(--reward-accent);
+  border-radius:1.45rem;
+  background:
+    radial-gradient(circle at 50% 20%,color-mix(in srgb,var(--reward-accent) 15%,transparent),transparent 42%),
+    linear-gradient(150deg,#fff,color-mix(in srgb,var(--reward-accent) 7%,#f7fafb));
+  box-shadow:
+    inset 0 0 0 .12rem color-mix(in srgb,var(--reward-accent) 30%,#e4ecef),
+    0 .3rem 0 color-mix(in srgb,var(--reward-accent) 58%,#8799a1),
+    0 .8rem 1.6rem rgba(42,63,72,.16),
+    0 0 1.1rem color-mix(in srgb,var(--reward-accent) 28%,transparent);
+}
+.rewardReveal.show::before{
+  content:'';
+  position:absolute;
+  inset:.38rem;
+  z-index:-1;
+  border:.07rem solid color-mix(in srgb,var(--reward-accent) 46%,white);
+  border-radius:1.05rem;
+  pointer-events:none;
+}
+.rewardReveal.show .rewardBall{
+  width:clamp(7.6rem,31vw,9.4rem);
+  height:clamp(7.6rem,31vw,9.4rem);
+  border-width:0;
+  filter:drop-shadow(0 0 .8rem color-mix(in srgb,var(--reward-accent) 52%,transparent)) drop-shadow(0 .55rem .55rem rgba(40,65,76,.2));
+}
+.rewardReveal.show .rewardName{
+  color:#304854;
+  font-size:1.62rem;
+  line-height:1;
+}
+.rewardReveal.show .rewardCopy{gap:.3rem}
+.rewardReveal.show .rewardRarity{
+  color:color-mix(in srgb,var(--reward-accent) 72%,#304854);
+  background:color-mix(in srgb,var(--reward-accent) 12%,white);
+  border:.07rem solid color-mix(in srgb,var(--reward-accent) 52%,white);
+  font-size:.78rem;
+}
+.rewardReveal.show .rewardDesc{
+  max-width:95%;
+  color:#5a707c;
+  font-size:.88rem;
+  line-height:1.25;
+}
+.packRewardBenefit{
+  width:100%;
+  min-height:2.8rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.65rem;
+  padding:.58rem .72rem;
+  border:.11rem solid color-mix(in srgb,var(--reward-accent) 42%,#cedbe0);
+  border-radius:.75rem;
+  color:#6a7f8a;
+  background:color-mix(in srgb,var(--reward-accent) 7%,#f7fafb);
+  font-size:.7rem;
+  line-height:1.1;
+  font-weight:1000;
+}
+.packRewardBenefit span{letter-spacing:.06em}
+.packRewardBenefit strong{
+  color:color-mix(in srgb,var(--reward-accent) 72%,#304854);
+  text-align:right;
+}
+.packEquipReward{
+  width:100%;
+  min-height:3.15rem;
+  flex:none;
+  color:white;
+  background:linear-gradient(180deg,#5bd078 0,#35b75a 58%,#238d43 100%);
+  border:.14rem solid #247c3e;
+  border-radius:.8rem;
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.45),0 .24rem 0 #1d6d35,0 0 .75rem rgba(47,178,86,.24);
+  font-size:.92rem;
+  text-shadow:0 .1rem 0 #1e7037;
+}
+.packEquipReward.equippedButton{
+  color:#65480d;
+  background:linear-gradient(180deg,#fff8cf,#f7d76b 58%,#e6ad2f);
+  border-color:#c78c1c;
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.72),0 .22rem 0 #a97515,0 0 .8rem rgba(231,177,46,.3);
+  text-shadow:0 .08rem 0 rgba(255,255,255,.62);
+  opacity:1;
+}
+.packModal:has(.rewardReveal.show) .packAfterActions{
+  flex:none;
+  flex-wrap:nowrap;
+  width:100%;
+  margin-top:.25rem;
+  gap:.55rem;
+}
+.packModal:has(.rewardReveal.show) .packContinue,
+.packModal:has(.rewardReveal.show) .buyAnotherPack{
+  flex:1 1 0;
+  width:auto;
+  min-width:0;
+  min-height:3.2rem;
+  padding:.55rem .5rem;
+  font-size:.82rem;
+  line-height:1.05;
+}
+.packEquipConfirmation{
+  position:absolute;
+  left:50%;
+  top:50%;
+  z-index:25;
+  width:max-content;
+  max-width:90%;
+  padding:.68rem 1rem;
+  border:.13rem solid #c88d1c;
+  border-radius:999rem;
+  color:#60430c;
+  background:linear-gradient(180deg,#fffde8,#f4cf58);
+  box-shadow:inset 0 .12rem 0 #fff,0 .28rem 0 #a87516,0 .6rem 1.4rem rgba(78,57,13,.25);
+  font-size:.84rem;
+  font-weight:1000;
+  text-align:center;
+  pointer-events:none;
+  animation:packEquipConfirmationPop 1s cubic-bezier(.16,.88,.22,1.2) both;
+}
+.packEquipSpark{
+  position:fixed;
+  left:var(--burst-x,50%);
+  top:var(--burst-y,50%);
+  z-index:230;
+  width:.62rem;
+  height:.62rem;
+  border-radius:40%;
+  color:var(--particle-color,#4fcf79);
+  background:currentColor;
+  box-shadow:0 0 .75rem currentColor;
+  pointer-events:none;
+  animation:purchaseParticleBurst var(--particle-duration,.82s) cubic-bezier(.12,.72,.22,1) var(--particle-delay,0ms) both;
+}
+@keyframes packEquipConfirmationPop{
+  0%{opacity:0;transform:translate(-50%,30%) scale(.52) rotate(-4deg)}
+  28%,70%{opacity:1;transform:translate(-50%,-50%) scale(1.06) rotate(0)}
+  100%{opacity:0;transform:translate(-50%,-80%) scale(.95)}
+}
+@media(max-height:43.75rem) and (orientation:portrait){
+  .packModal:has(.rewardReveal.show){padding:.62rem;gap:.25rem}
+  .packModal:has(.rewardReveal.show) .packTitle{font-size:1.3rem}
+  .packModal:has(.rewardReveal.show) .packSub{
+    padding:.3rem .75rem;
+    font-size:.82rem;
+  }
+  .rewardReveal.show{padding:.58rem;gap:.3rem}
+  .rewardReveal.show .rewardBall{
+    width:clamp(5.6rem,22dvh,7.25rem);
+    height:clamp(5.6rem,22dvh,7.25rem);
+  }
+  .rewardReveal.show .rewardName{font-size:1.25rem}
+  .rewardReveal.show .rewardRarity{font-size:.66rem}
+  .rewardReveal.show .rewardDesc{font-size:.72rem;line-height:1.15}
+  .packRewardBenefit{min-height:2.3rem;padding:.4rem .58rem;font-size:.62rem}
+  .packEquipReward{min-height:2.7rem;font-size:.8rem}
+  .packModal:has(.rewardReveal.show) .packContinue,
+  .packModal:has(.rewardReveal.show) .buyAnotherPack{
+    min-height:2.8rem;
+    font-size:.72rem;
+  }
+}
 @media(prefers-reduced-motion:reduce){
   #storeScreen.purchaseScreenShake,
   #storeScreen .purchaseBoom,
@@ -6287,7 +6479,9 @@ body:has(#collectionScreen.active) #quickCollection.active{
   #storeScreen.packTransitionOut .menuApp,
   .storeFxLayer.packPortalTransition::after,
   .packOverlay.packTransitionIn,
-  .packOverlay.packTransitionIn .packModal{animation-duration:.01ms!important;animation-iteration-count:1!important}
+  .packOverlay.packTransitionIn .packModal,
+  .packEquipConfirmation,
+  .packEquipSpark{animation-duration:.01ms!important;animation-iteration-count:1!important}
 }
 
 </style>
@@ -6794,10 +6988,15 @@ body:has(#collectionScreen.active) #quickCollection.active{
         <div class="rewardRarity" id="rewardRarity">COMMON BALL</div>
         <div class="rewardDesc" id="rewardDesc">Reliable standard ball.</div>
       </div>
+      <div class="packRewardBenefit">
+        <span>WHAT IT GIVES</span>
+        <strong id="rewardBenefit">BALANCED GROWTH</strong>
+      </div>
+      <button class="equipButton packEquipReward" id="packEquipReward">EQUIP</button>
     </div>
 
     <div class="packAfterActions">
-      <button class="primary buyAnotherPack" id="buyAnotherPack">BUY + OPEN ANOTHER • ◉ 25</button>
+      <button class="primary buyAnotherPack" id="buyAnotherPack">BUY ANOTHER</button>
       <button class="packContinue" id="packContinue">PLAY</button>
     </div>
   </div>
@@ -6956,6 +7155,8 @@ body:has(#collectionScreen.active) #quickCollection.active{
     rewardName: document.getElementById('rewardName'),
     rewardRarity: document.getElementById('rewardRarity'),
     rewardDesc: document.getElementById('rewardDesc'),
+    rewardBenefit: document.getElementById('rewardBenefit'),
+    packEquipReward: document.getElementById('packEquipReward'),
     buyAnotherPack: document.getElementById('buyAnotherPack'),
     packContinue: document.getElementById('packContinue'),
 
@@ -8240,9 +8441,8 @@ body:has(#collectionScreen.active) #quickCollection.active{
 
     const canChainPack=activePackMode==='paid' && walletCoins>=PACK_PRICE;
     ui.buyAnotherPack.disabled=!canChainPack;
-    ui.buyAnotherPack.textContent=canChainPack
-      ? `BUY + OPEN ANOTHER • ◉ ${PACK_PRICE}`
-      : `NEED ${Math.max(0,PACK_PRICE-walletCoins)} MORE COINS`;
+    ui.buyAnotherPack.textContent='BUY ANOTHER';
+    ui.buyAnotherPack.setAttribute('aria-label',`Buy another pack for ${PACK_PRICE} coins`);
   }
 
   function showScreen(name){
@@ -8412,6 +8612,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
     ui.packFxLayer.style.setProperty('--burst-x',`${centerX}px`);
     ui.packFxLayer.style.setProperty('--burst-y',`${centerY}px`);
     ui.packModal.style.setProperty('--reveal-color',revealColor);
+    ui.rewardReveal.style.setProperty('--reward-accent',revealColor);
     void ui.packFxLayer.offsetWidth;
 
     ui.packFxLayer.classList.add('openingBurst');
@@ -8453,6 +8654,78 @@ body:has(#collectionScreen.active) #quickCollection.active{
     },1650);
   }
 
+  function updatePackEquipButton(){
+    const canEquip=!!activePackReward && ownedBalls.has(activePackReward);
+    const equipped=canEquip && selectedBallType===activePackReward;
+
+    ui.packEquipReward.disabled=!canEquip || equipped;
+    ui.packEquipReward.classList.toggle('equippedButton',equipped);
+    ui.packEquipReward.textContent=equipped ? '✓ EQUIPPED' : 'EQUIP';
+    ui.packEquipReward.setAttribute('aria-pressed',equipped ? 'true' : 'false');
+  }
+
+  function celebratePackRewardEquip(type){
+    sfx('purchase');
+    const data=BALL_TYPES[type] || BALL_TYPES.normal;
+    const ballRect=ui.rewardBall.getBoundingClientRect();
+    const centerX=ballRect.left+ballRect.width/2;
+    const centerY=ballRect.top+ballRect.height/2;
+
+    ui.rewardReveal.querySelectorAll('.packEquipConfirmation').forEach(el=>el.remove());
+    ui.packFxLayer.querySelectorAll('.packEquipSpark').forEach(el=>el.remove());
+
+    ui.rewardReveal.animate([
+      {transform:'scale(1)',filter:'brightness(1)'},
+      {transform:'scale(1.035)',filter:'brightness(1.13)',offset:.34},
+      {transform:'scale(1)',filter:'brightness(1)'}
+    ],{duration:880,easing:'cubic-bezier(.18,.84,.25,1)'});
+    ui.rewardBall.animate([
+      {transform:'translateY(0) scale(1)'},
+      {transform:'translateY(-10px) scale(1.16)',filter:'brightness(1.25)',offset:.38},
+      {transform:'translateY(0) scale(1)',filter:'brightness(1)'}
+    ],{duration:820,easing:'cubic-bezier(.16,.88,.22,1.22)'});
+    ui.packEquipReward.animate([
+      {transform:'scale(1)'},
+      {transform:'scale(1.08)',offset:.35},
+      {transform:'scale(1)'}
+    ],{duration:620,easing:'cubic-bezier(.16,.88,.22,1.2)'});
+
+    const badge=document.createElement('div');
+    badge.className='packEquipConfirmation';
+    badge.setAttribute('role','status');
+    badge.textContent=`✓ ${data.name.toUpperCase()} EQUIPPED!`;
+    ui.rewardReveal.appendChild(badge);
+
+    radialJuiceBurst(
+      ui.packFxLayer,
+      'packEquipSpark',
+      28,
+      centerX,
+      centerY,
+      ['#4fcf79','#f4cf58','#ffffff','#73d5ff'],
+      60,
+      155
+    );
+    if(navigator.vibrate) navigator.vibrate([18,24,35]);
+
+    setTimeout(()=>{
+      badge.remove();
+      ui.packFxLayer.querySelectorAll('.packEquipSpark').forEach(el=>el.remove());
+    },1100);
+  }
+
+  function equipPackReward(){
+    if(!activePackReward || !ownedBalls.has(activePackReward) || selectedBallType===activePackReward) return;
+
+    const equippedType=activePackReward;
+    selectedBallType=equippedType;
+    collectionPreviewType=equippedType;
+    updateCollectionUI();
+    syncUI();
+    updatePackEquipButton();
+    celebratePackRewardEquip(equippedType);
+  }
+
   function showPackOverlay(mode){
     packCelebrationToken++;
     activePackMode=mode;
@@ -8473,9 +8746,15 @@ body:has(#collectionScreen.active) #quickCollection.active{
     ui.packContinue.classList.remove('show');
     ui.buyAnotherPack.classList.remove('show');
     ui.buyAnotherPack.disabled=false;
+    ui.packEquipReward.classList.remove('equippedButton');
+    ui.packEquipReward.disabled=true;
+    ui.packEquipReward.textContent='EQUIP';
+    ui.packEquipReward.setAttribute('aria-pressed','false');
+    ui.rewardBenefit.textContent='BALANCED GROWTH';
     ui.packFxLayer.classList.remove('openingBurst','preRevealCharge');
     ui.packModal.classList.remove('revealBoom','packAnticipation');
-    ui.packFxLayer.querySelectorAll('.shopConfetti,.packDropBanner,.packMegaSpark').forEach(el=>el.remove());
+    ui.packFxLayer.querySelectorAll('.shopConfetti,.packDropBanner,.packMegaSpark,.packEquipSpark').forEach(el=>el.remove());
+    ui.rewardReveal.querySelectorAll('.packEquipConfirmation').forEach(el=>el.remove());
 
     if(mode==='starter'){
       ui.packTitle.textContent='FREE STARTER PACK';
@@ -8547,6 +8826,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
       ui.rewardName.textContent=rewardData.name.toUpperCase();
       ui.rewardRarity.textContent=`${rewardData.rarity.toUpperCase()} BALL`;
       ui.rewardDesc.textContent=rewardData.desc;
+      ui.rewardBenefit.textContent=BALL_BENEFITS[activePackReward] || 'SPECIAL POWER';
 
       const wasOwned=ownedBalls.has(activePackReward);
       ownedBalls.add(activePackReward);
@@ -8566,6 +8846,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
 
       updateCollectionUI();
       syncUI();
+      updatePackEquipButton();
     },860);
   }
 
@@ -8616,7 +8897,8 @@ body:has(#collectionScreen.active) #quickCollection.active{
     ui.rewardReveal.classList.remove('show','megaReveal');
     ui.packContinue.classList.remove('show');
     ui.buyAnotherPack.classList.remove('show');
-    ui.packFxLayer.querySelectorAll('.shopConfetti,.packDropBanner,.packMegaSpark').forEach(el=>el.remove());
+    ui.packFxLayer.querySelectorAll('.shopConfetti,.packDropBanner,.packMegaSpark,.packEquipSpark').forEach(el=>el.remove());
+    ui.rewardReveal.querySelectorAll('.packEquipConfirmation').forEach(el=>el.remove());
 
     activePackMode=null;
     activePackReward=null;
@@ -10742,6 +11024,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
   ui.buyGaiaBall.addEventListener('click',()=>buyImpossibleBall('gaia'));
 
   ui.bigPack.addEventListener('click',openCurrentPack);
+  ui.packEquipReward.addEventListener('click',equipPackReward);
   ui.buyAnotherPack.addEventListener('click',buyAnotherPackFromReveal);
   ui.packContinue.addEventListener('click',closePackOverlay);
 
