@@ -361,6 +361,30 @@ h1,h2,p{margin:0}
   touch-action:none;
 }
 canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
+.boardWrap.speedRushLevel #game{
+  border-color:#ef9f25;
+  animation:speedRushArenaPulse 1.15s ease-in-out infinite;
+}
+.boardWrap.miniBossLevel #game{
+  border-color:#d45264;
+  animation:miniBossArenaPulse 1.35s ease-in-out infinite;
+}
+#levelChallenge.speedRushLevel{
+  color:#ad5a08;
+  text-shadow:0 0 .65rem rgba(255,183,55,.38);
+}
+#levelChallenge.miniBossLevel{
+  color:#a4273e;
+  text-shadow:0 0 .7rem rgba(255,84,111,.32);
+}
+@keyframes speedRushArenaPulse{
+  0%,100%{box-shadow:inset 0 0 0 rgba(255,174,42,0)}
+  50%{box-shadow:inset 0 0 1.4rem rgba(255,174,42,.28),0 0 .8rem rgba(255,174,42,.2)}
+}
+@keyframes miniBossArenaPulse{
+  0%,100%{box-shadow:inset 0 0 .35rem rgba(221,56,82,.15)}
+  50%{box-shadow:inset 0 0 1.65rem rgba(221,56,82,.3),0 0 .95rem rgba(221,56,82,.24)}
+}
 
 /* arena overlays — deliberate positioning exception */
 .overlay,.tutorialCoach{
@@ -804,8 +828,9 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   font-size:.8125rem;
   animation:utilityIn .25s ease-out both;
 }
-.utilitySound{animation-delay:.05s}
-.utilityAdmin{animation-delay:.10s}
+.utilityCollection{animation-delay:.05s}
+.utilitySound{animation-delay:.10s}
+.utilityAdmin{animation-delay:.15s}
 @keyframes utilityIn{
   from{transform:translateY(1.875rem) scale(.8);opacity:0}
   to{transform:translateY(0) scale(1);opacity:1}
@@ -1811,6 +1836,16 @@ body.packOpen{overflow:hidden!important}
 }
 .packContinue{display:none;min-width:8.75rem}
 .packContinue.show{display:flex}
+.packContinue.packPlayButton{
+  color:white;
+  border-color:#23783b;
+  background:linear-gradient(180deg,#5bd37a 0,#36b75a 56%,#22853f 100%);
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.42),0 .25rem 0 #1c6934,0 .45rem .75rem rgba(31,108,54,.18);
+  text-shadow:0 .1rem 0 #1d6c36;
+}
+.packContinue.packPlayButton:active{
+  box-shadow:inset 0 .08rem 0 rgba(255,255,255,.32),0 .06rem 0 #1c6934;
+}
 .buyAnotherPack{
   display:none;
   min-width:11.875rem;
@@ -2300,13 +2335,29 @@ body.packOpen{overflow:hidden!important}
   height:3.0625rem;
   display:flex;
   border-radius:50%;
-  border:.1875rem solid #2f88b0;
-  background:
-    radial-gradient(circle at 34% 28%,#9bdbf2 0 13%,transparent 14%),
-    radial-gradient(circle at 38% 32%,#69bddf 0 18%,#54a9ce 44%,#378bb3 78%);
-  box-shadow:
-    inset -.3125rem -.375rem .5rem rgba(31,93,123,.18),
-    0 .25rem .5rem rgba(45,109,139,.18);
+  border:0;
+  background-color:transparent;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+  filter:drop-shadow(0 .24rem .24rem rgba(34,79,99,.22));
+}
+
+.hudCollectionButton{
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .12s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.hudCollectionButton:hover,
+.hudCollectionButton:focus-visible{
+  border-color:#7bbdd5;
+  box-shadow:0 .3125rem 0 #a9c7d3,0 .5rem 1rem rgba(45,91,116,.14),0 0 0 .12rem rgba(102,190,221,.18);
+}
+.hudCollectionButton:focus-visible{outline:.16rem solid #45acd2;outline-offset:.12rem}
+.hudCollectionButton:active{
+  transform:translateY(.16rem);
+  box-shadow:0 .12rem 0 #a9c7d3,0 .24rem .5rem rgba(45,91,116,.12);
 }
 
 .hudTimerVisual{
@@ -4733,7 +4784,8 @@ body.packOpen{overflow:hidden!important}
 .mythicCore,
 .elementOrb,
 .gaiaCore,
-.rewardBall{
+.rewardBall,
+.hudBallVisual{
   background-color:transparent;
   background-position:center;
   background-repeat:no-repeat;
@@ -6601,6 +6653,415 @@ body:has(#collectionScreen.active) #quickCollection.active{
   100%{transform:translateY(0) scale(1)}
 }
 
+/* Home hub: one-tap continuation plus contextual store and collection paths. */
+#homeScreen{
+  position:relative;
+  height:100dvh;
+  justify-content:center;
+  padding:0 0 calc(5.35rem + env(safe-area-inset-bottom));
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% -8%,rgba(78,179,205,.2),transparent 28rem),
+    linear-gradient(180deg,#f7faf9 0,#e8efeb 100%);
+}
+#homeScreen::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:.48;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(52,76,87,.035) .0625rem,transparent .0625rem),
+    linear-gradient(90deg,rgba(52,76,87,.035) .0625rem,transparent .0625rem);
+  background-size:1.5rem 1.5rem;
+}
+.homeApp{
+  position:relative;
+  z-index:1;
+  width:min(100%,30rem);
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  gap:.72rem;
+  padding:max(.7rem,env(safe-area-inset-top)) .72rem 1.1rem;
+  overflow-x:hidden;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+.homeApp::-webkit-scrollbar{display:none}
+.homeHeader{
+  min-height:3.65rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.7rem;
+  flex:none;
+  padding:.15rem .2rem;
+}
+.homeEyebrow,
+.homeNextLabel,
+.homeActionKicker,
+.homeJourneyHead span,
+.homeStat span{
+  display:block;
+  color:#6a8077;
+  font-size:.62rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.12em;
+}
+.homeHeader h1{
+  margin-top:.18rem;
+  color:#304940;
+  font-size:1.72rem;
+  line-height:.92;
+  letter-spacing:-.035em;
+  text-shadow:0 .1rem 0 white;
+}
+.homeWallet{
+  min-width:6.7rem;
+  min-height:3rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  padding:.42rem .72rem;
+  color:#584314;
+  background:linear-gradient(180deg,#fff,#fbf7e8);
+  border:.14rem solid #d7a52d;
+  border-radius:1rem;
+  box-shadow:inset 0 .12rem 0 #fff,0 .2rem 0 #a97a19,0 .36rem .7rem rgba(74,60,23,.12);
+  font-size:1.2rem;
+}
+.homeCoin{
+  width:1.9rem;
+  height:1.9rem;
+  display:grid;
+  place-items:center;
+  border:.12rem solid #bd7510;
+  border-radius:50%;
+  color:#fff3a0;
+  background:radial-gradient(circle at 34% 28%,#fff6a0,#ffc83c 44%,#e99713 78%);
+  box-shadow:inset 0 0 0 .1rem rgba(255,250,164,.68),0 .12rem 0 #a7670c;
+  font-size:.78rem;
+}
+.homeHero{
+  position:relative;
+  isolation:isolate;
+  min-height:15.8rem;
+  display:grid;
+  grid-template-columns:7.9rem minmax(0,1fr);
+  align-items:center;
+  gap:.45rem;
+  flex:none;
+  padding:1rem .85rem;
+  overflow:hidden;
+  color:#2c463c;
+  background:
+    radial-gradient(circle at 18% 28%,rgba(255,255,255,.95),transparent 8rem),
+    linear-gradient(145deg,#fff 0,#f6fbf8 64%,#e4f0e9 100%);
+  border:.16rem solid #9eb9ac;
+  border-radius:1.45rem;
+  box-shadow:inset 0 0 0 .12rem #d9e6df,inset 0 .16rem 0 #fff,0 .3rem 0 #789a89,0 .7rem 1.25rem rgba(45,69,58,.16);
+}
+.homeHeroRays{
+  position:absolute;
+  z-index:-1;
+  width:21rem;
+  height:21rem;
+  left:-6.2rem;
+  top:-6.5rem;
+  opacity:.17;
+  border-radius:50%;
+  background:repeating-conic-gradient(from -12deg,#56b7cf 0 9deg,transparent 9deg 21deg);
+  animation:homeRaysDrift 22s linear infinite;
+}
+.homeBallStage{
+  position:relative;
+  min-width:0;
+  height:10.2rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.homeBallHalo{
+  position:absolute;
+  width:7.5rem;
+  height:7.5rem;
+  border:.12rem dashed rgba(69,161,190,.48);
+  border-radius:50%;
+  box-shadow:0 0 1.4rem rgba(78,179,205,.28),inset 0 0 1rem rgba(78,179,205,.12);
+  animation:homeHaloBreathe 2.6s ease-in-out infinite;
+}
+.homeBallPreview{
+  position:relative;
+  z-index:1;
+  width:6.55rem;
+  height:6.55rem;
+  filter:drop-shadow(0 .55rem .4rem rgba(38,77,91,.25));
+  animation:homeBallFloat 2.8s ease-in-out infinite;
+}
+.homeEquippedTag{
+  position:absolute;
+  z-index:2;
+  bottom:.15rem;
+  padding:.27rem .55rem;
+  color:#2d7453;
+  background:#f4fff8;
+  border:.08rem solid #75bd91;
+  border-radius:62rem;
+  box-shadow:0 .12rem 0 #5b9b73;
+  font-size:.55rem;
+  font-weight:1000;
+  letter-spacing:.1em;
+}
+.homeHeroCopy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:.38rem;
+}
+.homeNextLabel{color:#468f72}
+.homeHeroCopy h2{
+  color:#2b443a;
+  font-size:clamp(1.9rem,9vw,2.65rem);
+  line-height:.9;
+  letter-spacing:-.045em;
+  text-shadow:0 .11rem 0 white;
+}
+.homeHeroCopy p{
+  min-height:2.15rem;
+  color:#6b8077;
+  font-size:.76rem;
+  line-height:1.3;
+  font-weight:850;
+}
+.homePlayButton{
+  width:100%;
+  min-height:3.55rem;
+  margin-top:.25rem;
+  padding:.55rem .62rem;
+  color:white;
+  background:linear-gradient(180deg,#5bd37a 0,#36b75a 56%,#22853f 100%);
+  border:.15rem solid #247a3c;
+  border-radius:1rem;
+  box-shadow:inset 0 .16rem 0 rgba(255,255,255,.45),inset 0 0 0 .08rem #69dc86,0 .27rem 0 #1c6934,0 .5rem .8rem rgba(31,108,54,.2);
+  font-size:.94rem;
+  text-shadow:0 .1rem 0 #1d6c36;
+  animation:homePlayInvite 2.9s ease-in-out infinite;
+}
+.homePlayButton:active{transform:translateY(.2rem);box-shadow:inset 0 .1rem 0 rgba(255,255,255,.35),0 .06rem 0 #1c6934}
+.homeStats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:.5rem;
+  flex:none;
+}
+.homeStat{
+  min-width:0;
+  min-height:4.8rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.35rem;
+  color:#315045;
+  background:rgba(255,255,255,.86);
+  border:.12rem solid #c4d3cc;
+  border-radius:1rem;
+  box-shadow:inset 0 .1rem 0 white,0 .2rem 0 #a8bab1,0 .34rem .65rem rgba(48,70,60,.1);
+}
+.homeStat strong{font-size:1.45rem;line-height:1}
+.homeGoldStat strong{color:#a97713}
+.homeBallStat strong{color:#2e849e}
+.homeJourney{
+  flex:none;
+  padding:.8rem .9rem .72rem;
+  color:#344e44;
+  background:rgba(255,255,255,.82);
+  border:.12rem solid #c2d1ca;
+  border-radius:1rem;
+  box-shadow:inset 0 .1rem 0 #fff,0 .18rem 0 #a7b9b0;
+}
+.homeJourneyHead{display:flex;align-items:flex-end;justify-content:space-between;gap:.75rem}
+.homeJourneyHead>div{display:flex;flex-direction:column;gap:.22rem}
+.homeJourneyHead strong{font-size:.83rem}
+.homeJourneyTrack{
+  height:.72rem;
+  margin:.62rem 0 .48rem;
+  overflow:hidden;
+  background:#dbe5e0;
+  border:.08rem solid #b6c8bf;
+  border-radius:62rem;
+  box-shadow:inset 0 .1rem .2rem rgba(54,78,67,.13);
+}
+.homeJourneyTrack span{
+  width:5%;
+  height:100%;
+  display:block;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#57bad0,#4eae83);
+  box-shadow:inset 0 .08rem 0 rgba(255,255,255,.38),0 0 .5rem rgba(78,179,205,.28);
+  transition:width .35s ease;
+}
+.homeJourney p{color:#647b71;font-size:.66rem;line-height:1.25;font-weight:950;letter-spacing:.04em}
+.homeActionStack{display:flex;flex-direction:column;gap:.65rem;flex:none}
+.homePackCard,
+.homeLoadoutCard{
+  width:100%;
+  min-height:6.45rem;
+  display:grid;
+  grid-template-columns:4.15rem minmax(0,1fr) auto;
+  align-items:center;
+  gap:.68rem;
+  padding:.68rem .72rem;
+  color:#344b42;
+  background:linear-gradient(145deg,#fff,#f5f8f6);
+  border:.13rem solid #bdccc5;
+  border-radius:1.15rem;
+  box-shadow:inset 0 .12rem 0 white,0 .22rem 0 #9eafa7,0 .45rem .8rem rgba(48,70,60,.12);
+  text-align:left;
+}
+.homeActionCopy{min-width:0;display:flex;flex-direction:column;gap:.25rem}
+.homeActionCopy strong{font-size:.92rem;line-height:1.05}
+.homeActionCopy>span:not(.homeActionKicker):not(.homePackTrack){color:#71827b;font-size:.68rem;line-height:1.22;font-weight:750}
+.homeActionCta{
+  align-self:center;
+  padding:.38rem .48rem;
+  color:#397660;
+  background:#edf8f1;
+  border:.08rem solid #9bc5ab;
+  border-radius:.62rem;
+  font-size:.58rem;
+  line-height:1.05;
+  font-weight:1000;
+  text-align:center;
+}
+.homePackIcon{
+  position:relative;
+  width:3.55rem;
+  height:4.35rem;
+  display:grid;
+  place-items:center;
+  color:white;
+  background:linear-gradient(150deg,#ffdb59,#f6a725 54%,#d7751c);
+  border:.14rem solid #a65318;
+  border-radius:.48rem .48rem .72rem .72rem;
+  box-shadow:inset .25rem 0 .35rem rgba(255,255,255,.3),inset -.2rem 0 .3rem rgba(127,53,17,.16),0 .24rem .35rem rgba(95,53,20,.22);
+  transform:rotate(-3deg);
+}
+.homePackIcon::before,
+.homePackIcon::after{content:'';position:absolute;left:-.14rem;right:-.14rem;height:.42rem;background:#bd4b34;border:.11rem solid #8c2e27}
+.homePackIcon::before{top:.18rem}.homePackIcon::after{bottom:.22rem}
+.homePackIcon span{
+  width:1.85rem;
+  height:1.85rem;
+  display:grid;
+  place-items:center;
+  border:.12rem solid #fff3ac;
+  border-radius:50%;
+  background:#d84d47;
+  box-shadow:0 0 .55rem rgba(255,244,164,.5);
+  font-size:1rem;
+}
+.homePackTrack{
+  width:100%;
+  height:.42rem;
+  margin-top:.12rem;
+  overflow:hidden;
+  background:#e3ded0;
+  border-radius:62rem;
+}
+.homePackTrack span{width:0;height:100%;display:block;border-radius:inherit;background:linear-gradient(90deg,#f2ad28,#ffd955);transition:width .35s ease}
+.homePackCard.nearReady{border-color:#d4aa42;box-shadow:inset 0 .12rem 0 #fff,0 .22rem 0 #ab8126,0 0 .9rem rgba(240,177,42,.2)}
+.homePackCard.purchaseReady{
+  border-color:#d99d1c;
+  background:linear-gradient(145deg,#fffdf2,#fff1ba);
+  box-shadow:inset 0 .12rem 0 white,0 .24rem 0 #aa7214,0 0 1.1rem rgba(245,183,40,.38);
+}
+.homePackCard.purchaseReady .homeActionCta{color:white;background:linear-gradient(180deg,#58ca72,#2eaa4f);border-color:#23783b}
+.homePackCard.purchaseReady .homePackIcon{animation:homePackBounce 1.8s ease-in-out infinite}
+.homeLoadoutBall{
+  width:3.85rem;
+  height:3.85rem;
+  filter:drop-shadow(0 .28rem .25rem rgba(42,83,96,.24));
+  animation:homeBallFloat 3.1s ease-in-out -.5s infinite;
+}
+@keyframes homeRaysDrift{to{transform:rotate(360deg)}}
+@keyframes homeHaloBreathe{50%{transform:scale(1.08);opacity:.65}}
+@keyframes homeBallFloat{0%,100%{transform:translateY(.14rem) scale(.98)}50%{transform:translateY(-.3rem) scale(1.025)}}
+@keyframes homePlayInvite{0%,72%,100%{filter:brightness(1);scale:1}80%{filter:brightness(1.08);scale:1.018}}
+@keyframes homePackBounce{0%,70%,100%{transform:translateY(0) rotate(-3deg)}78%{transform:translateY(-.25rem) rotate(2deg)}86%{transform:translateY(0) rotate(-1deg)}}
+
+/* The same four destinations stay in the same place on every non-game screen. */
+body:has(#homeScreen.active) .quickNav{
+  left:50%;
+  right:auto;
+  bottom:0;
+  z-index:80;
+  width:min(100%,30rem);
+  height:5.35rem;
+  padding:.34rem .46rem max(.3rem,env(safe-area-inset-bottom));
+  gap:.3rem;
+  transform:translateX(-50%);
+  border:0;
+  border-top:.2rem solid #bdcdc5;
+  border-radius:0;
+  background:linear-gradient(180deg,rgba(252,252,249,.99),rgba(232,239,235,.99));
+  box-shadow:0 -.14rem 0 #9eb3a9,0 -.4rem .75rem rgba(45,66,57,.16);
+}
+body:has(#homeScreen.active) .quickNavButton{
+  min-width:0;
+  min-height:4.45rem;
+  gap:.18rem;
+  padding:.3rem .3rem .24rem;
+  color:#667a71;
+  background:rgba(255,255,255,.72);
+  border:.1rem solid #ccd8d2;
+  border-radius:.75rem;
+  box-shadow:inset 0 .1rem 0 #fff,0 .12rem 0 #afc0b8;
+  font-size:.68rem;
+}
+body:has(#homeScreen.active) #quickHome.active{
+  color:#3e7561;
+  background:linear-gradient(180deg,#fff,#ebf5ef);
+  border-color:#78b495;
+  box-shadow:inset 0 .14rem 0 #fff,0 .18rem 0 #4f8d6f,0 0 .6rem rgba(67,141,105,.2);
+  transform:translateY(-.12rem);
+}
+.quickStoreBadge{
+  display:none;
+  position:absolute;
+  z-index:6;
+  top:-.3rem;
+  right:.18rem;
+  padding:.18rem .3rem;
+  color:#653b08;
+  background:#ffd756;
+  border:.07rem solid #b87912;
+  border-radius:62rem;
+  box-shadow:0 .1rem 0 #9c6410,0 0 .5rem rgba(255,200,48,.35);
+  font-size:.48rem;
+  line-height:1;
+  font-weight:1000;
+}
+#quickStore.purchaseReady .quickStoreBadge{display:block;animation:storeBadgePop 1.5s ease-in-out infinite}
+@keyframes storeBadgePop{0%,65%,100%{transform:scale(1)}76%{transform:scale(1.13) rotate(2deg)}}
+
+@media(max-width:22rem){
+  .homeApp{padding-left:.5rem;padding-right:.5rem}
+  .homeHero{grid-template-columns:6.8rem minmax(0,1fr);padding:.8rem .62rem}
+  .homeBallStage{height:9rem}
+  .homeBallHalo{width:6.5rem;height:6.5rem}
+  .homeBallPreview{width:5.75rem;height:5.75rem}
+  .homeHeroCopy h2{font-size:1.85rem}
+  .homePackCard,.homeLoadoutCard{grid-template-columns:3.7rem minmax(0,1fr);gap:.5rem}
+  .homePackCard .homeActionCta,.homeLoadoutCard .homeActionCta{grid-column:2;justify-self:start}
+  .homePackIcon{width:3.3rem;height:4rem}
+  .homeLoadoutBall{width:3.5rem;height:3.5rem}
+}
+
 /* Quiet invitation on every enabled tap target; stronger when a purchase is ready. */
 button:not(:disabled){isolation:isolate}
 button:not(:disabled):not(.bigPack):not(.gameUtilityBackdrop):not(.firstPackMilestoneBackdrop)::after{
@@ -6854,6 +7315,296 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 }
 @keyframes firstPackRays{to{transform:translateX(-50%) rotate(360deg)}}
 
+/* Compact reward summary: information reads first, with one obvious level CTA. */
+.packOverlay:has(.rewardReveal.show){
+  align-items:flex-end;
+  background:
+    radial-gradient(circle at 50% 20%,rgba(255,224,115,.22),transparent 28%),
+    radial-gradient(circle at 20% 82%,rgba(101,204,227,.16),transparent 32%),
+    rgba(237,242,246,.97);
+}
+.packModal:has(.rewardReveal.show){
+  width:min(calc(100vw - 1.25rem),27rem);
+  height:min(70dvh,42rem);
+  max-height:calc(100dvh - 1.25rem);
+  min-height:0;
+  container-type:normal;
+  justify-content:flex-start;
+  gap:.72rem;
+  padding:1.05rem;
+  overflow-x:hidden;
+  overflow-y:auto;
+  border-color:#cad9df;
+  border-radius:1.55rem;
+  background:
+    linear-gradient(115deg,rgba(255,255,255,.95),rgba(247,251,252,.95)),
+    #f8fbfc;
+  box-shadow:0 1.35rem 3.5rem rgba(42,63,72,.22),inset 0 .1rem 0 white;
+  scrollbar-width:none;
+}
+.packModal:has(.rewardReveal.show)::-webkit-scrollbar{display:none}
+.packModal:has(.rewardReveal.show) .packTitle{
+  margin:.2rem 0 .05rem;
+  color:#29453d;
+  font-size:clamp(1.45rem,7vw,1.85rem);
+  line-height:1;
+  letter-spacing:.025em;
+  white-space:normal;
+  text-shadow:0 .12rem 0 rgba(255,255,255,.9);
+}
+.packModal:has(.rewardReveal.show) .packSub{
+  margin:0 0 .08rem;
+  min-height:1.9rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:.35rem .8rem;
+  border:.08rem solid color-mix(in srgb,var(--reveal-color,#85a9ba) 54%,#c8d8de);
+  border-radius:999rem;
+  color:color-mix(in srgb,var(--reveal-color,#85a9ba) 72%,#284854);
+  background:color-mix(in srgb,var(--reveal-color,#85a9ba) 9%,white);
+  box-shadow:none;
+  font-size:.68rem;
+  line-height:1;
+  letter-spacing:.09em;
+}
+.rewardReveal.show{
+  position:relative;
+  isolation:isolate;
+  flex:none;
+  width:100%;
+  max-width:none;
+  min-height:auto;
+  display:grid;
+  grid-template-columns:minmax(6.8rem,7.6rem) minmax(0,1fr);
+  grid-template-areas:
+    "ball identity"
+    "power power"
+    "status status";
+  align-items:center;
+  justify-content:stretch;
+  gap:.95rem .95rem;
+  padding:1.15rem 1.05rem;
+  overflow:hidden;
+  border:.15rem solid var(--reward-accent,#85a9ba);
+  border-radius:1.25rem;
+  background:
+    radial-gradient(circle at 17% 23%,color-mix(in srgb,var(--reward-accent,#85a9ba) 19%,transparent),transparent 30%),
+    linear-gradient(150deg,#fff 0 56%,color-mix(in srgb,var(--reward-accent,#85a9ba) 8%,#f7fafb) 100%);
+  box-shadow:
+    inset 0 0 0 .08rem color-mix(in srgb,var(--reward-accent,#85a9ba) 30%,#e4ecef),
+    0 .25rem 0 color-mix(in srgb,var(--reward-accent,#85a9ba) 56%,#8799a1),
+    0 .75rem 1.55rem rgba(42,63,72,.15),
+    0 0 1.15rem color-mix(in srgb,var(--reward-accent,#85a9ba) 25%,transparent);
+}
+.rewardReveal.show::before{
+  inset:.34rem;
+  border:.06rem solid color-mix(in srgb,var(--reward-accent,#85a9ba) 40%,white);
+  border-radius:.9rem;
+}
+.rewardReveal.show::after{
+  content:'✦';
+  position:absolute;
+  top:.5rem;
+  right:.65rem;
+  z-index:2;
+  color:color-mix(in srgb,var(--reward-accent,#85a9ba) 74%,white);
+  font-size:1.2rem;
+  line-height:1;
+  text-shadow:0 0 .55rem var(--reward-accent,#85a9ba);
+  pointer-events:none;
+}
+.rewardReveal.show .rewardBall{
+  grid-area:ball;
+  justify-self:center;
+  width:clamp(6.8rem,29vw,7.6rem);
+  height:clamp(6.8rem,29vw,7.6rem);
+  margin:0;
+  border-width:0;
+  filter:drop-shadow(0 0 .8rem color-mix(in srgb,var(--reward-accent,#85a9ba) 48%,transparent)) drop-shadow(0 .48rem .5rem rgba(40,65,76,.2));
+}
+.rewardIdentity{
+  grid-area:identity;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:.55rem;
+  text-align:left;
+}
+.rewardReveal.show .rewardRarity{
+  order:0;
+  padding:.28rem .52rem;
+  border:.08rem solid color-mix(in srgb,var(--reward-accent,#85a9ba) 55%,white);
+  border-radius:999rem;
+  color:color-mix(in srgb,var(--reward-accent,#85a9ba) 76%,#294754);
+  background:color-mix(in srgb,var(--reward-accent,#85a9ba) 12%,white);
+  font-size:.65rem;
+  line-height:1;
+  letter-spacing:.08em;
+}
+.rewardReveal.show .rewardName{
+  order:1;
+  color:#293f49;
+  font-size:clamp(1.15rem,5vw,1.55rem);
+  line-height:.96;
+  text-align:left;
+  white-space:nowrap;
+}
+.rewardReveal.show .rewardDesc{
+  order:2;
+  max-width:100%;
+  color:#596d77;
+  font-size:.83rem;
+  line-height:1.38;
+  font-weight:800;
+  text-align:left;
+}
+.packRewardBenefit{
+  grid-area:power;
+  min-height:3.85rem;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:.25rem .8rem;
+  padding:.78rem .85rem;
+  border:.08rem solid color-mix(in srgb,var(--reward-accent,#85a9ba) 38%,#c9d7dc);
+  border-left:.28rem solid var(--reward-accent,#85a9ba);
+  border-radius:.75rem;
+  color:#6a7e87;
+  background:color-mix(in srgb,var(--reward-accent,#85a9ba) 6%,#f8fbfc);
+  font-size:.65rem;
+  line-height:1.1;
+  text-align:left;
+  box-shadow:none;
+}
+.packRewardBenefit span{letter-spacing:.09em}
+.packRewardBenefit strong{
+  color:color-mix(in srgb,var(--reward-accent,#85a9ba) 76%,#294650);
+  font-size:.8rem;
+  line-height:1.15;
+  text-align:right;
+}
+.packLoadoutStatus{
+  grid-area:status;
+  min-height:3.55rem;
+  display:grid;
+  grid-template-columns:2rem minmax(0,1fr);
+  align-items:center;
+  gap:.75rem;
+  padding:.62rem .75rem;
+  border:.08rem solid #ccd9dd;
+  border-radius:.72rem;
+  color:#52676f;
+  background:#f1f5f6;
+  text-align:left;
+  pointer-events:none;
+  cursor:default;
+  user-select:none;
+}
+.packLoadoutStatus.isEquipped{
+  border-color:#a9d5b6;
+  background:linear-gradient(90deg,#edf8f0,#f6faf7);
+}
+.packLoadoutStatusIcon{
+  width:2rem;
+  height:2rem;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:white;
+  background:#72a081;
+  font-size:1rem;
+  font-weight:1000;
+}
+.packLoadoutStatus.isEquipped .packLoadoutStatusIcon{background:#42aa63}
+.packLoadoutStatusCopy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:.2rem;
+}
+.packLoadoutStatusCopy strong{
+  color:#344e44;
+  font-size:.75rem;
+  line-height:1.05;
+  letter-spacing:.045em;
+}
+.packLoadoutStatusCopy small{
+  overflow:hidden;
+  color:#687a73;
+  font-size:.65rem;
+  line-height:1.25;
+  font-weight:750;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.packModal:has(.rewardReveal.show) .packAfterActions{
+  flex:none;
+  width:100%;
+  margin:auto 0 .2rem;
+  gap:.55rem;
+}
+.packModal:has(.rewardReveal.show) .packContinue,
+.packModal:has(.rewardReveal.show) .buyAnotherPack{
+  width:auto;
+  min-width:0;
+  min-height:4.2rem;
+  padding:.65rem .75rem;
+  border-radius:.9rem;
+  font-size:.94rem;
+  line-height:1.05;
+}
+.packModal:has(.rewardReveal.show) .packContinue{flex:1.35 1 0}
+.packModal:has(.rewardReveal.show) .buyAnotherPack{flex:.85 1 0}
+.packModal:has(.rewardReveal.show) .packContinue.packPlayButton{
+  border:.15rem solid #20723a;
+  background:linear-gradient(180deg,#62dc83 0,#35b95b 55%,#238942 100%);
+  box-shadow:inset 0 .15rem 0 rgba(255,255,255,.5),0 .3rem 0 #1b6934,0 .75rem 1.15rem rgba(32,118,58,.24);
+  font-size:1rem;
+  letter-spacing:.025em;
+  animation:packStartLevelInvite 2s ease-in-out infinite;
+}
+@keyframes packStartLevelInvite{
+  0%,64%,100%{transform:translateY(0) scale(1);filter:brightness(1)}
+  74%{transform:translateY(-.08rem) scale(1.018);filter:brightness(1.08)}
+  84%{transform:translateY(0) scale(1);filter:brightness(1)}
+}
+@media(max-width:22.5rem){
+  .packModal:has(.rewardReveal.show){padding:.7rem;gap:.4rem}
+  .rewardReveal.show{
+    grid-template-columns:5.8rem minmax(0,1fr);
+    gap:.55rem .65rem;
+    padding:.75rem;
+  }
+  .rewardReveal.show .rewardBall{width:5.7rem;height:5.7rem}
+  .rewardReveal.show .rewardName{font-size:1.12rem}
+  .rewardReveal.show .rewardDesc{font-size:.72rem}
+  .packRewardBenefit{min-height:3rem;padding:.5rem .58rem}
+  .packRewardBenefit strong{font-size:.7rem}
+  .packLoadoutStatus{min-height:2.8rem;padding:.42rem .55rem}
+  .packModal:has(.rewardReveal.show) .packContinue,
+  .packModal:has(.rewardReveal.show) .buyAnotherPack{min-height:3.75rem;font-size:.82rem}
+}
+@media(max-height:38rem) and (orientation:portrait){
+  .packModal:has(.rewardReveal.show){padding:.55rem;gap:.3rem}
+  .packModal:has(.rewardReveal.show) .packTitle{font-size:1.2rem}
+  .packModal:has(.rewardReveal.show) .packSub{min-height:1.55rem;padding:.25rem .65rem;font-size:.58rem}
+  .rewardReveal.show{grid-template-columns:5.2rem minmax(0,1fr);gap:.42rem .6rem;padding:.62rem}
+  .rewardReveal.show .rewardBall{width:5.1rem;height:5.1rem}
+  .rewardReveal.show .rewardName{font-size:1.05rem}
+  .rewardReveal.show .rewardRarity{font-size:.55rem}
+  .rewardReveal.show .rewardDesc{font-size:.66rem}
+  .packRewardBenefit{min-height:2.55rem;padding:.4rem .5rem;font-size:.56rem}
+  .packRewardBenefit strong{font-size:.66rem}
+  .packLoadoutStatus{min-height:2.55rem;padding:.35rem .5rem}
+  .packLoadoutStatusIcon{width:1.7rem;height:1.7rem}
+  .packLoadoutStatusCopy strong{font-size:.66rem}
+  .packLoadoutStatusCopy small{font-size:.55rem}
+  .packModal:has(.rewardReveal.show) .packContinue,
+  .packModal:has(.rewardReveal.show) .buyAnotherPack{min-height:3.4rem;font-size:.74rem}
+}
+
 @media(prefers-reduced-motion:reduce){
   #storeScreen.purchaseScreenShake,
   #storeScreen .purchaseBoom,
@@ -6880,14 +7631,24 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   .packOverlay.packTransitionIn .packModal,
   .packEquipConfirmation,
   .packEquipSpark,
+  .homeHeroRays,
+  .homeBallHalo,
+  .homeBallPreview,
+  .homeLoadoutBall,
+  .homePlayButton,
+  .homePackCard.purchaseReady .homePackIcon,
+  #quickStore.purchaseReady .quickStoreBadge,
   #storeScreen .shopBuyInvite,
   button::before,
   button::after,
   .firstPackMilestoneCard,
   .firstPackMilestoneCard::before,
   .firstPackCoin,
+  .packContinue.packPlayButton,
   .defeatPrelude::before,
   .defeatImpact,
+  .boardWrap.speedRushLevel #game,
+  .boardWrap.miniBossLevel #game,
   .boardWrap.defeatSlowdown #game,
   .resultCard.defeat.celebrate{animation-duration:.01ms!important;animation-iteration-count:1!important}
 }
@@ -6897,7 +7658,17 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
 <body>
 <nav class="quickNav" id="quickNav" aria-label="Main navigation">
+  <button class="quickNavButton active" id="quickHome" title="Home" aria-label="Home">
+    <span class="quickNavIcon" aria-hidden="true">
+      <svg viewBox="0 0 32 32">
+        <path d="m5.5 14.5 10.5-9 10.5 9" />
+        <path d="M8.5 13v13h15V13M13 26v-7h6v7" />
+      </svg>
+    </span>
+    <span class="quickNavLabel">HOME</span>
+  </button>
   <button class="quickNavButton" id="quickStore" title="Store" aria-label="Store">
+    <span class="quickStoreBadge" id="quickStoreBadge" aria-hidden="true">PACK!</span>
     <span class="quickNavIcon" aria-hidden="true">
       <svg viewBox="0 0 32 32">
         <path d="M7.5 13.5v12h17v-12" />
@@ -6908,7 +7679,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     </span>
     <span class="quickNavLabel">STORE</span>
   </button>
-  <button class="quickNavButton active" id="quickPlay" title="Play" aria-label="Play">
+  <button class="quickNavButton" id="quickPlay" title="Play" aria-label="Play">
     <span class="quickNavIcon" aria-hidden="true">
       <svg viewBox="0 0 32 32">
         <circle cx="16" cy="16" r="11.5" />
@@ -6930,15 +7701,96 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     <span class="quickNavLabel">BALLS</span>
   </button>
 </nav>
-<div class="screen active" id="gameScreen">
+
+<div class="screen active" id="homeScreen">
+  <main class="homeApp">
+    <header class="homeHeader">
+      <div>
+        <span class="homeEyebrow">YOUR ADVENTURE</span>
+        <h1>BALL FILL</h1>
+      </div>
+      <div class="homeWallet" aria-label="Current gold">
+        <span class="homeCoin" aria-hidden="true">★</span>
+        <strong id="homeGold">0</strong>
+      </div>
+    </header>
+
+    <section class="homeHero" aria-labelledby="homeLevelTitle">
+      <div class="homeHeroRays" aria-hidden="true"></div>
+      <div class="homeBallStage" aria-label="Currently equipped ball">
+        <div class="homeBallHalo"></div>
+        <div class="homeBallPreview" id="homeBallPreview"></div>
+        <span class="homeEquippedTag">EQUIPPED</span>
+      </div>
+      <div class="homeHeroCopy">
+        <span class="homeNextLabel">CONTINUE YOUR RUN</span>
+        <h2 id="homeLevelTitle">LEVEL 1</h2>
+        <p id="homeLevelEvent">FIRST FILL • WORLD 1</p>
+        <button class="homePlayButton" id="homePlayButton" type="button">▶ PLAY LEVEL 1</button>
+      </div>
+    </section>
+
+    <section class="homeStats" aria-label="Player stats">
+      <div class="homeStat">
+        <span>LEVEL</span>
+        <strong id="homeCurrentLevel">1</strong>
+      </div>
+      <div class="homeStat homeGoldStat">
+        <span>GOLD</span>
+        <strong id="homeGoldStat">0</strong>
+      </div>
+      <div class="homeStat homeBallStat">
+        <span>BALLS</span>
+        <strong id="homeBallCount">1</strong>
+      </div>
+    </section>
+
+    <section class="homeJourney">
+      <div class="homeJourneyHead">
+        <div>
+          <span>WORLD PROGRESS</span>
+          <strong id="homeWorldLabel">WORLD 1</strong>
+        </div>
+        <strong id="homeWorldProgress">1 / 20</strong>
+      </div>
+      <div class="homeJourneyTrack"><span id="homeJourneyFill"></span></div>
+      <p id="homeNextMilestone">NEXT EVENT • LEVEL 5 ENEMY RUSH</p>
+    </section>
+
+    <section class="homeActionStack" aria-label="Quick actions">
+      <button class="homePackCard" id="homePackCard" type="button">
+        <span class="homePackIcon" aria-hidden="true"><span>?</span></span>
+        <span class="homeActionCopy">
+          <span class="homeActionKicker">SURPRISE BALL PACK</span>
+          <strong id="homePackTitle">NEXT PACK • 25 GOLD</strong>
+          <span id="homePackCopy">Earn 25 gold to reveal a new ball.</span>
+          <span class="homePackTrack"><span id="homePackProgress"></span></span>
+        </span>
+        <span class="homeActionCta" id="homePackCta">VIEW STORE</span>
+      </button>
+
+      <button class="homeLoadoutCard" id="homeCollectionCard" type="button">
+        <span class="homeLoadoutBall" id="homeLoadoutBall" aria-hidden="true"></span>
+        <span class="homeActionCopy">
+          <span class="homeActionKicker">CURRENT LOADOUT</span>
+          <strong id="homeEquippedName">Normal Ball</strong>
+          <span id="homeOwnedCopy">1 of 11 balls collected</span>
+        </span>
+        <span class="homeActionCta">COLLECTION ›</span>
+      </button>
+    </section>
+  </main>
+</div>
+
+<div class="screen" id="gameScreen">
   <div class="app">
     <div class="top gameHudTop">
       <span id="level" hidden>1</span>
       <div class="gameStatusBar hudCardRow">
-        <div class="hudStatCard hudBallsCard" title="Balls left">
-          <span class="hudBallVisual" aria-hidden="true"></span>
+        <button class="hudStatCard hudBallsCard hudCollectionButton" id="hudCollectionButton" type="button" title="Open collection" aria-label="Open collection">
+          <span class="hudBallVisual" id="hudBallVisual" aria-hidden="true"></span>
           <strong id="balls">10</strong>
-        </div>
+        </button>
 
         <div class="hudStatCard hudTimerCard" title="Time left">
           <span class="hudTimerVisual" aria-hidden="true">⏱️</span>
@@ -6968,6 +7820,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     <div class="gameUtilityOverlay" id="gameUtilityOverlay" aria-hidden="true">
       <button class="gameUtilityBackdrop" id="gameUtilityBackdrop" type="button" aria-label="Close menu"></button>
       <div class="gameUtilityActions">
+        <button class="utilityAction utilityHome" id="gameToHome" type="button">⌂ HOME</button>
         <button class="utilityAction utilityCollection" id="gameToCollection" type="button">⚪ COLLECTION</button>
         <button class="utilityAction utilitySound" id="soundToggle" type="button">🔊 SOUND</button>
         <button class="utilityAction utilityAdmin" id="gameAdminButton" type="button">⚙ ADMIN</button>
@@ -7398,33 +8251,39 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
     <div class="rewardReveal" id="rewardReveal">
       <div class="rewardBall normalReward" id="rewardBall"></div>
-      <div class="rewardName" id="rewardName">NORMAL BALL</div>
-      <div class="rewardCopy">
+      <div class="rewardIdentity">
         <div class="rewardRarity" id="rewardRarity">COMMON BALL</div>
+        <div class="rewardName" id="rewardName">NORMAL BALL</div>
         <div class="rewardDesc" id="rewardDesc">Reliable standard ball.</div>
       </div>
       <div class="packRewardBenefit">
-        <span>WHAT IT GIVES</span>
+        <span>BALL POWER</span>
         <strong id="rewardBenefit">BALANCED GROWTH</strong>
       </div>
-      <button class="equipButton packEquipReward" id="packEquipReward">EQUIP</button>
+      <div class="packLoadoutStatus isEquipped" id="packLoadoutStatus" role="status" aria-live="polite">
+        <span class="packLoadoutStatusIcon" id="packLoadoutStatusIcon" aria-hidden="true">✓</span>
+        <span class="packLoadoutStatusCopy">
+          <strong id="packLoadoutStatusTitle">EQUIPPED &amp; READY</strong>
+          <small id="packLoadoutStatusDetail">Selected for your next level</small>
+        </span>
+      </div>
     </div>
 
     <div class="packAfterActions">
+      <button class="packContinue packPlayButton" id="packContinue">START LEVEL 1</button>
       <button class="primary buyAnotherPack" id="buyAnotherPack">BUY ANOTHER</button>
-      <button class="packContinue" id="packContinue">PLAY</button>
     </div>
   </div>
 </div>
 
 <div class="bossWarningOverlay" id="bossWarningOverlay" aria-hidden="true">
   <div class="bossWarningCard" id="bossWarningCard">
-    <div class="bossWarningBurst">⚠</div>
-    <div class="bossWarningEyebrow">BOSS INCOMING</div>
+    <div class="bossWarningBurst" id="bossWarningBurst">⚠</div>
+    <div class="bossWarningEyebrow" id="bossWarningEyebrow">BOSS INCOMING</div>
     <h2 id="bossWarningName">CRIMSON HUNTER</h2>
     <div class="bossWarningMechanic" id="bossWarningMechanic">PREDATOR LOCK</div>
     <p id="bossWarningDesc">Charges the ball whenever you begin growing it.</p>
-    <div class="bossWarningTip">Hey — you are about to fight the boss. Prepare.</div>
+    <div class="bossWarningTip" id="bossWarningTip">Hey — you are about to fight the boss. Prepare.</div>
     <button class="primary bossFightButton" id="bossFightButton">I'M READY • FIGHT!</button>
   </div>
 </div>
@@ -7453,6 +8312,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   const hudFxCanvas = document.getElementById('hudFxCanvas');
   const hudFxCtx = hudFxCanvas.getContext('2d');
   const ui = {
+    homeScreen: document.getElementById('homeScreen'),
     gameScreen: document.getElementById('gameScreen'),
     storeScreen: document.getElementById('storeScreen'),
     collectionScreen: document.getElementById('collectionScreen'),
@@ -7461,6 +8321,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     difficulty: document.getElementById('difficulty'),
     time: document.getElementById('time'),
     balls: document.getElementById('balls'),
+    hudCollectionButton: document.getElementById('hudCollectionButton'),
+    hudBallVisual: document.getElementById('hudBallVisual'),
     coins: document.getElementById('coins'),
     walletCoins: document.getElementById('walletCoins'),
     gameWalletPill: document.getElementById('gameWalletPill'),
@@ -7512,6 +8374,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     adminBalls: document.getElementById('adminBalls'),
     adminBoosters: document.getElementById('adminBoosters'),
 
+    gameToHome: document.getElementById('gameToHome'),
     gameToStore: document.getElementById('gameToStore'),
     gameToCollection: document.getElementById('gameToCollection'),
     gameAdminButton: document.getElementById('gameAdminButton'),
@@ -7529,9 +8392,32 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     packFxLayer: document.getElementById('packFxLayer'),
     packModal: document.getElementById('packModal'),
     quickNav: document.getElementById('quickNav'),
+    quickHome: document.getElementById('quickHome'),
     quickStore: document.getElementById('quickStore'),
     quickPlay: document.getElementById('quickPlay'),
     quickCollection: document.getElementById('quickCollection'),
+
+    homeGold: document.getElementById('homeGold'),
+    homeGoldStat: document.getElementById('homeGoldStat'),
+    homeCurrentLevel: document.getElementById('homeCurrentLevel'),
+    homeBallCount: document.getElementById('homeBallCount'),
+    homeBallPreview: document.getElementById('homeBallPreview'),
+    homeLoadoutBall: document.getElementById('homeLoadoutBall'),
+    homeEquippedName: document.getElementById('homeEquippedName'),
+    homeOwnedCopy: document.getElementById('homeOwnedCopy'),
+    homeLevelTitle: document.getElementById('homeLevelTitle'),
+    homeLevelEvent: document.getElementById('homeLevelEvent'),
+    homePlayButton: document.getElementById('homePlayButton'),
+    homeWorldLabel: document.getElementById('homeWorldLabel'),
+    homeWorldProgress: document.getElementById('homeWorldProgress'),
+    homeJourneyFill: document.getElementById('homeJourneyFill'),
+    homeNextMilestone: document.getElementById('homeNextMilestone'),
+    homePackCard: document.getElementById('homePackCard'),
+    homePackTitle: document.getElementById('homePackTitle'),
+    homePackCopy: document.getElementById('homePackCopy'),
+    homePackProgress: document.getElementById('homePackProgress'),
+    homePackCta: document.getElementById('homePackCta'),
+    homeCollectionCard: document.getElementById('homeCollectionCard'),
 
     gameEquippedDot: document.getElementById('gameEquippedDot'),
     gameEquippedName: document.getElementById('gameEquippedName'),
@@ -7592,15 +8478,21 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     rewardRarity: document.getElementById('rewardRarity'),
     rewardDesc: document.getElementById('rewardDesc'),
     rewardBenefit: document.getElementById('rewardBenefit'),
-    packEquipReward: document.getElementById('packEquipReward'),
+    packLoadoutStatus: document.getElementById('packLoadoutStatus'),
+    packLoadoutStatusIcon: document.getElementById('packLoadoutStatusIcon'),
+    packLoadoutStatusTitle: document.getElementById('packLoadoutStatusTitle'),
+    packLoadoutStatusDetail: document.getElementById('packLoadoutStatusDetail'),
     buyAnotherPack: document.getElementById('buyAnotherPack'),
     packContinue: document.getElementById('packContinue'),
 
     bossWarningOverlay: document.getElementById('bossWarningOverlay'),
     bossWarningCard: document.getElementById('bossWarningCard'),
+    bossWarningBurst: document.getElementById('bossWarningBurst'),
+    bossWarningEyebrow: document.getElementById('bossWarningEyebrow'),
     bossWarningName: document.getElementById('bossWarningName'),
     bossWarningMechanic: document.getElementById('bossWarningMechanic'),
     bossWarningDesc: document.getElementById('bossWarningDesc'),
+    bossWarningTip: document.getElementById('bossWarningTip'),
     bossFightButton: document.getElementById('bossFightButton'),
 
     firstPackMilestoneOverlay: document.getElementById('firstPackMilestoneOverlay'),
@@ -7967,13 +8859,15 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       }
     }
 
-    if(canvas.width!==nextW || canvas.height!==nextH){
+    const changed=canvas.width!==nextW || canvas.height!==nextH;
+    if(changed){
       canvas.width=nextW;
       canvas.height=nextH;
     }
 
     W=canvas.width;
     H=canvas.height;
+    return changed;
   }
   const START_TIME = 45;
   const START_BALLS = 10;
@@ -8177,6 +9071,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     setBallAssetBackground(document.querySelector('.elementOrb'),'cataclysm');
     setBallAssetBackground(document.querySelector('.gaiaCore'),'gaia');
     setBallAssetBackground(ui.rewardBall,'normal');
+    setBallAssetBackground(ui.hudBallVisual,'normal');
   }
   installSharedBallAssets();
   let selectedBallType='normal';
@@ -8188,6 +9083,10 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
   const MAX_LEVEL = 200;
   const BOSS_LEVELS = [20,40,60,80,100,120,140,160,180,200];
+  const MINI_BOSS_NAMES = [
+    'Crimson Fang','Frost Sentinel','Clockwork Brute','Storm Herald','Void Stalker',
+    'Thorn Behemoth','Solar Ravager','Toxic Marauder','Nebula Phantom','Prismatic Knight'
+  ];
 
   const BOSS_PROFILES = {
     1:{
@@ -8282,6 +9181,61 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     return worldProfileForLevel(level);
   }
 
+  function isMiniBossLevel(level){
+    return level%10===0 && !BOSS_LEVELS.includes(level);
+  }
+
+  function isRushEventLevel(level){
+    return level%5===0 && level%10!==0;
+  }
+
+  function encounterProfileForLevel(level){
+    const worldProfile=worldProfileForLevel(level);
+    if(BOSS_LEVELS.includes(level)){
+      return {
+        ...worldProfile,
+        type:'boss',
+        eyebrow:'BOSS INCOMING',
+        icon:'⚠',
+        tip:'A major boss guards the end of this world. Prepare.',
+        button:"I'M READY • FIGHT!"
+      };
+    }
+
+    if(isMiniBossLevel(level)){
+      const worldIndex=Math.max(0,Math.min(MINI_BOSS_NAMES.length-1,Math.floor((level-1)/20)));
+      return {
+        ...worldProfile,
+        type:'miniBoss',
+        name:MINI_BOSS_NAMES[worldIndex],
+        mechanic:'RELENTLESS HUNTER',
+        description:'A crowned elite hunts every growing ball while its guards close in.',
+        eyebrow:'MINI BOSS INCOMING',
+        icon:'♛',
+        tip:'Defeat it for a 35% gold bonus.',
+        button:'FACE THE MINI BOSS!'
+      };
+    }
+
+    if(isRushEventLevel(level)){
+      return {
+        type:'rush',
+        name:'ENEMY RUSH',
+        fill:'#a94d12',
+        edge:'#ffd15a',
+        glow:'#ff9e38',
+        mechanic:'ENEMY OVERDRIVE',
+        description:'Enemies move 24% faster and one extra hunter joins the arena.',
+        eyebrow:'5-LEVEL EVENT',
+        icon:'⚡',
+        tip:'Survive the rush for a 15% gold bonus.',
+        button:"LET'S GO • START!"
+      };
+    }
+
+    return null;
+  }
+
   const EARLY_LEVEL_CHALLENGES = [
     'FIRST FILL',
     'KEEP MOVING',
@@ -8335,11 +9289,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   let walletCoins = 0;
   let firstPackMilestoneSeen=false;
   let firstPackMilestoneQueued=false;
-  let firstPackMilestoneTimer=0;
   let resumeGameAfterFirstPackMilestone=false;
-  try{
-    firstPackMilestoneSeen=localStorage.getItem('ballFillFirstPackMilestoneSeenV1')==='1';
-  }catch(e){}
   function roundCoinAmount(value){
     return Math.round((Number(value)||0)*100)/100;
   }
@@ -8356,7 +9306,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   let packCelebrationToken = 0;
   let storePackTransitioning = false;
   let resumeGameAfterPack = false;
-  let currentScreen = 'game';
+  let currentScreen = 'home';
   let resumeGameAfterMenus = false;
   let utilityMenuPausedGame=false;
   const COLORS = {
@@ -8367,7 +9317,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
   let state;
   let currentLevel = 1;
-  const bossWarningsSeen = new Set();
+  const encounterWarningsSeen = new Set();
 
   let tutorialSeen=false;
   try{
@@ -8399,19 +9349,23 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     state.last=performance.now();
   }
 
-  function maybeShowBossWarning(){
-    if(!state || !starterPackOpened || !BOSS_LEVELS.includes(currentLevel) || bossWarningsSeen.has(currentLevel)) return false;
+  function maybeShowEncounterWarning(){
+    if(!state || !starterPackOpened || encounterWarningsSeen.has(currentLevel)) return false;
 
-    const profile=bossProfileForLevel(currentLevel);
+    const profile=encounterProfileForLevel(currentLevel);
     if(!profile) return false;
 
-    bossWarningsSeen.add(currentLevel);
+    encounterWarningsSeen.add(currentLevel);
     state.running=false;
     stopGrowSound(true);
 
+    ui.bossWarningBurst.textContent=profile.icon;
+    ui.bossWarningEyebrow.textContent=profile.eyebrow;
     ui.bossWarningName.textContent=profile.name.toUpperCase();
     ui.bossWarningMechanic.textContent=profile.mechanic;
     ui.bossWarningDesc.textContent=profile.description;
+    ui.bossWarningTip.textContent=profile.tip;
+    ui.bossFightButton.textContent=profile.button;
     ui.bossWarningCard.style.setProperty('--boss-fill',profile.fill);
     ui.bossWarningCard.style.setProperty('--boss-edge',profile.edge);
     ui.bossWarningCard.style.setProperty('--boss-glow',profile.glow || profile.edge);
@@ -8421,7 +9375,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     return true;
   }
 
-  function startBossFight(){
+  function startEncounter(){
     ui.bossWarningOverlay.style.display='none';
     ui.bossWarningOverlay.setAttribute('aria-hidden','true');
     if(state){
@@ -8438,6 +9392,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     const world=Math.floor((level-1)/20);       // 0..9
     const stage=((level-1)%20)+1;              // 1..20
     const boss=stage===20;
+    const miniBoss=isMiniBossLevel(level);
+    const rushEvent=isRushEventLevel(level);
 
     // Give the opening ten levels an immediate pace boost, then taper that
     // bonus away by level 20 so bosses and later worlds keep their balance.
@@ -8445,7 +9401,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     const earlySpeedBonus=level<=10
       ? 0.08
       : (level<20 ? 0.08*((20-level)/10) : 0);
-    const speedMult=Math.min(2.40,legacySpeedMult+earlySpeedBonus);
+    const baseSpeedMult=Math.min(2.40,legacySpeedMult+earlySpeedBonus);
+    const speedMult=baseSpeedMult*(rushEvent ? 1.24 : (miniBoss ? 1.08 : 1));
 
     // Early enemies react during a normal two-second hold instead of drifting
     // past it. This bonus also converges with the original curve at level 20.
@@ -8453,9 +9410,17 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     const earlySeekBonus=level<=10
       ? 0.06
       : (level<20 ? 0.06*((20-level)/10) : 0);
-    const seekStrength=Math.min(0.72,legacySeekStrength+earlySeekBonus);
-    const challenge=EARLY_LEVEL_CHALLENGES[level-1]
-      || (boss ? 'BOSS BATTLE' : `WORLD ${world+1} PUSH`);
+    const seekStrength=Math.min(
+      0.82,
+      legacySeekStrength+earlySeekBonus+(rushEvent ? .08 : (miniBoss ? .05 : 0))
+    );
+    const challenge=boss
+      ? 'BOSS BATTLE'
+      : (miniBoss
+          ? 'MINI BOSS'
+          : (rushEvent
+              ? '⚡ ENEMY RUSH'
+              : (EARLY_LEVEL_CHALLENGES[level-1] || `WORLD ${world+1} PUSH`)));
 
     if(boss){
       // Boss fights: one boss plus a few minions.
@@ -8468,41 +9433,69 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
         world,
         stage,
         boss:true,
+        miniBoss:false,
+        rushEvent:false,
         count:1+minions,
         minions,
         speedMult,
         seekStrength,
-        challenge
+        challenge,
+        rewardMult:1
+      };
+    }
+
+    if(miniBoss){
+      // Mid-world trials use the boss silhouette and hunting behavior, but
+      // save the world's unique ability and booster reward for level 20.
+      const minions=Math.min(4,3+Math.floor(world/5));
+      return {
+        level,
+        world,
+        stage,
+        boss:false,
+        miniBoss:true,
+        rushEvent:false,
+        count:1+minions,
+        minions,
+        speedMult,
+        seekStrength,
+        challenge,
+        rewardMult:1.35
       };
     }
 
     // Three moving threats make the first screen feel alive. Add one enemy
     // every two levels so the opening ten levels have a clear rising rhythm:
     // 3,3,4,4,5,5,6,6,7,7. Later worlds retain their established curve.
-    const count=world===0
+    const baseCount=world===0
       ? Math.min(7,3 + Math.floor((stage-1)/2))
       : Math.min(7,2 + Math.floor((stage-1)/3));
+    const count=Math.min(8,baseCount+(rushEvent ? 1 : 0));
 
     return {
       level,
       world,
       stage,
       boss:false,
+      miniBoss:false,
+      rushEvent,
       count,
       minions:0,
       speedMult,
       seekStrength,
-      challenge
+      challenge,
+      rewardMult:rushEvent ? 1.15 : 1
     };
   }
 
   function setupEnemiesForLevel(){
     const cfg=enemyConfig(currentLevel);
 
-    if(cfg.boss){
-      // Boss itself is larger and slightly more deliberate.
+    if(cfg.boss || cfg.miniBoss){
+      // Mini bosses share the crowned silhouette but stay smaller than world bosses.
+      const isMiniBoss=cfg.miniBoss;
       const bossAngle=Math.random()*Math.PI*2;
-      const bossSpeed=(82 + cfg.world*5)*cfg.speedMult;
+      const bossSpeed=((isMiniBoss ? 78 : 82) + cfg.world*5)*cfg.speedMult;
 
       spawnEnemy(
         W*0.5,
@@ -8511,11 +9504,12 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
         Math.sin(bossAngle)*bossSpeed,
         {
           boss:true,
+          miniBoss:isMiniBoss,
           bossIndex:cfg.world+1,
           worldIndex:cfg.world+1,
-          r:35 + cfg.world*2.5,
-          maxSpeed:bossSpeed*1.10,
-          seekStrength:Math.min(.82,cfg.seekStrength+.12)
+          r:(isMiniBoss ? 29 : 35) + cfg.world*(isMiniBoss ? 1.5 : 2.5),
+          maxSpeed:bossSpeed*(isMiniBoss ? 1.14 : 1.10),
+          seekStrength:Math.min(.86,cfg.seekStrength+(isMiniBoss ? .1 : .12))
         }
       );
 
@@ -8655,8 +9649,10 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
     if(!starterPackOpened){
       showPackOverlay('starter');
-    }else if(!maybeShowBossWarning()){
+    }else if(currentScreen==='game' && !maybeShowEncounterWarning()){
       maybeShowLevelOneTutorial();
+    }else if(currentScreen!=='game'){
+      state.running=false;
     }
   }
 
@@ -8668,6 +9664,13 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       const profile=bossProfileForLevel(value);
       ui.adminPreview.textContent=
         `Level ${value} • ${profile?.name || 'BOSS'} + ${cfg.minions} minions • ${profile?.mechanic || ''} • speed ×${cfg.speedMult.toFixed(2)}`;
+    }else if(cfg.miniBoss){
+      const profile=encounterProfileForLevel(value);
+      ui.adminPreview.textContent=
+        `Level ${value} • MINI BOSS ${profile?.name || ''} + ${cfg.minions} guards • 35% gold bonus • speed ×${cfg.speedMult.toFixed(2)}`;
+    }else if(cfg.rushEvent){
+      ui.adminPreview.textContent=
+        `Level ${value} • ENEMY RUSH • ${cfg.count} enemies • 24% faster • 15% gold bonus`;
     }else{
       ui.adminPreview.textContent=
         `Level ${value} • ${cfg.count} enemies • speed ×${cfg.speedMult.toFixed(2)} • reaction ${cfg.seekStrength.toFixed(2)}`;
@@ -8776,6 +9779,69 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     return true;
   }
 
+  function syncHomeUI(){
+    if(!ui.homeScreen) return;
+
+    const cfg=enemyConfig(currentLevel);
+    const equipped=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
+    const ownedCount=ownedBalls.size;
+    const stage=((currentLevel-1)%20)+1;
+    const canBuyPack=starterPackOpened && walletCoins>=PACK_PRICE;
+    const packProgress=Math.max(0,Math.min(100,walletCoins/PACK_PRICE*100));
+    const resultOpen=ui.overlay.style.display==='grid';
+
+    ui.homeGold.textContent=formatCoinAmount(walletCoins);
+    ui.homeGoldStat.textContent=formatCoinAmount(walletCoins);
+    ui.homeCurrentLevel.textContent=currentLevel;
+    ui.homeBallCount.textContent=ownedCount;
+    ui.homeEquippedName.textContent=equipped.name;
+    ui.homeOwnedCopy.textContent=`${ownedCount} of ${Object.keys(BALL_TYPES).length} balls collected`;
+    ui.homeLevelTitle.textContent=`LEVEL ${currentLevel}`;
+    ui.homeLevelEvent.textContent=`${cfg.challenge} • WORLD ${cfg.world+1}`;
+    ui.homePlayButton.textContent=resultOpen
+      ? `▶ VIEW LEVEL ${currentLevel} RESULT`
+      : `${resumeGameAfterMenus ? '▶ RESUME' : '▶ PLAY'} LEVEL ${currentLevel}`;
+
+    setBallAssetBackground(ui.homeBallPreview,selectedBallType);
+    setBallAssetBackground(ui.homeLoadoutBall,selectedBallType);
+    ui.homeBallPreview.setAttribute('aria-label',`${equipped.name}, equipped`);
+
+    ui.homeWorldLabel.textContent=`WORLD ${cfg.world+1}`;
+    ui.homeWorldProgress.textContent=`${stage} / 20`;
+    ui.homeJourneyFill.style.width=`${stage/20*100}%`;
+
+    const currentEncounter=encounterProfileForLevel(currentLevel);
+    let nextMilestoneLevel=0;
+    let nextMilestoneProfile=null;
+    for(let level=currentLevel+1;level<=MAX_LEVEL;level++){
+      const profile=encounterProfileForLevel(level);
+      if(profile){
+        nextMilestoneLevel=level;
+        nextMilestoneProfile=profile;
+        break;
+      }
+    }
+    ui.homeNextMilestone.textContent=currentEncounter
+      ? `CURRENT EVENT • ${currentEncounter.eyebrow} • ${currentEncounter.mechanic}`
+      : (nextMilestoneProfile
+          ? `NEXT EVENT • LEVEL ${nextMilestoneLevel} ${nextMilestoneProfile.name.toUpperCase()}`
+          : 'FINAL WORLD • THE LAST BOSS AWAITS');
+
+    ui.homePackProgress.style.width=`${packProgress}%`;
+    ui.homePackCard.classList.toggle('purchaseReady',canBuyPack);
+    ui.homePackCard.classList.toggle('nearReady',!canBuyPack && walletCoins>=PACK_PRICE*.72);
+    if(canBuyPack){
+      ui.homePackTitle.textContent='YOUR NEXT PACK IS READY!';
+      ui.homePackCopy.textContent='You have enough gold. Reveal a new ball now.';
+      ui.homePackCta.textContent='OPEN NOW';
+    }else{
+      const needed=Math.max(0,roundCoinAmount(PACK_PRICE-walletCoins));
+      ui.homePackTitle.textContent=`${formatCoinAmount(needed)} GOLD TO NEXT PACK`;
+      ui.homePackCopy.textContent='Keep playing or visit the store to see every reward.';
+      ui.homePackCta.textContent='VIEW STORE';
+    }
+  }
+
   function updateCollectionUI(){
     const types=['normal','swift','shield','magnet','coin','giant','ghost','legendary','apex','cataclysm','gaia'];
 
@@ -8863,6 +9929,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
     const data=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
     ui.gameEquippedName.textContent=data.name;
+    setBallAssetBackground(ui.homeBallPreview,selectedBallType);
+    setBallAssetBackground(ui.homeLoadoutBall,selectedBallType);
 
     if(!BALL_TYPES[collectionPreviewType]) collectionPreviewType=selectedBallType;
     const previewData=BALL_TYPES[collectionPreviewType] || data;
@@ -8940,6 +10008,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     ui.buyAnotherPack.classList.toggle('purchaseReady',canChainPack);
     ui.buyAnotherPack.textContent='BUY ANOTHER';
     ui.buyAnotherPack.setAttribute('aria-label',`Buy another pack for ${PACK_PRICE} coins`);
+    syncHomeUI();
   }
 
   function showScreen(name){
@@ -8952,19 +10021,52 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     }
 
     currentScreen=name;
+    ui.homeScreen.classList.toggle('active',name==='home');
     ui.gameScreen.classList.toggle('active',name==='game');
     ui.storeScreen.classList.toggle('active',name==='store');
     ui.collectionScreen.classList.toggle('active',name==='collection');
 
     ui.quickNav.classList.toggle('gameHidden',name==='game');
+    ui.quickHome.classList.toggle('active',name==='home');
     ui.quickStore.classList.toggle('active',name==='store');
     ui.quickPlay.classList.toggle('active',name==='game');
     ui.quickCollection.classList.toggle('active',name==='collection');
 
-    if(name==='game' && state && resumeGameAfterMenus && starterPackOpened && ui.overlay.style.display!=='grid'){
-      state.running=true;
-      state.last=performance.now();
-      if(state.active && soundEnabled) startGrowSound();
+    if(name==='game'){
+      // Home keeps the game screen at display:none. Measure only after making
+      // it visible so the canvas buffer matches the tall mobile arena instead
+      // of stretching the hidden-screen 600 × 600 fallback.
+      const arenaChanged=configureArenaForViewport();
+      syncHudFxCanvas();
+      const untouchedRun=!!(
+        state &&
+        !state.settled &&
+        !state.active &&
+        state.placed.length===0 &&
+        state.scoreCoins===0 &&
+        state.ballsLeft===START_BALLS &&
+        Math.abs(state.timeLeft-START_TIME)<.01
+      );
+      if(arenaChanged && untouchedRun){
+        reset();
+        return;
+      }
+    }
+
+    if(
+      name==='game' &&
+      state &&
+      !state.settled &&
+      starterPackOpened &&
+      ui.overlay.style.display!=='grid'
+    ){
+      const encounterOpened=maybeShowEncounterWarning();
+      const tutorialOpened=!encounterOpened && maybeShowLevelOneTutorial();
+      if(!encounterOpened && !tutorialOpened){
+        state.running=true;
+        state.last=performance.now();
+        if(state.active && soundEnabled) startGrowSound();
+      }
       resumeGameAfterMenus=false;
     }
 
@@ -9018,11 +10120,9 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
   function showFirstPackMilestone(){
     firstPackMilestoneQueued=false;
-    firstPackMilestoneTimer=0;
     if(firstPackMilestoneSeen || walletCoins<PACK_PRICE) return;
 
     firstPackMilestoneSeen=true;
-    try{localStorage.setItem('ballFillFirstPackMilestoneSeenV1','1');}catch(e){}
 
     resumeGameAfterFirstPackMilestone=!!(state && state.running && currentScreen==='game');
     if(resumeGameAfterFirstPackMilestone){
@@ -9048,7 +10148,6 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     ) return;
 
     firstPackMilestoneQueued=true;
-    clearTimeout(firstPackMilestoneTimer);
     // The level reward crossed 25 gold: put the store prompt over the result immediately.
     showFirstPackMilestone();
   }
@@ -9218,76 +10317,18 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     },1650);
   }
 
-  function updatePackEquipButton(){
+  function updatePackLoadoutStatus(){
     const canEquip=!!activePackReward && ownedBalls.has(activePackReward);
     const equipped=canEquip && selectedBallType===activePackReward;
+    const rewardName=(BALL_TYPES[activePackReward] || BALL_TYPES.normal).name;
 
-    ui.packEquipReward.disabled=!canEquip || equipped;
-    ui.packEquipReward.classList.toggle('equippedButton',equipped);
-    ui.packEquipReward.textContent=equipped ? '✓ EQUIPPED' : 'EQUIP';
-    ui.packEquipReward.setAttribute('aria-pressed',equipped ? 'true' : 'false');
-  }
-
-  function celebratePackRewardEquip(type){
-    sfx('purchase');
-    const data=BALL_TYPES[type] || BALL_TYPES.normal;
-    const ballRect=ui.rewardBall.getBoundingClientRect();
-    const centerX=ballRect.left+ballRect.width/2;
-    const centerY=ballRect.top+ballRect.height/2;
-
-    ui.rewardReveal.querySelectorAll('.packEquipConfirmation').forEach(el=>el.remove());
-    ui.packFxLayer.querySelectorAll('.packEquipSpark').forEach(el=>el.remove());
-
-    ui.rewardReveal.animate([
-      {transform:'scale(1)',filter:'brightness(1)'},
-      {transform:'scale(1.035)',filter:'brightness(1.13)',offset:.34},
-      {transform:'scale(1)',filter:'brightness(1)'}
-    ],{duration:880,easing:'cubic-bezier(.18,.84,.25,1)'});
-    ui.rewardBall.animate([
-      {transform:'translateY(0) scale(1)'},
-      {transform:'translateY(-10px) scale(1.16)',filter:'brightness(1.25)',offset:.38},
-      {transform:'translateY(0) scale(1)',filter:'brightness(1)'}
-    ],{duration:820,easing:'cubic-bezier(.16,.88,.22,1.22)'});
-    ui.packEquipReward.animate([
-      {transform:'scale(1)'},
-      {transform:'scale(1.08)',offset:.35},
-      {transform:'scale(1)'}
-    ],{duration:620,easing:'cubic-bezier(.16,.88,.22,1.2)'});
-
-    const badge=document.createElement('div');
-    badge.className='packEquipConfirmation';
-    badge.setAttribute('role','status');
-    badge.textContent=`✓ ${data.name.toUpperCase()} EQUIPPED!`;
-    ui.rewardReveal.appendChild(badge);
-
-    radialJuiceBurst(
-      ui.packFxLayer,
-      'packEquipSpark',
-      28,
-      centerX,
-      centerY,
-      ['#4fcf79','#f4cf58','#ffffff','#73d5ff'],
-      60,
-      155
-    );
-    if(navigator.vibrate) navigator.vibrate([18,24,35]);
-
-    setTimeout(()=>{
-      badge.remove();
-      ui.packFxLayer.querySelectorAll('.packEquipSpark').forEach(el=>el.remove());
-    },1100);
-  }
-
-  function equipPackReward(){
-    if(!activePackReward || !ownedBalls.has(activePackReward) || selectedBallType===activePackReward) return;
-
-    const equippedType=activePackReward;
-    selectedBallType=equippedType;
-    collectionPreviewType=equippedType;
-    updateCollectionUI();
-    syncUI();
-    updatePackEquipButton();
-    celebratePackRewardEquip(equippedType);
+    ui.packLoadoutStatus.classList.toggle('isEquipped',equipped);
+    ui.packLoadoutStatus.classList.toggle('willEquip',canEquip && !equipped);
+    ui.packLoadoutStatusIcon.textContent=equipped ? '✓' : '→';
+    ui.packLoadoutStatusTitle.textContent=equipped ? 'EQUIPPED & READY' : 'READY TO TRY';
+    ui.packLoadoutStatusDetail.textContent=equipped
+      ? `${rewardName} is selected for your next level`
+      : `Starting the level equips ${rewardName}`;
   }
 
   function showPackOverlay(mode){
@@ -9310,10 +10351,10 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     ui.packContinue.classList.remove('show');
     ui.buyAnotherPack.classList.remove('show');
     ui.buyAnotherPack.disabled=false;
-    ui.packEquipReward.classList.remove('equippedButton');
-    ui.packEquipReward.disabled=true;
-    ui.packEquipReward.textContent='EQUIP';
-    ui.packEquipReward.setAttribute('aria-pressed','false');
+    ui.packLoadoutStatus.classList.remove('isEquipped','willEquip');
+    ui.packLoadoutStatusIcon.textContent='→';
+    ui.packLoadoutStatusTitle.textContent='REWARD READY';
+    ui.packLoadoutStatusDetail.textContent='Open the pack to reveal your ball';
     ui.rewardBenefit.textContent='BALANCED GROWTH';
     ui.packFxLayer.classList.remove('openingBurst','preRevealCharge');
     ui.packModal.classList.remove('revealBoom','packAnticipation');
@@ -9323,11 +10364,11 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     if(mode==='starter'){
       ui.packTitle.textContent='FREE STARTER PACK';
       ui.packSub.textContent='Tap the pack';
-      ui.packContinue.textContent='START LEVEL 1';
+      ui.packContinue.textContent=`START LEVEL ${currentLevel}`;
     }else{
       ui.packTitle.textContent='PACK OPENING';
       ui.packSub.textContent='Tap the pack';
-      ui.packContinue.textContent='BACK TO STORE';
+      ui.packContinue.textContent='PLAY WITH NEW BALL';
     }
   }
 
@@ -9369,7 +10410,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       ui.bigPack.classList.add('opened');
       ui.packContinue.classList.add('show');
       ui.buyAnotherPack.classList.toggle('show',activePackMode==='paid');
-      ui.packSub.textContent='YOU GOT';
+      ui.packSub.textContent=activePackMode==='starter' ? 'STARTER BALL UNLOCKED' : 'NEW BALL UNLOCKED';
       ui.packModal.classList.remove('packAnticipation');
 
       const rewardData=BALL_TYPES[activePackReward];
@@ -9391,6 +10432,9 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       ui.rewardRarity.textContent=`${rewardData.rarity.toUpperCase()} BALL`;
       ui.rewardDesc.textContent=rewardData.desc;
       ui.rewardBenefit.textContent=BALL_BENEFITS[activePackReward] || 'SPECIAL POWER';
+      if(activePackMode==='paid'){
+        ui.packContinue.textContent=`PLAY WITH ${rewardData.name.toUpperCase()}`;
+      }
 
       const wasOwned=ownedBalls.has(activePackReward);
       ownedBalls.add(activePackReward);
@@ -9410,7 +10454,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
       updateCollectionUI();
       syncUI();
-      updatePackEquipButton();
+      updatePackLoadoutStatus();
     },860);
   }
 
@@ -9468,16 +10512,12 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     activePackReward=null;
 
     if(finishedMode==='starter'){
-      // The first pack transitions from a deliberately paused pre-game state.
-      // Start Level 1 from a clean state instead of trying to resume that old state.
+      // The starter reward lands on Home so the player sees their new loadout,
+      // progression, and the primary Level 1 action before entering gameplay.
       resumeGameAfterPack=false;
-      currentScreen='game';
-      ui.gameScreen.classList.add('active');
-      ui.storeScreen.classList.remove('active');
-      ui.collectionScreen.classList.remove('active');
-      ui.quickNav.classList.add('gameHidden');
-
+      currentScreen='home';
       reset();
+      showScreen('home');
       return;
     }
 
@@ -9485,6 +10525,39 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     resumeGameAfterPack=false;
     updateCollectionUI();
     syncUI();
+  }
+
+  function playFromPackReveal(){
+    if(activePackMode==='starter'){
+      closePackOverlay();
+      showScreen('game');
+      return;
+    }
+
+    if(activePackMode!=='paid'){
+      closePackOverlay();
+      return;
+    }
+
+    const rewardToEquip=activePackReward;
+    const finishedLevel=!!state?.settled;
+    const wonFinishedLevel=finishedLevel && state.lastWin;
+
+    if(rewardToEquip && ownedBalls.has(rewardToEquip)){
+      selectedBallType=rewardToEquip;
+      collectionPreviewType=rewardToEquip;
+      updateCollectionUI();
+    }
+
+    closePackOverlay();
+    showScreen('game');
+
+    // Packs are often opened from the post-level 25-gold prompt. In that case,
+    // start the next level instead of returning to the completed result card.
+    if(finishedLevel){
+      if(wonFinishedLevel && currentLevel<MAX_LEVEL) currentLevel++;
+      reset();
+    }
   }
 
   function transitionStoreToPack(){
@@ -9536,6 +10609,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       x,y,vx,vy,
       r:opts.r ?? 17,
       boss:!!opts.boss,
+      miniBoss:!!opts.miniBoss,
       minion:!!opts.minion,
       bossIndex:opts.bossIndex || 0,
       worldIndex:opts.worldIndex || opts.bossIndex || 1,
@@ -9954,10 +11028,24 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     }
   }
 
+  function clearFinishedLevelCoins(){
+    if(!state) return;
+    state.coins.length=0;
+    state.coinFx.length=0;
+
+    // Coin flights use a separate fixed HUD canvas. Clear it immediately so
+    // the last animation frame cannot remain frozen behind the result popup.
+    hudFxCtx.save();
+    hudFxCtx.setTransform(1,0,0,1,0,0);
+    hudFxCtx.clearRect(0,0,hudFxCanvas.width,hudFxCanvas.height);
+    hudFxCtx.restore();
+  }
+
   function beginDefeatSequence(){
     if(!state || !state.running || state.settled || state.defeatSequence) return;
 
     const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    clearFinishedLevelCoins();
     state.running=false;
     state.defeatSequence={elapsed:0,duration:reducedMotion ? .18 : 1.15};
     stopGrowSound(true);
@@ -10465,6 +11553,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     const runCoins=roundCoinAmount(state.scoreCoins);
     const bankedWalletBefore=roundCoinAmount(walletCoins);
     const walletBefore=roundCoinAmount(walletCoins+runCoins);
+    clearFinishedLevelCoins();
     state.running=false;
     state.lastWin=win;
     state.settled=true;
@@ -10478,14 +11567,14 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       state.active=null;
     }
     computeCoverage();
+    const cfg=enemyConfig(currentLevel);
     const stars=win?starsForWin():0;
-    const mult=win ? STAR_MULTIPLIERS[stars] : 1.00;
+    const mult=win ? STAR_MULTIPLIERS[stars]*cfg.rewardMult : 1.00;
     const payout=win ? roundCoinAmount(runCoins*mult) : 0;
     if(win) walletCoins=roundCoinAmount(walletCoins+payout);
     const walletAfter=roundCoinAmount(walletCoins);
     state.scoreCoins=0;
 
-    const cfg=enemyConfig(currentLevel);
     const nextCfg=enemyConfig(Math.min(MAX_LEVEL,currentLevel+1));
     const bossReward=(win && cfg.boss) ? unlockBoosterForBoss(currentLevel) : null;
     const campaignComplete=win && currentLevel===MAX_LEVEL;
@@ -10500,6 +11589,12 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       ? `<strong>${bossReward.icon} BOOSTER UNLOCKED</strong><br>${bossReward.name}`
       : '';
 
+    const encounterRewardLine=win && cfg.miniBoss
+      ? '<strong>♛ MINI BOSS DEFEATED!</strong><br>35% GOLD BONUS CLAIMED'
+      : (win && cfg.rushEvent
+          ? '<strong>⚡ RUSH SURVIVED!</strong><br>15% GOLD BONUS CLAIMED'
+          : '');
+
     const earlyPackProgress=win && currentLevel<=10
       ? (walletAfter>=PACK_PRICE
           ? '<strong>PACK READY!</strong><br>Open the store to reveal a new ball.'
@@ -10511,7 +11606,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     ui.resultText.innerHTML=win
       ? (campaignComplete
           ? '<strong>ALL BOSSES DEFEATED!</strong>'
-          : (rewardLine || earlyPackProgress))
+          : (rewardLine || encounterRewardLine || earlyPackProgress))
       : '<strong>TRY AGAIN!</strong>';
 
     ui.again.textContent=campaignComplete?'Replay final boss':(win?'NEXT LEVEL':'RETRY');
@@ -10528,13 +11623,26 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     ui.level.textContent=currentLevel;
     ui.levelChallenge.textContent=`LEVEL ${currentLevel} • ${cfg.challenge}`;
     ui.levelGoal.textContent=`GOAL ${TARGET}%`;
+    ui.boardWrap.classList.toggle('speedRushLevel',cfg.rushEvent);
+    ui.boardWrap.classList.toggle('miniBossLevel',cfg.miniBoss);
+    ui.levelChallenge.classList.toggle('speedRushLevel',cfg.rushEvent);
+    ui.levelChallenge.classList.toggle('miniBossLevel',cfg.miniBoss);
     const worldProfile=worldProfileForLevel(currentLevel);
     ui.difficulty.textContent=cfg.boss
       ? `${worldProfile.name} • ${cfg.minions} minions • Speed ×${cfg.speedMult.toFixed(2)}`
-      : `World ${cfg.world+1} • ${cfg.count} enemies • Speed ×${cfg.speedMult.toFixed(2)} • Reaction ${cfg.seekStrength.toFixed(2)}`;
+      : (cfg.miniBoss
+          ? `${encounterProfileForLevel(currentLevel).name} • ${cfg.minions} guards • Gold ×${cfg.rewardMult.toFixed(2)}`
+          : (cfg.rushEvent
+              ? `Enemy Rush • ${cfg.count} enemies • Speed ×${cfg.speedMult.toFixed(2)} • Gold ×${cfg.rewardMult.toFixed(2)}`
+              : `World ${cfg.world+1} • ${cfg.count} enemies • Speed ×${cfg.speedMult.toFixed(2)} • Reaction ${cfg.seekStrength.toFixed(2)}`));
     ui.difficulty.style.color=worldProfile.fill;
     ui.time.textContent=state.timeLeft.toFixed(1);
     ui.balls.textContent=state.ballsLeft;
+    const equippedBall=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
+    setBallAssetBackground(ui.hudBallVisual,selectedBallType);
+    const hudCollectionLabel=`Open collection. ${equippedBall.name} equipped. ${state.ballsLeft} balls left.`;
+    ui.hudCollectionButton.setAttribute('aria-label',hudCollectionLabel);
+    ui.hudCollectionButton.title=`${equippedBall.name} equipped • Open collection`;
     ui.coins.textContent=formatCoinAmount(state.scoreCoins);
     syncEconomyUI();
     const displayedCoverage=state.active ? state.liveCoverage : state.coverage;
@@ -11672,12 +12780,22 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   ui.equipCataclysm.addEventListener('click',()=>selectBallType('cataclysm'));
   ui.equipGaia.addEventListener('click',()=>selectBallType('gaia'));
 
+  ui.gameToHome.addEventListener('click',()=>showScreen('home'));
   ui.gameToStore.addEventListener('click',()=>showScreen('store'));
   ui.gameToCollection.addEventListener('click',()=>showScreen('collection'));
+  ui.hudCollectionButton.addEventListener('click',()=>{
+    collectionPreviewType=selectedBallType;
+    showScreen('collection');
+  });
 
+  ui.quickHome.addEventListener('click',()=>showScreen('home'));
   ui.quickStore.addEventListener('click',()=>showScreen('store'));
   ui.quickPlay.addEventListener('click',()=>showScreen('game'));
   ui.quickCollection.addEventListener('click',()=>showScreen('collection'));
+
+  ui.homePlayButton.addEventListener('click',()=>showScreen('game'));
+  ui.homePackCard.addEventListener('click',()=>showScreen('store'));
+  ui.homeCollectionCard.addEventListener('click',()=>showScreen('collection'));
 
   ui.buyPack.addEventListener('click',buyPack);
   ui.buyApexBall.addEventListener('click',buyApexBall);
@@ -11685,9 +12803,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   ui.buyGaiaBall.addEventListener('click',()=>buyImpossibleBall('gaia'));
 
   ui.bigPack.addEventListener('click',openCurrentPack);
-  ui.packEquipReward.addEventListener('click',equipPackReward);
   ui.buyAnotherPack.addEventListener('click',buyAnotherPackFromReveal);
-  ui.packContinue.addEventListener('click',closePackOverlay);
+  ui.packContinue.addEventListener('click',playFromPackReveal);
 
   ui.firstPackMilestoneStore.addEventListener('click',openStoreFromFirstPackMilestone);
   ui.firstPackMilestoneLater.addEventListener('click',()=>closeFirstPackMilestone(true));
@@ -11836,7 +12953,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     syncUI();
   });
 
-  ui.bossFightButton.addEventListener('click',startBossFight);
+  ui.bossFightButton.addEventListener('click',startEncounter);
 
   let adminPausedGame=false;
 
@@ -11940,8 +13057,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     const requested=Math.max(1,Math.min(MAX_LEVEL,Math.floor(Number(ui.adminLevel.value)||1)));
     currentLevel=requested;
     ui.adminLevel.value=requested;
-    // Admin jumps are testing actions, so always preview the boss warning again.
-    if(BOSS_LEVELS.includes(requested)) bossWarningsSeen.delete(requested);
+    // Admin jumps are testing actions, so always preview milestone warnings again.
+    if(encounterProfileForLevel(requested)) encounterWarningsSeen.delete(requested);
     reset();
   }
 
