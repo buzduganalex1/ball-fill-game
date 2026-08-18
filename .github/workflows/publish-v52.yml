@@ -1,0 +1,42 @@
+name: Publish Ball Fill v52
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/publish-v52.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rebuild v52 index.html
+        shell: python
+        run: |
+          from pathlib import Path
+          import base64, gzip
+
+          parts = [Path(f'deploy/v52/part{i:02d}.txt').read_text().strip() for i in range(1, 6)]
+          payload = ''.join(parts)
+          assert len(payload) == 57472, f'Unexpected payload length: {len(payload)}'
+          assert payload.startswith('H4sI'), 'Invalid gzip/base64 header'
+
+          html = gzip.decompress(base64.b64decode(payload)).decode('utf-8')
+          assert '<canvas id="game"' in html, 'Game canvas missing'
+          assert 'BALL_TYPES' in html, 'Game data missing'
+          assert 'v52' in html, 'Not the requested v52 build'
+
+          Path('index.html').write_text(html, encoding='utf-8')
+          print(f'Published index.html: {len(html):,} chars')
+      - name: Commit v52
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Publish Ball Fill v52"
+          git push
