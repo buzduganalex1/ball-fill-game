@@ -276,7 +276,6 @@ h1,h2,p{margin:0}
 .progressSegmentFill{
   height:100%;
   background:linear-gradient(90deg,#59afd1,#7cd0e7);
-  transition:width .12s linear;
 }
 .starMarker{
   flex:none;
@@ -351,38 +350,141 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
 .tutorialCoach.show{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  gap:18px;
   pointer-events:none;
 }
+.tutorialIntroBadge{
+  padding:7px 14px;
+  border:2px solid #78b9d2;
+  border-radius:999px;
+  color:#2d7899;
+  background:#f5fcff;
+  box-shadow:0 3px 0 #bfd8e3;
+  font-size:14px;
+  line-height:1;
+  font-weight:1000;
+}
 .tutorialTarget{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  position:relative;
+  width:min(82%,340px);
+  height:220px;
+  flex:none;
 }
-.tutorialPulse{display:none}
+.tutorialMotionTrail{
+  position:absolute;
+  left:12%;
+  right:12%;
+  top:88px;
+  height:64px;
+  border-top:4px dashed rgba(79,157,190,.32);
+  border-radius:50%;
+  transform:rotate(-4deg);
+}
+.tutorialDemoBall{
+  position:absolute;
+  left:50%;
+  top:30px;
+  width:58px;
+  height:58px;
+  border:4px solid #2f88b0;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 34% 28%,#b9eaff 0 12%,transparent 13%),
+    radial-gradient(circle at 38% 32%,#72c5e4 0 18%,#54a9ce 45%,#378bb3 79%);
+  box-shadow:0 10px 18px rgba(44,116,148,.24);
+  animation:tutorialBallMove 3.6s ease-in-out infinite;
+}
+.tutorialPulse{
+  position:absolute;
+  left:50%;
+  top:60px;
+  width:76px;
+  height:76px;
+  border:4px solid rgba(71,164,202,.48);
+  border-radius:50%;
+  opacity:0;
+  transform:translate(-50%,-50%) scale(.35);
+  animation:tutorialPressPulse 3.6s ease-out infinite;
+}
+.tutorialPulse.pulseTwo{animation-delay:.16s}
 .tutorialHand{
-  font-size:62px;
-  animation:handTap 1.2s ease-in-out infinite;
+  position:absolute;
+  left:50%;
+  top:105px;
+  z-index:2;
+  font-size:68px;
+  line-height:1;
+  filter:drop-shadow(0 5px 5px rgba(50,67,78,.2));
+  animation:tutorialHandMove 3.6s ease-in-out infinite;
 }
-@keyframes handTap{
-  0%,100%{transform:translateY(-8px) scale(1)}
-  50%{transform:translateY(10px) scale(.92)}
+@keyframes tutorialBallMove{
+  0%,8%{transform:translateX(-50%) scale(.72)}
+  20%{transform:translateX(-50%) scale(.92)}
+  48%{transform:translateX(calc(-50% + 78px)) translateY(-16px) scale(1.22)}
+  74%{transform:translateX(calc(-50% - 72px)) translateY(18px) scale(1.5)}
+  90%,100%{transform:translateX(-50%) translateY(-4px) scale(1.72)}
+}
+@keyframes tutorialHandMove{
+  0%,8%{transform:translateX(-50%) translateY(18px) scale(1)}
+  16%,22%{transform:translateX(-50%) translateY(2px) scale(.9)}
+  48%{transform:translateX(calc(-50% + 78px)) translateY(-14px) scale(.94)}
+  74%{transform:translateX(calc(-50% - 72px)) translateY(18px) scale(.94)}
+  90%,100%{transform:translateX(-50%) translateY(-4px) scale(.94)}
+}
+@keyframes tutorialPressPulse{
+  0%,8%{opacity:0;transform:translate(-50%,-50%) scale(.35)}
+  16%{opacity:.8}
+  30%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}
+  31%,100%{opacity:0}
 }
 .tutorialCopy{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:4px;
-  max-width:300px;
-  padding:11px 15px;
+  gap:8px;
+  width:min(92%,380px);
+  padding:16px 18px;
   border:2px solid #b8d4e0;
-  border-radius:17px;
+  border-radius:20px;
   background:white;
   box-shadow:var(--shadow);
   text-align:center;
 }
-.tutorialCopy strong{font-size:21px;color:#2f7fa1}
-.tutorialCopy span{font-size:10px;font-weight:850;color:var(--muted)}
+.tutorialCopy strong{
+  color:#256f91;
+  font-size:26px;
+  line-height:1.08;
+}
+.tutorialMoveCopy{
+  max-width:320px;
+  color:#536775;
+  font-size:16px;
+  line-height:1.35;
+  font-weight:850;
+}
+.tutorialStartCue{
+  margin-top:3px;
+  padding:9px 16px;
+  border-radius:999px;
+  color:white;
+  background:#4fa8cc;
+  box-shadow:0 4px 0 #347e9f;
+  font-size:15px;
+  line-height:1;
+  font-weight:1000;
+}
+@media(max-height:680px) and (orientation:portrait){
+  .tutorialCoach.show{gap:10px}
+  .tutorialTarget{height:170px;transform:scale(.84)}
+  .tutorialCopy{padding:12px 14px;gap:6px}
+  .tutorialCopy strong{font-size:23px}
+  .tutorialMoveCopy{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  .tutorialDemoBall,
+  .tutorialHand,
+  .tutorialPulse{animation-duration:7.2s}
+}
 
 /* result */
 .resultCard{
@@ -2221,14 +2323,18 @@ body.packOpen{overflow:hidden!important}
       <canvas id="game" width="600" height="600"></canvas>
 
       <div class="tutorialCoach" id="tutorialCoach" aria-hidden="true">
+        <div class="tutorialIntroBadge">HOW TO PLAY</div>
         <div class="tutorialTarget">
+          <div class="tutorialMotionTrail"></div>
           <div class="tutorialPulse pulseOne"></div>
           <div class="tutorialPulse pulseTwo"></div>
+          <div class="tutorialDemoBall"></div>
           <div class="tutorialHand">☝️</div>
         </div>
         <div class="tutorialCopy">
-          <strong>TAP &amp; HOLD</strong>
-          <span>Hold to grow • drag while holding • release to lock</span>
+          <strong>TAP &amp; HOLD TO GROW</strong>
+          <span class="tutorialMoveCopy">Keep holding and move your finger to guide the ball.</span>
+          <span class="tutorialStartCue">TAP ANYWHERE TO START</span>
         </div>
       </div>
 
@@ -3049,7 +3155,7 @@ body.packOpen{overflow:hidden!important}
     }
   }
 
-  const TARGET = 50;
+  const TARGET = 35;
 
   function configureArenaForViewport(){
     const board=canvas.parentElement;
@@ -3080,10 +3186,11 @@ body.packOpen{overflow:hidden!important}
   const START_TIME = 45;
   const START_BALLS = 10;
   const MAX_COINS = 2;
+  const COIN_RADIUS = 21;
   const FRENZY_MAX_COINS = 14;
   const FRENZY_DURATION = 3.0;
   const BALL_MIN = 13;
-  const BALL_GROWTH = 58; // px/s
+  const BALL_COVERAGE_GROWTH = Math.PI*6380/(600*600); // canvas fraction/s at normal speed
   const BALL_TYPES = {
     normal: {
       name:'Normal Ball',
@@ -3375,12 +3482,12 @@ body.packOpen{overflow:hidden!important}
 
   let tutorialSeen=false;
   try{
-    tutorialSeen=localStorage.getItem('ballFillTutorialSeenV1')==='1';
+    tutorialSeen=localStorage.getItem('ballFillTutorialSeenV2')==='1';
   }catch(e){}
 
   function markTutorialSeen(){
     tutorialSeen=true;
-    try{localStorage.setItem('ballFillTutorialSeenV1','1');}catch(e){}
+    try{localStorage.setItem('ballFillTutorialSeenV2','1');}catch(e){}
   }
 
   function maybeShowLevelOneTutorial(){
@@ -4177,13 +4284,13 @@ body.packOpen{overflow:hidden!important}
     const maxNow = (forceFrenzy || state.frenzyLeft > 0) ? FRENZY_MAX_COINS : MAX_COINS;
     if(state.coins.length >= maxNow) return;
 
-    const coinR=15;
+    const coinR=COIN_RADIUS;
 
     // A coin may ONLY spawn in genuinely empty space:
     // not over locked balls, not over the active ball, not on enemies,
     // and not on top of another coin.
     for(let tries=0;tries<90;tries++){
-      const p=randomPoint(34);
+      const p=randomPoint(COIN_RADIUS+18);
 
       const overlapsPlaced = state.placed.some(
         b => dist(p.x,p.y,b.x,b.y) < b.r + coinR + 10
@@ -4258,7 +4365,7 @@ body.packOpen{overflow:hidden!important}
         pointerTargetX:startX,
         pointerTargetY:startY,
         pointerLift:lift,
-        followRate:(ev.pointerType==='touch' || !!ev.touches) ? 12 : 16,
+        followRate:(ev.pointerType==='touch' || !!ev.touches) ? 7.5 : 16,
         r:startR,
         startR,
         alive:true,
@@ -4658,9 +4765,11 @@ body.packOpen{overflow:hidden!important}
       const isPhysicallyGrowing=b.r < limit-0.35;
       if(b.r < limit){
         const bossGrowthMult=(state.frostDebuffLeft>0 ? 0.40 : 1) * (state.toxicLeft>0 ? 0.70 : 1);
+        const typeGrowthMult=BALL_TYPES[b.type || 'normal']?.growthMult || 1;
+        const nextArea=Math.PI*b.r*b.r + W*H*BALL_COVERAGE_GROWTH*typeGrowthMult*bossGrowthMult*dt;
         b.r=Math.min(
           limit,
-          b.r + BALL_GROWTH*(BALL_TYPES[b.type || 'normal']?.growthMult || 1)*bossGrowthMult*dt
+          Math.sqrt(nextArea/Math.PI)
         );
       }
 
@@ -5275,7 +5384,15 @@ body.packOpen{overflow:hidden!important}
 
     // Coins
     const now=performance.now()/1000;
-    for(const c of state.coins) drawCoin(c.x,c.y,c.r*(1+.08*Math.sin(now*5+c.pulse)));
+    for(const c of state.coins){
+      const bob=Math.sin(now*3+c.pulse)*2.5;
+      drawCoin(
+        c.x,
+        c.y+bob,
+        c.r*(1+.06*Math.sin(now*5+c.pulse)),
+        now*.8+c.pulse
+      );
+    }
 
     // Enemy motion trails
     for(const e of state.enemies) drawEnemyTrail(e);
@@ -5323,7 +5440,7 @@ body.packOpen{overflow:hidden!important}
         ctx.fill();
         ctx.restore();
 
-        drawCoin(pos.x,pos.y,12*(1-.34*e));
+        drawCoin(pos.x,pos.y,12*(1-.34*e),now*4+f.t*6);
       }else{
         ctx.save();ctx.globalAlpha=Math.max(0,f.life/.45);ctx.fillStyle=COLORS.ball;
         ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,Math.PI*2);ctx.fill();ctx.restore();
@@ -5725,12 +5842,76 @@ body.packOpen{overflow:hidden!important}
     ctx.restore();
   }
 
-  function drawCoin(x,y,r){
+  function drawCoin(x,y,r,rotation=0){
     ctx.save();
-    ctx.fillStyle=COLORS.coin;ctx.strokeStyle=COLORS.coinEdge;ctx.lineWidth=3;
-    ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.stroke();
-    ctx.strokeStyle='#fff1a8';ctx.lineWidth=2;
-    ctx.beginPath();ctx.arc(x,y,r*.45,0,Math.PI*2);ctx.stroke();
+    ctx.translate(x,y);
+
+    const glow=ctx.createRadialGradient(0,0,r*.35,0,0,r*1.5);
+    glow.addColorStop(0,'rgba(255,210,55,.3)');
+    glow.addColorStop(.58,'rgba(255,190,28,.14)');
+    glow.addColorStop(1,'rgba(255,184,20,0)');
+    ctx.fillStyle=glow;
+    ctx.beginPath();
+    ctx.arc(0,0,r*1.5,0,Math.PI*2);
+    ctx.fill();
+
+    const face=ctx.createRadialGradient(-r*.34,-r*.38,r*.08,0,0,r);
+    face.addColorStop(0,'#fff9b0');
+    face.addColorStop(.28,'#ffe25a');
+    face.addColorStop(.67,'#ffc42c');
+    face.addColorStop(1,'#e69a0b');
+    ctx.shadowColor='rgba(171,107,5,.28)';
+    ctx.shadowBlur=r*.38;
+    ctx.shadowOffsetY=r*.16;
+    ctx.fillStyle=face;
+    ctx.strokeStyle='#d78c08';
+    ctx.lineWidth=Math.max(3,r*.16);
+    ctx.beginPath();
+    ctx.arc(0,0,r,0,Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.shadowColor='transparent';
+    ctx.strokeStyle='rgba(255,247,164,.9)';
+    ctx.lineWidth=Math.max(2,r*.1);
+    ctx.beginPath();
+    ctx.arc(0,0,r*.76,0,Math.PI*2);
+    ctx.stroke();
+
+    ctx.save();
+    ctx.rotate(Math.sin(rotation)*.1);
+    ctx.fillStyle='#fff383';
+    ctx.strokeStyle='#dc980d';
+    ctx.lineWidth=Math.max(1.3,r*.07);
+    ctx.beginPath();
+    for(let point=0;point<10;point++){
+      const angle=-Math.PI/2+point*Math.PI/5;
+      const pointRadius=point%2===0?r*.43:r*.2;
+      const starX=Math.cos(angle)*pointRadius;
+      const starY=Math.sin(angle)*pointRadius;
+      if(point===0) ctx.moveTo(starX,starY);
+      else ctx.lineTo(starX,starY);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle='rgba(255,255,222,.88)';
+    ctx.beginPath();
+    ctx.ellipse(-r*.32,-r*.38,r*.17,r*.1,-.45,0,Math.PI*2);
+    ctx.fill();
+
+    if(r>=18){
+      ctx.strokeStyle='rgba(255,255,225,.92)';
+      ctx.lineWidth=1.8;
+      ctx.beginPath();
+      ctx.moveTo(r*.62,-r*.77);
+      ctx.lineTo(r*.62,-r*.45);
+      ctx.moveTo(r*.46,-r*.61);
+      ctx.lineTo(r*.78,-r*.61);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 
