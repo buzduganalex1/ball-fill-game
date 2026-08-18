@@ -598,25 +598,31 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
 .boosterDock{
   flex:none;
   width:100%;
-  min-height:86px;
+  min-height:98px;
   display:flex;
   align-items:center;
-  gap:7px;
-  padding:10px 9px;
+  justify-content:center;
+  gap:9px;
+  padding:11px 10px 13px;
   border:2px solid var(--line);
   border-radius:23px;
   background:white;
   box-shadow:var(--shadow);
 }
 .boosterViewport{
-  flex:1 1 0;
+  flex:0 1 auto;
   min-width:0;
+  max-width:440px;
   display:flex;
   align-items:center;
+  padding:2px 0 5px;
   overflow-x:auto;
   overflow-y:hidden;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
   scroll-snap-type:x mandatory;
+  scroll-padding-inline:2px;
 }
 .boosterViewport::-webkit-scrollbar{display:none}
 .bottomBar{
@@ -624,11 +630,12 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   align-items:center;
   gap:8px;
   width:max-content;
+  padding:0 2px;
 }
 .bottomBar button{
-  flex:0 0 62px;
-  width:62px;
-  height:62px;
+  flex:0 0 66px;
+  width:66px;
+  height:66px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -636,7 +643,7 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   border-radius:16px;
   background:#f9fbfc;
   box-shadow:0 4px 0 #c5d0d8;
-  font-size:24px;
+  font-size:27px;
   scroll-snap-align:start;
 }
 .bottomBar button:active{transform:translateY(3px);box-shadow:0 1px 0 #c5d0d8}
@@ -648,34 +655,19 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   font-size:14px;
   color:#70818d;
 }
-.boosterScrollButton{
-  flex:none;
-  width:50px;
-  height:62px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:2px solid #9fc7da;
-  border-radius:16px;
-  color:#337c9f;
-  background:#e7f7fd;
-  box-shadow:0 4px 0 #9ab9c8;
-  font-size:34px;
-}
-.boosterScrollButton:disabled{opacity:.25}
 .gameUtilityMenuButton{
   flex:none;
-  width:54px;
-  height:62px;
+  width:64px;
+  height:66px;
   display:flex;
   align-items:center;
   justify-content:center;
   border:2px solid #326780;
-  border-radius:16px;
+  border-radius:18px;
   color:white;
   background:#3e819f;
   box-shadow:0 4px 0 #2f6076;
-  font-size:24px;
+  font-size:29px;
 }
 .boosterToast{
   display:flex;
@@ -1544,7 +1536,7 @@ body.packOpen{overflow:hidden!important}
     height:calc(100dvh - 88px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   }
 }
-@media(max-width:390px){
+@media(max-width:499px) and (orientation:portrait){
   .gameStatusBar{gap:3px;padding-left:5px;padding-right:5px}
   .gameGold{width:85px}
   .gameBallsLeft{width:45px}
@@ -1552,10 +1544,11 @@ body.packOpen{overflow:hidden!important}
   .gameStatusItem strong{font-size:16px}
   .packHudButton{width:78px;min-width:78px}
   .starMarker{width:32px;height:32px}
-  .boosterDock{gap:5px;padding:8px 7px}
-  .bottomBar button{flex-basis:58px;width:58px;height:58px}
-  .boosterScrollButton{width:46px;height:58px}
-  .gameUtilityMenuButton{width:50px;height:58px}
+  .boosterDock{gap:5px;padding:10px 6px 12px}
+  .boosterViewport{max-width:302px}
+  .bottomBar{gap:2px}
+  .bottomBar button{flex-basis:58px;width:58px;height:64px}
+  .gameUtilityMenuButton{width:52px;height:64px}
   .storeHero{gap:7px;padding:8px}
   .shopPackVisual{width:70px}
   .shopPackBox{width:62px;height:68px;font-size:30px}
@@ -1578,7 +1571,7 @@ body.packOpen{overflow:hidden!important}
   .gameStatusItem{min-height:40px}
   .boosterDock{min-height:76px;padding-top:7px;padding-bottom:7px}
   .bottomBar button{height:56px}
-  .boosterScrollButton,.gameUtilityMenuButton{height:56px}
+  .gameUtilityMenuButton{height:56px}
   .packModal{
     height:calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     padding:12px;
@@ -1592,6 +1585,30 @@ body.packOpen{overflow:hidden!important}
   .rewardBall{width:88px;height:88px}
   .rewardName{font-size:18px}
   .rewardDesc{font-size:9px}
+}
+
+@media(max-width:370px) and (orientation:portrait){
+  .boosterDock{gap:3px;padding-left:4px;padding-right:4px}
+  .boosterViewport{max-width:262px}
+  .bottomBar{gap:2px}
+  .bottomBar button{flex-basis:50px;width:50px;font-size:23px}
+  .gameUtilityMenuButton{width:48px}
+}
+
+@media(min-width:371px) and (max-width:399px) and (orientation:portrait){
+  .boosterDock{gap:5px;padding-left:6px;padding-right:6px}
+  .boosterViewport{max-width:289px}
+  .bottomBar{gap:2px}
+  .bottomBar button{flex-basis:55px;width:55px;font-size:25px}
+  .gameUtilityMenuButton{width:52px}
+}
+
+@media(max-width:330px) and (orientation:portrait){
+  .boosterDock{gap:3px;padding-left:4px;padding-right:4px}
+  .boosterViewport{max-width:242px}
+  .bottomBar{gap:2px}
+  .bottomBar button{flex-basis:46px;width:46px;font-size:21px}
+  .gameUtilityMenuButton{width:44px}
 }
 
 
@@ -2143,55 +2160,71 @@ body.packOpen{overflow:hidden!important}
     font-size:21px;
   }
 
-  .overlay{padding:6px}
+  .overlay{
+    padding:0;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr);
+  }
   .resultCard{
-    width:min(100%,360px);
-    max-height:calc(100% - 4px);
+    width:96%;
+    height:90%;
+    max-height:90%;
+    align-self:center;
+    justify-self:center;
+    justify-content:space-evenly;
     gap:8px;
-    padding:14px 12px;
+    padding:16px 14px;
     overflow-y:auto;
-    border-radius:22px;
+    border-radius:26px;
     scrollbar-width:none;
   }
   .resultCard::-webkit-scrollbar{display:none}
   .completionBadge{
-    padding:7px 12px;
-    font-size:12px;
+    padding:8px 14px;
+    font-size:13px;
     letter-spacing:.06em;
   }
   .result{
-    font-size:30px;
+    font-size:32px;
     line-height:1.08;
   }
-  .celebrationStars{font-size:46px}
-  .coinTransfer{gap:6px}
+  .celebrationStars{font-size:52px}
+  .coinTransfer{gap:8px}
   .rewardBucket{
-    min-height:78px;
-    padding:8px 4px;
+    min-height:94px;
+    padding:10px 6px;
+    border-radius:19px;
   }
   .rewardBucket span:first-child{
-    font-size:12px;
+    font-size:13px;
     letter-spacing:.04em;
   }
-  .rewardBucket strong{font-size:30px}
-  .rewardFormula{font-size:24px}
+  .rewardBucket strong{font-size:34px}
+  .rewardFormula{font-size:27px}
   .sub{
-    font-size:14px;
+    font-size:16px;
     line-height:1.3;
   }
   .resultContinue{
-    min-width:190px;
-    min-height:50px;
-    font-size:16px;
+    min-width:230px;
+    min-height:60px;
+    font-size:19px;
   }
 }
 
 @media(max-width:350px) and (orientation:portrait){
   .packModal{padding:18px 14px}
-  .resultCard{gap:6px;padding:10px 8px}
-  .result{font-size:28px}
-  .celebrationStars{font-size:42px}
+  .resultCard{gap:6px;padding:12px 9px}
+  .result{font-size:29px}
+  .celebrationStars{font-size:46px}
   .transferLane{width:24px}
+}
+
+@media(max-width:800px) and (max-height:850px) and (orientation:portrait){
+  .resultCard{
+    gap:2px;
+    padding:8px 12px;
+  }
 }
 
 @media(max-width:800px) and (max-height:700px) and (orientation:portrait){
@@ -2207,6 +2240,41 @@ body.packOpen{overflow:hidden!important}
   .rewardDesc{font-size:17px}
   .packContinue,
   .buyAnotherPack{min-height:58px;font-size:19px}
+  .resultCard{
+    gap:0;
+    padding:4px 8px;
+  }
+  .completionBadge{
+    padding:4px 8px;
+    font-size:11px;
+  }
+  .result{
+    font-size:24px;
+    line-height:1.04;
+  }
+  .celebrationStars{font-size:38px}
+  .coinTransfer{gap:4px}
+  .rewardBucket{
+    min-height:68px;
+    padding:4px;
+    border-radius:15px;
+  }
+  .rewardBucket span:first-child{font-size:12px}
+  .rewardBucket strong{font-size:29px}
+  .transferLane{width:24px}
+  .rewardFormula{
+    font-size:22px;
+    line-height:1.1;
+  }
+  .sub{
+    font-size:14px;
+    line-height:1.1;
+  }
+  .resultContinue{
+    min-width:200px;
+    min-height:48px;
+    font-size:17px;
+  }
 }
 
 </style>
@@ -2375,7 +2443,6 @@ body.packOpen{overflow:hidden!important}
     <div id="boosterStatus" class="boosterToast"></div>
 
     <div class="boosterDock" id="boosterDock">
-      <button class="boosterScrollButton boosterPrev" id="boosterPrev" type="button" aria-label="Previous boosters">‹</button>
       <div class="boosterViewport" id="boosterViewport">
         <div class="bottomBar" id="boosterTrack">
           <button id="restart" title="Restart">↻</button>
@@ -2391,8 +2458,7 @@ body.packOpen{overflow:hidden!important}
           <button id="panicClear" title="Panic Clear">🌟</button>
         </div>
       </div>
-      <button class="boosterScrollButton boosterNext" id="boosterNext" type="button" aria-label="More boosters">›</button>
-      <button class="gameUtilityMenuButton" id="gameUtilityMenuButton" type="button" aria-label="Game menu">☰</button>
+      <button class="gameUtilityMenuButton" id="gameUtilityMenuButton" type="button" aria-label="Game settings">⚙</button>
     </div>
   </div>
   <canvas id="hudFxCanvas" class="hudFxCanvas" aria-hidden="true"></canvas>
@@ -2746,8 +2812,6 @@ body.packOpen{overflow:hidden!important}
     boosterDock: document.getElementById('boosterDock'),
     boosterViewport: document.getElementById('boosterViewport'),
     boosterTrack: document.getElementById('boosterTrack'),
-    boosterPrev: document.getElementById('boosterPrev'),
-    boosterNext: document.getElementById('boosterNext'),
     storeHero: document.getElementById('storeHero'),
     storeFxLayer: document.getElementById('storeFxLayer'),
     packFxLayer: document.getElementById('packFxLayer'),
@@ -3155,7 +3219,7 @@ body.packOpen{overflow:hidden!important}
     }
   }
 
-  const TARGET = 35;
+  const TARGET = 30;
 
   function configureArenaForViewport(){
     const board=canvas.parentElement;
@@ -4358,13 +4422,17 @@ body.packOpen{overflow:hidden!important}
       const startR=BALL_MIN*(typeData.startSizeMult || 1);
       const lift=pointerLift(ev);
       const startX=Math.max(startR,Math.min(W-startR,p.x));
-      const startY=Math.max(startR,Math.min(H-startR,p.y-lift));
+      const startY=Math.max(startR,Math.min(H-startR,p.y));
       state.active={
         x:startX,
         y:startY,
         pointerTargetX:startX,
         pointerTargetY:startY,
+        pointerStartX:startX,
+        pointerStartY:startY,
         pointerLift:lift,
+        pointerMoveThreshold:6*H/canvas.getBoundingClientRect().height,
+        pointerLiftActive:false,
         followRate:(ev.pointerType==='touch' || !!ev.touches) ? 7.5 : 16,
         r:startR,
         startR,
@@ -4415,8 +4483,11 @@ body.packOpen{overflow:hidden!important}
     ev.preventDefault();
     const p=pointerPos(ev);
     const b=state.active;
+    if(!b.pointerLiftActive){
+      b.pointerLiftActive=dist(p.x,p.y,b.pointerStartX,b.pointerStartY)>=b.pointerMoveThreshold;
+    }
     b.pointerTargetX=p.x;
-    b.pointerTargetY=p.y-b.pointerLift;
+    b.pointerTargetY=p.y-(b.pointerLiftActive ? b.pointerLift : 0);
   }
 
   function followPointerTarget(ball,dt){
@@ -6482,26 +6553,6 @@ body.packOpen{overflow:hidden!important}
       adminPausedGame=false;
     }
   });
-
-  function updateBoosterScrollButtons(){
-    const viewport=ui.boosterViewport;
-    const max=Math.max(0,viewport.scrollWidth-viewport.clientWidth);
-    ui.boosterPrev.disabled=viewport.scrollLeft<=3;
-    ui.boosterNext.disabled=viewport.scrollLeft>=max-3;
-  }
-
-  function scrollBoosters(direction){
-    const viewport=ui.boosterViewport;
-    const page=Math.max(120,viewport.clientWidth*.92);
-    viewport.scrollBy({left:direction*page,behavior:'smooth'});
-    setTimeout(updateBoosterScrollButtons,330);
-  }
-
-  ui.boosterPrev.addEventListener('click',()=>scrollBoosters(-1));
-  ui.boosterNext.addEventListener('click',()=>scrollBoosters(1));
-  ui.boosterViewport.addEventListener('scroll',updateBoosterScrollButtons,{passive:true});
-  window.addEventListener('resize',updateBoosterScrollButtons);
-  requestAnimationFrame(updateBoosterScrollButtons);
 
   ui.soundToggle.addEventListener('click',()=>{
     setSoundEnabled(!soundEnabled);
