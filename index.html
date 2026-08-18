@@ -5659,6 +5659,53 @@ body:has(#collectionScreen.active) .quickNavButton.active{
   background:rgba(38,57,67,.97);
   box-shadow:0 .3rem .65rem rgba(27,41,48,.22);
 }
+#storeScreen .storeNote:not(:empty){
+  position:fixed;
+  left:50%;
+  top:50%;
+  bottom:auto;
+  z-index:70;
+  width:min(calc(100vw - 2rem),22rem);
+  min-height:8.25rem;
+  margin:0;
+  padding:1.15rem 1.25rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.7rem;
+  color:#30473e;
+  background:linear-gradient(180deg,#fff,#f8f5e9);
+  border:.18rem solid #dda728;
+  border-radius:1.35rem;
+  box-shadow:inset 0 .14rem 0 #fff,0 .28rem 0 #aa7b18,0 1rem 2.6rem rgba(39,55,48,.3);
+  font-size:1.3rem;
+  line-height:1.2;
+  text-align:center;
+  text-shadow:0 .06rem 0 #fff;
+  transform:translate(-50%,-50%);
+  animation:storeNoticePop .34s cubic-bezier(.16,.88,.24,1.18) both;
+}
+#storeScreen .storeNote:not(:empty)::before{
+  content:'★';
+  width:3rem;
+  height:3rem;
+  display:grid;
+  place-items:center;
+  flex:none;
+  border:.16rem solid #bd7810;
+  border-radius:50%;
+  color:#fff4a7;
+  background:radial-gradient(circle at 34% 28%,#fff7a8,#ffc93b 42%,#e39712 78%);
+  box-shadow:inset 0 0 0 .12rem rgba(255,250,171,.72),0 .24rem 0 #a9670c,0 0 1rem rgba(244,183,45,.32);
+  font-size:1.2rem;
+  text-shadow:0 .08rem 0 #ad690c;
+}
+@keyframes storeNoticePop{
+  0%{opacity:0;transform:translate(-50%,-44%) scale(.78)}
+  68%{opacity:1;transform:translate(-50%,-52%) scale(1.035)}
+  100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
 
 #collectionScreen .collectionBrowseHint{
   color:var(--ui-ink);
@@ -5980,6 +6027,10 @@ body:has(#collectionScreen.active) #quickCollection.active{
 .packModal.packAnticipation{
   animation:packChargeFrame .88s cubic-bezier(.2,.72,.22,1) both;
 }
+.packFxLayer.preRevealCharge{
+  background:radial-gradient(circle at 50% 50%,rgba(255,245,170,.48),rgba(244,189,55,.1) 24%,transparent 52%);
+  animation:preRevealChargeFlash .38s ease-out both;
+}
 .bigPack.opening{
   animation:packSuperShake .86s cubic-bezier(.2,.72,.22,1)!important;
   filter:drop-shadow(0 0 1.5rem rgba(244,190,46,.7));
@@ -6092,6 +6143,11 @@ body:has(#collectionScreen.active) #quickCollection.active{
   75%{transform:scale(1.015);box-shadow:0 1.5rem 4.375rem rgba(48,63,78,.2),0 0 2.8rem rgba(244,190,46,.42)}
   100%{transform:scale(.99);box-shadow:0 1.5rem 4.375rem rgba(48,63,78,.2),0 0 4rem rgba(244,190,46,.58)}
 }
+@keyframes preRevealChargeFlash{
+  0%{opacity:0;transform:scale(.9)}
+  38%{opacity:.8;transform:scale(1)}
+  100%{opacity:0;transform:scale(1.08)}
+}
 @keyframes packSuperShake{
   0%{transform:translate(0) rotate(0) scale(1)}
   12%{transform:translate(-.18rem,.04rem) rotate(-4deg) scale(1.03)}
@@ -6161,6 +6217,53 @@ body:has(#collectionScreen.active) #quickCollection.active{
   38%,72%{opacity:1;transform:translate(-50%,0) scale(1)}
   100%{opacity:0;transform:translate(-50%,-1rem) scale(.94)}
 }
+
+/* A short visual bridge from the purchased card into the opening room. */
+#storeScreen.packTransitionOut .menuApp{
+  animation:storeCatalogToPack .58s cubic-bezier(.3,.02,.2,1) both;
+}
+.storeFxLayer.packPortalTransition{
+  z-index:190;
+}
+.storeFxLayer.packPortalTransition::after{
+  content:'';
+  position:fixed;
+  left:50%;
+  top:50%;
+  width:12rem;
+  height:12rem;
+  margin:-6rem 0 0 -6rem;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,#fff 0 28%,#fff4b3 29% 42%,rgba(91,196,142,.88) 43% 57%,rgba(91,196,142,.32) 58% 67%,transparent 68%);
+  box-shadow:0 0 3rem #fff,0 0 6rem rgba(84,192,137,.55);
+  animation:storePackPortalCover .58s cubic-bezier(.2,.68,.2,1) both;
+}
+.packOverlay.packTransitionIn{
+  animation:packRoomFadeIn .58s ease-out both;
+}
+.packOverlay.packTransitionIn .packModal{
+  animation:packRoomLand .68s cubic-bezier(.16,.86,.24,1.15) both;
+}
+@keyframes storeCatalogToPack{
+  0%{opacity:1;transform:scale(1);filter:blur(0)}
+  55%{opacity:.72;transform:scale(.975);filter:blur(.08rem)}
+  100%{opacity:0;transform:scale(.92);filter:blur(.35rem)}
+}
+@keyframes storePackPortalCover{
+  0%{opacity:0;transform:scale(.08) rotate(-15deg)}
+  18%{opacity:1}
+  100%{opacity:1;transform:scale(10) rotate(18deg)}
+}
+@keyframes packRoomFadeIn{
+  0%{opacity:0}
+  100%{opacity:1}
+}
+@keyframes packRoomLand{
+  0%{opacity:0;transform:translateY(2rem) scale(.9)}
+  58%{opacity:1;transform:translateY(-.2rem) scale(1.015)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
 @media(prefers-reduced-motion:reduce){
   #storeScreen.purchaseScreenShake,
   #storeScreen .purchaseBoom,
@@ -6168,6 +6271,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
   .purchaseSuccessBanner,
   .purchaseBurstParticle,
   .packModal.packAnticipation,
+  .packFxLayer.preRevealCharge,
   .bigPack.opening,
   .packFxLayer.openingBurst,
   .packRays,
@@ -6179,7 +6283,11 @@ body:has(#collectionScreen.active) #quickCollection.active{
   .rewardReveal.megaReveal .rewardBall,
   .rewardReveal.megaReveal .rewardName,
   .packDropBanner,
-  .packMegaSpark{animation-duration:.01ms!important;animation-iteration-count:1!important}
+  .packMegaSpark,
+  #storeScreen.packTransitionOut .menuApp,
+  .storeFxLayer.packPortalTransition::after,
+  .packOverlay.packTransitionIn,
+  .packOverlay.packTransitionIn .packModal{animation-duration:.01ms!important;animation-iteration-count:1!important}
 }
 
 </style>
@@ -6505,7 +6613,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
 
     <div class="instantHint">Tap BUY and the pack opens instantly.</div>
 
-    <div class="storeNote" id="storeMessage"></div>
+    <div class="storeNote" id="storeMessage" role="status" aria-live="polite"></div>
   </div>
 </div>
 
@@ -7574,6 +7682,8 @@ body:has(#collectionScreen.active) #quickCollection.active{
   const ownedBalls = new Set();
   let activePackMode = null;
   let activePackReward = null;
+  let packCelebrationToken = 0;
+  let storePackTransitioning = false;
   let resumeGameAfterPack = false;
   let currentScreen = 'game';
   let resumeGameAfterMenus = false;
@@ -8179,28 +8289,34 @@ body:has(#collectionScreen.active) #quickCollection.active{
     }
   }
 
-  function shopConfetti(container,count=46,bright=false){
+  function shopConfetti(container,count=46,bright=false,quick=false){
     const palette=bright
       ? ['#fff7b0','#ffd445','#ffffff','#ff8ecb','#7de7ff','#cba1ff']
       : ['#ffd445','#ff8a66','#73d5ff','#91df76','#b991ff','#ffffff'];
 
+    const pieces=[];
     for(let i=0;i<count;i++){
       const piece=document.createElement('i');
       piece.className='shopConfetti';
       piece.style.left=(Math.random()*100)+'%';
       piece.style.background=palette[i%palette.length];
-      piece.style.setProperty('--dur',(1.15+Math.random()*1.15)+'s');
-      piece.style.setProperty('--delay',(Math.random()*.22)+'s');
+      piece.style.setProperty('--dur',quick
+        ? `${.82+Math.random()*.48}s`
+        : `${1.15+Math.random()*1.15}s`);
+      piece.style.setProperty('--delay',quick
+        ? `${Math.random()*.08}s`
+        : `${Math.random()*.22}s`);
       piece.style.setProperty('--drift',((-110+Math.random()*220))+'px');
       piece.style.setProperty('--spin',((360+Math.random()*950)*(Math.random()<.5?-1:1))+'deg');
       piece.style.width=(5+Math.random()*7)+'px';
       piece.style.height=(8+Math.random()*11)+'px';
       container.appendChild(piece);
+      pieces.push(piece);
     }
 
     setTimeout(()=>{
-      container.querySelectorAll('.shopConfetti').forEach(el=>el.remove());
-    },2700);
+      pieces.forEach(el=>el.remove());
+    },quick?1500:2700);
   }
 
   function radialJuiceBurst(container,className,count,x,y,colors,minDistance,maxDistance){
@@ -8274,6 +8390,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
 
   function celebratePackReveal(type,isNew){
     sfx('packReveal');
+    const celebrationToken=++packCelebrationToken;
     const data=BALL_TYPES[type] || BALL_TYPES.normal;
     const revealColor={
       Common:'#85a9ba',
@@ -8288,7 +8405,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
     const centerY=ballRect.top+ballRect.height/2;
 
     ui.packFxLayer.querySelectorAll('.packDropBanner,.packMegaSpark').forEach(el=>el.remove());
-    ui.packFxLayer.classList.remove('openingBurst');
+    ui.packFxLayer.classList.remove('openingBurst','preRevealCharge');
     ui.packModal.classList.remove('revealBoom','packAnticipation');
     ui.rewardReveal.classList.remove('megaReveal');
     ui.packFxLayer.style.setProperty('--reveal-color',revealColor);
@@ -8319,23 +8436,25 @@ body:has(#collectionScreen.active) #quickCollection.active{
       88,
       250
     );
-    shopConfetti(ui.packFxLayer,170,true);
-    setTimeout(()=>shopConfetti(ui.packFxLayer,100,true),210);
-    setTimeout(()=>shopConfetti(ui.packFxLayer,58,false),430);
+    // One dense synchronized wave prevents the reveal from feeling as if it
+    // restarts while still delivering the same amount of visual energy.
+    shopConfetti(ui.packFxLayer,230,true,true);
     if(navigator.vibrate) navigator.vibrate([35,35,55,45,90]);
 
     setTimeout(()=>{
+      if(celebrationToken!==packCelebrationToken) return;
       ui.packFxLayer.classList.remove('openingBurst');
       ui.packModal.classList.remove('revealBoom');
-      ui.rewardReveal.classList.remove('megaReveal');
     },1850);
     setTimeout(()=>{
+      if(celebrationToken!==packCelebrationToken) return;
       banner.remove();
-      ui.packFxLayer.querySelectorAll('.packMegaSpark').forEach(el=>el.remove());
-    },2200);
+      ui.packFxLayer.querySelectorAll('.packMegaSpark,.shopConfetti').forEach(el=>el.remove());
+    },1650);
   }
 
   function showPackOverlay(mode){
+    packCelebrationToken++;
     activePackMode=mode;
     activePackReward=null;
 
@@ -8347,13 +8466,14 @@ body:has(#collectionScreen.active) #quickCollection.active{
     ui.packOverlay.style.display='grid';
     ui.packOverlay.style.pointerEvents='auto';
     ui.packOverlay.setAttribute('aria-hidden','false');
+    ui.packOverlay.classList.remove('packTransitionIn');
     document.body.classList.add('packOpen');
     ui.bigPack.classList.remove('opening','opened');
     ui.rewardReveal.classList.remove('show','megaReveal');
     ui.packContinue.classList.remove('show');
     ui.buyAnotherPack.classList.remove('show');
     ui.buyAnotherPack.disabled=false;
-    ui.packFxLayer.classList.remove('openingBurst');
+    ui.packFxLayer.classList.remove('openingBurst','preRevealCharge');
     ui.packModal.classList.remove('revealBoom','packAnticipation');
     ui.packFxLayer.querySelectorAll('.shopConfetti,.packDropBanner,.packMegaSpark').forEach(el=>el.remove());
 
@@ -8390,9 +8510,9 @@ body:has(#collectionScreen.active) #quickCollection.active{
     // instead of firing immediately when the pack is tapped.
     setTimeout(()=>{
       if(ui.bigPack.classList.contains('opening')){
-        ui.packFxLayer.classList.remove('openingBurst');
+        ui.packFxLayer.classList.remove('preRevealCharge');
         void ui.packFxLayer.offsetWidth;
-        ui.packFxLayer.classList.add('openingBurst');
+        ui.packFxLayer.classList.add('preRevealCharge');
       }
     },620);
 
@@ -8480,15 +8600,17 @@ body:has(#collectionScreen.active) #quickCollection.active{
   }
 
   function closePackOverlay(){
+    packCelebrationToken++;
     const finishedMode=activePackMode;
 
     // Fully remove the pack layer from both rendering and hit testing.
     ui.packOverlay.style.display='none';
     ui.packOverlay.style.pointerEvents='none';
     ui.packOverlay.setAttribute('aria-hidden','true');
+    ui.packOverlay.classList.remove('packTransitionIn');
     document.body.classList.remove('packOpen');
 
-    ui.packFxLayer.classList.remove('openingBurst');
+    ui.packFxLayer.classList.remove('openingBurst','preRevealCharge');
     ui.packModal.classList.remove('revealBoom','packAnticipation');
     ui.bigPack.classList.remove('opening','opened');
     ui.rewardReveal.classList.remove('show','megaReveal');
@@ -8519,12 +8641,31 @@ body:has(#collectionScreen.active) #quickCollection.active{
     syncUI();
   }
 
+  function transitionStoreToPack(){
+    if(storePackTransitioning) return;
+    storePackTransitioning=true;
+    ui.storeScreen.classList.add('packTransitionOut');
+    ui.storeFxLayer.classList.add('packPortalTransition');
+
+    setTimeout(()=>{
+      showPackOverlay('paid');
+      ui.packOverlay.classList.add('packTransitionIn');
+
+      setTimeout(()=>{
+        ui.storeScreen.classList.remove('packTransitionOut');
+        ui.storeFxLayer.classList.remove('packPortalTransition');
+        ui.packOverlay.classList.remove('packTransitionIn');
+        storePackTransitioning=false;
+      },720);
+    },430);
+  }
+
   function buyPack(){
-    if(!starterPackOpened || !state) return;
+    if(!starterPackOpened || !state || storePackTransitioning) return;
 
     if(walletCoins < PACK_PRICE){
       ui.storeMessage.textContent=`Need ${PACK_PRICE-walletCoins} more coins`;
-      setTimeout(()=>{ui.storeMessage.textContent='';},1100);
+      setTimeout(()=>{ui.storeMessage.textContent='';},1800);
       return;
     }
 
@@ -8539,7 +8680,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
     // separate pack-opening moment.
     setTimeout(()=>{
       ui.storeMessage.textContent='';
-      showPackOverlay('paid');
+      transitionStoreToPack();
     },520);
   }
 
@@ -10453,7 +10594,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
 
     if(walletCoins<IMPOSSIBLE_BALL_PRICE){
       ui.storeMessage.textContent=`Need ${IMPOSSIBLE_BALL_PRICE-walletCoins} more coins`;
-      setTimeout(()=>{ui.storeMessage.textContent='';},1100);
+      setTimeout(()=>{ui.storeMessage.textContent='';},1800);
       return;
     }
 
@@ -10477,7 +10618,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
 
     if(walletCoins < 5000){
       ui.storeMessage.textContent=`Need ${5000-walletCoins} more coins`;
-      setTimeout(()=>{ui.storeMessage.textContent='';},1100);
+      setTimeout(()=>{ui.storeMessage.textContent='';},1800);
       return;
     }
 
