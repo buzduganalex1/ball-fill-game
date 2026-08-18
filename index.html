@@ -4421,6 +4421,7 @@ body.packOpen{overflow:hidden!important}
       const typeData=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
       const startR=BALL_MIN*(typeData.startSizeMult || 1);
       const lift=pointerLift(ev);
+      const isTouch=ev.pointerType==='touch' || !!ev.touches;
       const startX=Math.max(startR,Math.min(W-startR,p.x));
       const startY=Math.max(startR,Math.min(H-startR,p.y));
       state.active={
@@ -4433,7 +4434,11 @@ body.packOpen{overflow:hidden!important}
         pointerLift:lift,
         pointerMoveThreshold:6*H/canvas.getBoundingClientRect().height,
         pointerLiftActive:false,
-        followRate:(ev.pointerType==='touch' || !!ev.touches) ? 7.5 : 16,
+        pointerFollowAge:0,
+        followStartRate:isTouch ? 38 : 16,
+        followEndRate:isTouch ? 7.5 : 16,
+        followBlendDuration:isTouch ? .7 : .12,
+        liftBlendDuration:isTouch ? .42 : .12,
         r:startR,
         startR,
         alive:true,
@@ -4485,15 +4490,24 @@ body.packOpen{overflow:hidden!important}
     const b=state.active;
     if(!b.pointerLiftActive){
       b.pointerLiftActive=dist(p.x,p.y,b.pointerStartX,b.pointerStartY)>=b.pointerMoveThreshold;
+      if(b.pointerLiftActive) b.pointerFollowAge=0;
     }
     b.pointerTargetX=p.x;
-    b.pointerTargetY=p.y-(b.pointerLiftActive ? b.pointerLift : 0);
+    b.pointerTargetY=p.y;
   }
 
   function followPointerTarget(ball,dt){
+    if(!ball.pointerLiftActive) return;
+
+    ball.pointerFollowAge=(ball.pointerFollowAge||0)+dt;
+    const followProgress=Math.min(1,ball.pointerFollowAge/(ball.followBlendDuration||.7));
+    const liftProgress=Math.min(1,ball.pointerFollowAge/(ball.liftBlendDuration||.42));
+    const followBlend=followProgress*followProgress*(3-2*followProgress);
+    const liftBlend=liftProgress*liftProgress*(3-2*liftProgress);
+    const followRate=(ball.followStartRate||16)+((ball.followEndRate||7.5)-(ball.followStartRate||16))*followBlend;
     const targetX=Math.max(ball.r,Math.min(W-ball.r,ball.pointerTargetX));
-    const targetY=Math.max(ball.r,Math.min(H-ball.r,ball.pointerTargetY));
-    const follow=1-Math.exp(-(ball.followRate || 14)*dt);
+    const targetY=Math.max(ball.r,Math.min(H-ball.r,ball.pointerTargetY-ball.pointerLift*liftBlend));
+    const follow=1-Math.exp(-followRate*dt);
     const nextX=ball.x+(targetX-ball.x)*follow;
     const nextY=ball.y+(targetY-ball.y)*follow;
 
@@ -6609,17 +6623,3 @@ body.packOpen{overflow:hidden!important}
     for(const key of Object.keys(BOOSTERS)){
       unlockedBoosters.add(key);
       boosterCooldowns[key]=0;
-    }
-    updateBoosterUI();
-    syncUI();
-  });
-
-  // Prevent right-click menu from interrupting the toy.
-  canvas.addEventListener('contextmenu',e=>e.preventDefault());
-
-  reset();
-  requestAnimationFrame(loop);
-})();
-</script>
-</body>
-</html>
