@@ -1198,6 +1198,18 @@ body.packOpen{overflow:hidden!important}
   font-size:11px;
   font-weight:1000;
 }
+.bigPack:not(.opening):not(.opened){
+  transform-origin:50% 58%;
+  animation:packInvite 1.65s ease-in-out infinite;
+}
+@keyframes packInvite{
+  0%,48%,100%{transform:rotate(0) translateY(0) scale(1)}
+  56%{transform:rotate(-3deg) translateY(-3px) scale(1.025)}
+  64%{transform:rotate(3deg) translateY(-3px) scale(1.035)}
+  72%{transform:rotate(-2deg) translateY(-2px) scale(1.025)}
+  80%{transform:rotate(2deg) translateY(-1px) scale(1.015)}
+  88%{transform:rotate(0) translateY(0) scale(1)}
+}
 .bigPack.opening{animation:packShake .65s ease-in-out}
 .bigPack.opened{display:none}
 @keyframes packShake{
@@ -1240,6 +1252,18 @@ body.packOpen{overflow:hidden!important}
 .ghostReward{background:radial-gradient(circle at 34% 28%,#fff,#b9e6ef 35%,#72a7b4 78%);border-color:#6996a0}
 .legendaryReward{background:radial-gradient(circle at 34% 28%,#fff1af,#f7ae3f 35%,#df7414 78%);border-color:#a9520c;box-shadow:0 0 26px rgba(244,145,30,.5)}
 .rewardName{font-size:21px;font-weight:1000}
+.rewardCopy{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.rewardRarity{
+  color:#2f82a7;
+  font-size:11px;
+  font-weight:1000;
+  letter-spacing:.08em;
+}
 .rewardDesc{
   max-width:310px;
   font-size:10px;
@@ -1396,7 +1420,7 @@ body.packOpen{overflow:hidden!important}
 /* ============================================================
    MOBILE PORTRAIT TUNING
    ============================================================ */
-@media(max-width:600px) and (orientation:portrait){
+@media(max-width:800px) and (orientation:portrait){
   #gameScreen{
     padding:
       max(6px,env(safe-area-inset-top))
@@ -1775,7 +1799,7 @@ body.packOpen{overflow:hidden!important}
     0 4px 9px rgba(45,67,82,.10);
 }
 
-@media(max-width:600px) and (orientation:portrait){
+@media(max-width:800px) and (orientation:portrait){
   .gameStatusBar.hudCardRow{
     min-height:92px;
     gap:8px;
@@ -1899,6 +1923,188 @@ body.packOpen{overflow:hidden!important}
   .hudPackCue{
     display:none;
   }
+}
+
+/* Readable, touch-friendly pack and result screens on phones. */
+@media(max-width:600px) and (orientation:portrait){
+  .packOverlay{
+    padding:
+      max(10px,env(safe-area-inset-top))
+      max(10px,env(safe-area-inset-right))
+      max(10px,env(safe-area-inset-bottom))
+      max(10px,env(safe-area-inset-left));
+  }
+
+  .packModal{
+    flex:none;
+    width:min(calc(100vw - 20px),440px);
+    max-width:100%;
+    height:min(92dvh,700px);
+    justify-content:flex-start;
+    gap:0;
+    padding:28px 20px 30px;
+    border-radius:24px;
+  }
+
+  .packTitle{
+    margin-top:clamp(8px,3dvh,26px);
+    margin-bottom:10px;
+    font-size:34px;
+    line-height:1.1;
+    letter-spacing:0;
+  }
+
+  .packSub{
+    margin-bottom:0;
+    font-size:20px;
+    line-height:1.25;
+  }
+
+  .packModal:has(.rewardReveal.show) .packSub{
+    padding:8px 18px;
+    border:2px solid #79bdd8;
+    border-radius:999px;
+    color:#246f91;
+    background:#eaf8fd;
+    box-shadow:0 3px 0 #b8d9e6;
+    font-size:18px;
+    line-height:1;
+    letter-spacing:.08em;
+  }
+
+  .bigPack{
+    width:240px;
+    margin-top:auto;
+    margin-bottom:auto;
+  }
+  .packTop{width:156px;height:48px}
+  .packBody{width:176px;height:142px;font-size:62px}
+  .tapPackBadge{
+    margin-top:20px;
+    width:230px;
+    min-height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:14px 28px;
+    border-width:3px;
+    font-size:26px;
+    box-shadow:0 6px 0 #d8a11d,0 10px 18px rgba(180,123,12,.2);
+  }
+
+  .rewardReveal.show{
+    flex:1 1 auto;
+    width:100%;
+    min-height:0;
+    justify-content:center;
+    gap:14px;
+  }
+  .rewardBall{
+    width:clamp(190px,34vw,240px);
+    height:clamp(190px,34vw,240px);
+    border-width:7px;
+    box-shadow:0 16px 32px rgba(57,144,186,.28);
+  }
+  .rewardName{
+    font-size:32px;
+    line-height:1.1;
+  }
+  .rewardCopy{gap:6px}
+  .rewardRarity{
+    padding:4px 10px;
+    border-radius:999px;
+    color:#277796;
+    background:#e7f5fa;
+    font-size:15px;
+    line-height:1.2;
+    letter-spacing:.06em;
+  }
+  .rewardDesc{
+    max-width:360px;
+    color:#4f606d;
+    font-size:19px;
+    line-height:1.4;
+    font-weight:850;
+  }
+
+  .packAfterActions{
+    flex:none;
+    gap:10px;
+    margin-top:8px;
+  }
+  .packContinue,
+  .buyAnotherPack{
+    width:min(100%,280px);
+    min-width:0;
+    min-height:64px;
+    padding:12px 22px;
+    font-size:21px;
+  }
+
+  .overlay{padding:6px}
+  .resultCard{
+    width:min(100%,360px);
+    max-height:calc(100% - 4px);
+    gap:8px;
+    padding:14px 12px;
+    overflow-y:auto;
+    border-radius:22px;
+    scrollbar-width:none;
+  }
+  .resultCard::-webkit-scrollbar{display:none}
+  .completionBadge{
+    padding:7px 12px;
+    font-size:12px;
+    letter-spacing:.06em;
+  }
+  .result{
+    font-size:30px;
+    line-height:1.08;
+  }
+  .celebrationStars{font-size:46px}
+  .coinTransfer{gap:6px}
+  .rewardBucket{
+    min-height:78px;
+    padding:8px 4px;
+  }
+  .rewardBucket span:first-child{
+    font-size:12px;
+    letter-spacing:.04em;
+  }
+  .rewardBucket strong{font-size:30px}
+  .rewardFormula{font-size:24px}
+  .sub{
+    font-size:14px;
+    line-height:1.3;
+  }
+  .resultContinue{
+    min-width:190px;
+    min-height:50px;
+    font-size:16px;
+  }
+}
+
+@media(max-width:350px) and (orientation:portrait){
+  .packModal{padding:18px 14px}
+  .resultCard{gap:6px;padding:10px 8px}
+  .result{font-size:28px}
+  .celebrationStars{font-size:42px}
+  .transferLane{width:24px}
+}
+
+@media(max-width:800px) and (max-height:700px) and (orientation:portrait){
+  .packModal{padding-top:16px;padding-bottom:16px}
+  .packTitle{margin-top:0;margin-bottom:6px;font-size:30px}
+  .packSub{font-size:18px}
+  .tapPackBadge{margin-top:12px;min-height:64px}
+  .packAfterActions{margin-top:6px}
+  .rewardReveal.show{gap:8px}
+  .rewardBall{width:170px;height:170px}
+  .rewardName{font-size:28px}
+  .rewardRarity{font-size:14px}
+  .rewardDesc{font-size:17px}
+  .packContinue,
+  .buyAnotherPack{min-height:58px;font-size:19px}
 }
 
 </style>
@@ -2333,7 +2539,10 @@ body.packOpen{overflow:hidden!important}
     <div class="rewardReveal" id="rewardReveal">
       <div class="rewardBall normalReward" id="rewardBall"></div>
       <div class="rewardName" id="rewardName">NORMAL BALL</div>
-      <div class="rewardDesc" id="rewardDesc">Standard growth</div>
+      <div class="rewardCopy">
+        <div class="rewardRarity" id="rewardRarity">COMMON BALL</div>
+        <div class="rewardDesc" id="rewardDesc">Reliable standard ball.</div>
+      </div>
     </div>
 
     <div class="packAfterActions">
@@ -2498,6 +2707,7 @@ body.packOpen{overflow:hidden!important}
     rewardReveal: document.getElementById('rewardReveal'),
     rewardBall: document.getElementById('rewardBall'),
     rewardName: document.getElementById('rewardName'),
+    rewardRarity: document.getElementById('rewardRarity'),
     rewardDesc: document.getElementById('rewardDesc'),
     buyAnotherPack: document.getElementById('buyAnotherPack'),
     packContinue: document.getElementById('packContinue'),
@@ -2839,36 +3049,23 @@ body.packOpen{overflow:hidden!important}
     }
   }
 
-  let TARGET = 50;
-
-  // Win coverage is measured inside the dashed target rectangle.
-  // On portrait phones the arena gets taller. We lower the percentage target
-  // proportionally so the absolute amount of ball area needed to win stays
-  // approximately the same as the original 600x600 game.
-  let TARGET_RECT = {
-    x: W * 0.06,
-    y: H * 0.06,
-    w: W * 0.88,
-    h: H * 0.88
-  };
+  const TARGET = 50;
 
   function configureArenaForViewport(){
-    const portraitMobile=window.matchMedia('(max-width:600px) and (orientation:portrait)').matches;
-
+    const board=canvas.parentElement;
+    const cssW=Math.max(1,canvas.clientWidth || board?.clientWidth || 600);
+    const cssH=Math.max(1,canvas.clientHeight || board?.clientHeight || 600);
     let nextW=600;
     let nextH=600;
 
-    if(portraitMobile){
-      // IMPORTANT: use the rendered CONTENT box, not the old intrinsic
-      // canvas ratio. This makes CSS pixels-per-game-unit identical on
-      // X and Y, so circles remain perfectly round in a tall arena.
-      const board=canvas.parentElement;
-      const cssW=Math.max(1,canvas.clientWidth || board?.clientWidth || 600);
-      const cssH=Math.max(1,canvas.clientHeight || board?.clientHeight || 600);
-
-      if(cssW>10 && cssH>10){
+    // Match the rendered arena on every viewport. Keeping the shorter logical
+    // axis at 600 makes CSS pixels-per-game-unit identical on X and Y without
+    // changing the established ball and enemy scale.
+    if(cssW>10 && cssH>10){
+      if(cssW>=cssH){
+        nextW=Math.round(nextH*(cssW/cssH));
+      }else{
         nextH=Math.round(nextW*(cssH/cssW));
-        nextH=Math.max(600,Math.min(1400,nextH));
       }
     }
 
@@ -2879,18 +3076,6 @@ body.packOpen{overflow:hidden!important}
 
     W=canvas.width;
     H=canvas.height;
-
-    TARGET_RECT={
-      x:W*.06,
-      y:H*.06,
-      w:W*.88,
-      h:H*.88
-    };
-
-    // Preserve roughly the same absolute amount of filled ball area
-    // that was required by the original 600x600 arena.
-    TARGET=50*(600*600)/(W*H);
-    TARGET=Math.max(22,Math.min(50,TARGET));
   }
   const START_TIME = 45;
   const START_BALLS = 10;
@@ -3399,6 +3584,7 @@ body.packOpen{overflow:hidden!important}
       coinFx:[],
       enemies:[],
       coverage:0,
+      liveCoverage:0,
       last:performance.now(),
       freezeLeft:0,
       destroyMode:false,
@@ -3849,6 +4035,7 @@ body.packOpen{overflow:hidden!important}
 
       ui.rewardBall.className='rewardBall '+rewardClass;
       ui.rewardName.textContent=rewardData.name.toUpperCase();
+      ui.rewardRarity.textContent=`${rewardData.rarity.toUpperCase()} BALL`;
       ui.rewardDesc.textContent=rewardData.desc;
 
       const wasOwned=ownedBalls.has(activePackReward);
@@ -4043,6 +4230,13 @@ body.packOpen{overflow:hidden!important}
     };
   }
 
+  function pointerLift(ev){
+    const rect=canvas.getBoundingClientRect();
+    const isTouch=ev.pointerType==='touch' || !!ev.touches;
+    const cssLift=isTouch ? 82 : 20;
+    return cssLift*H/rect.height;
+  }
+
   function startBall(ev){
     if(state?.tutorialActive){
       dismissLevelOneTutorial();
@@ -4054,11 +4248,19 @@ body.packOpen{overflow:hidden!important}
     if(state.active || state.ballsLeft<=0) return;
     {
       const typeData=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
+      const startR=BALL_MIN*(typeData.startSizeMult || 1);
+      const lift=pointerLift(ev);
+      const startX=Math.max(startR,Math.min(W-startR,p.x));
+      const startY=Math.max(startR,Math.min(H-startR,p.y-lift));
       state.active={
-        x:p.x,
-        y:p.y,
-        r:BALL_MIN*(typeData.startSizeMult || 1),
-        startR:BALL_MIN*(typeData.startSizeMult || 1),
+        x:startX,
+        y:startY,
+        pointerTargetX:startX,
+        pointerTargetY:startY,
+        pointerLift:lift,
+        followRate:(ev.pointerType==='touch' || !!ev.touches) ? 12 : 16,
+        r:startR,
+        startR,
         alive:true,
         type:selectedBallType,
         shieldHits:typeData.shieldHits || (selectedBallType==='shield' ? 1 : 0),
@@ -4106,28 +4308,24 @@ body.packOpen{overflow:hidden!important}
     ev.preventDefault();
     const p=pointerPos(ev);
     const b=state.active;
-    const r=b.r;
+    b.pointerTargetX=p.x;
+    b.pointerTargetY=p.y-b.pointerLift;
+  }
 
-    // Candidate position, constrained by the walls.
-    let nx=Math.max(r,Math.min(W-r,p.x));
-    let ny=Math.max(r,Math.min(H-r,p.y));
+  function followPointerTarget(ball,dt){
+    const targetX=Math.max(ball.r,Math.min(W-ball.r,ball.pointerTargetX));
+    const targetY=Math.max(ball.r,Math.min(H-ball.r,ball.pointerTargetY));
+    const follow=1-Math.exp(-(ball.followRate || 14)*dt);
+    const nextX=ball.x+(targetX-ball.x)*follow;
+    const nextY=ball.y+(targetY-ball.y)*follow;
 
-    // Do not allow the growing ball to be dragged through locked balls.
-    let valid=true;
-    for(const placed of state.placed){
-      if(dist(nx,ny,placed.x,placed.y) < r+placed.r+2){
-        valid=false;
-        break;
-      }
+    const blocked=state.placed.some(
+      placed=>dist(nextX,nextY,placed.x,placed.y)<ball.r+placed.r+2
+    );
+    if(!blocked){
+      ball.x=nextX;
+      ball.y=nextY;
     }
-
-    // If the requested position collides, keep the last valid position.
-    if(valid){
-      b.x=nx;
-      b.y=ny;
-    }
-
-    collectCoins(b);
   }
 
   function lockBall(ev){
@@ -4441,6 +4639,7 @@ body.packOpen{overflow:hidden!important}
       b.growthAge=(b.growthAge||0)+dt;
       b.spawnPunch=Math.max(0,(b.spawnPunch||0)-dt*4.8);
       if(b.ghostLeft>0) b.ghostLeft=Math.max(0,b.ghostLeft-dt);
+      followPointerTarget(b,dt);
 
       if(state.gravityLeft>0){
         const boss=state.enemies.find(e=>e.boss);
@@ -4467,6 +4666,14 @@ body.packOpen{overflow:hidden!important}
 
       updateGrowSound(b,limit,isPhysicallyGrowing);
       collectCoins(b);
+      state.liveCoverage=measureCoverage([...state.placed,b],72);
+      if(state.liveCoverage>=TARGET){
+        state.liveCoverage=measureCoverage([...state.placed,b]);
+        if(state.liveCoverage>=TARGET){
+          finish(true);
+          return;
+        }
+      }
 
       // Small status hint when growth is physically blocked.
       if(b.r >= limit-0.5){
@@ -4604,18 +4811,13 @@ body.packOpen{overflow:hidden!important}
     syncUI();
   }
 
-  function computeCoverage(){
-    // COMMITTED progress only:
-    // a growing/held ball does not count until the player releases it.
-    // Overlapping locked balls are counted only once.
-    const n=110;
+  function measureCoverage(balls,n=110){
     let hit=0;
-    const balls=state.placed;
 
     for(let gy=0;gy<n;gy++){
-      const y=TARGET_RECT.y + (gy+.5)*TARGET_RECT.h/n;
+      const y=(gy+.5)*H/n;
       for(let gx=0;gx<n;gx++){
-        const x=TARGET_RECT.x + (gx+.5)*TARGET_RECT.w/n;
+        const x=(gx+.5)*W/n;
         let inside=false;
         for(const b of balls){
           const dx=x-b.x,dy=y-b.y;
@@ -4624,11 +4826,16 @@ body.packOpen{overflow:hidden!important}
         if(inside) hit++;
       }
     }
-    state.coverage=hit/(n*n)*100;
+    return hit/(n*n)*100;
   }
 
-  function currentPerformance(){
-    const coverageProgress=Math.min(1,state.coverage/TARGET);
+  function computeCoverage(){
+    state.coverage=measureCoverage(state.placed);
+    state.liveCoverage=state.coverage;
+  }
+
+  function currentPerformance(coverage=state.coverage){
+    const coverageProgress=Math.min(1,coverage/TARGET);
     const timeRatio=Math.max(0,state.timeLeft/START_TIME);
     const ballRatio=Math.max(0,state.ballsLeft/START_BALLS);
 
@@ -4641,8 +4848,8 @@ body.packOpen{overflow:hidden!important}
     );
   }
 
-  function liveStarCount(){
-    const score=currentPerformance();
+  function liveStarCount(coverage=state.coverage){
+    const score=currentPerformance(coverage);
 
     if(score>=0.82) return 3;
     if(score>=0.58) return 2;
@@ -4805,7 +5012,6 @@ body.packOpen{overflow:hidden!important}
   }
 
   function syncUI(){
-    // state.coverage changes only when a ball is released/locked.
     const cfg=enemyConfig(currentLevel);
     ui.level.textContent=currentLevel;
     const worldProfile=worldProfileForLevel(currentLevel);
@@ -4818,8 +5024,9 @@ body.packOpen{overflow:hidden!important}
     ui.coins.textContent=(Math.round(state.scoreCoins*100)/100).toString();
     ui.walletCoins.textContent=walletCoins;
     syncEconomyUI();
-    ui.coverage.textContent=state.coverage.toFixed(1);
-    const progressPct=Math.max(0,Math.min(100,state.coverage/TARGET*100));
+    const displayedCoverage=state.active ? state.liveCoverage : state.coverage;
+    ui.coverage.textContent=displayedCoverage.toFixed(1);
+    const progressPct=Math.max(0,Math.min(100,displayedCoverage/TARGET*100));
     const seg1=Math.max(0,Math.min(100,(progressPct/33.333)*100));
     const seg2=Math.max(0,Math.min(100,((progressPct-33.333)/33.333)*100));
     const seg3=Math.max(0,Math.min(100,((progressPct-66.666)/33.334)*100));
@@ -4827,7 +5034,7 @@ body.packOpen{overflow:hidden!important}
     ui.progressFill2.style.width=seg2+'%';
     ui.progressFill3.style.width=seg3+'%';
 
-    const liveStars=liveStarCount();
+    const liveStars=liveStarCount(displayedCoverage);
     ui.progressStars.textContent='★'.repeat(liveStars)+'☆'.repeat(3-liveStars);
 
     document.querySelector('.starMarker1')?.classList.toggle('earned',liveStars>=1);
