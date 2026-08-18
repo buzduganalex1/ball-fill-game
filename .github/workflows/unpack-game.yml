@@ -1,0 +1,41 @@
+name: Unpack game
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/unpack-game.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract real game HTML
+        shell: python
+        run: |
+          import re, base64, gzip, pathlib
+          p = pathlib.Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          m = re.search(r"const b='([^']+)'", s)
+          if not m:
+              raise SystemExit('Compressed payload not found')
+          b = re.sub(r'[^A-Za-z0-9+/=]', '', m.group(1))
+          b += '=' * ((4 - len(b) % 4) % 4)
+          raw = base64.b64decode(b, validate=False)
+          html = gzip.decompress(raw).decode('utf-8')
+          if '<canvas' not in html or 'BALL_TYPES' not in html:
+              raise SystemExit('Decoded file does not look like Ball Fill')
+          p.write_text(html, encoding='utf-8')
+          print(f'Unpacked {len(html):,} chars')
+      - name: Commit unpacked game
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Replace loader with playable Ball Fill v33"
+          git push
