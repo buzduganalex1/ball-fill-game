@@ -881,6 +881,40 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   font-weight:800;
 }
 .premiumSpark{font-size:18px;color:#c85cf0}
+.storeRarityDivider{
+  flex:none;
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 8px;
+  border:1px solid #d5e0e7;
+  border-radius:12px;
+  background:#f7fafc;
+}
+.storeRarityDivider strong{
+  font-size:13px;
+  letter-spacing:.08em;
+}
+.storeRarityDivider span:last-child{
+  color:#71828e;
+  font-size:12px;
+  font-weight:800;
+}
+.storeRarityPip{
+  width:12px;
+  height:12px;
+  flex:none;
+  border-radius:50%;
+}
+.mythicStoreDivider .storeRarityPip{
+  background:linear-gradient(135deg,#5bdcf0,#d65bbb,#f1c44e);
+  box-shadow:0 0 8px rgba(202,82,193,.35);
+}
+.impossibleStoreDivider .storeRarityPip{
+  background:conic-gradient(#ff5a45,#ffd24f,#62d7ed,#5fe47b,#ff5a45);
+  box-shadow:0 0 8px rgba(255,104,63,.32);
+}
 .mythicStoreCard{
   flex:1.15 1 0;
   min-height:0;
@@ -895,6 +929,7 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   box-shadow:var(--shadow);
 }
 .mythicVisual{
+  position:relative;
   flex:none;
   width:100px;
   height:100px;
@@ -902,17 +937,81 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   align-items:center;
   justify-content:center;
   border-radius:50%;
-  background:radial-gradient(circle,#79e8ff 0 12%,#ed5cd6 34%,#743bf1 58%,transparent 60%);
-  box-shadow:0 0 34px #8651ff,0 0 65px rgba(237,92,214,.32);
+  background:radial-gradient(circle,rgba(106,220,240,.18),transparent 67%);
+  box-shadow:none;
   animation:mythicFloat 1.7s ease-in-out infinite;
 }
 .mythicCore{
+  position:relative;
+  z-index:2;
   width:62px;
   height:62px;
   border-radius:50%;
-  background:radial-gradient(circle at 35% 30%,#fff 0 8%,#7eefff 20%,#ef66d5 46%,#6841ef 76%);
+  border:4px solid #f1c84d;
+  background:
+    radial-gradient(circle at 33% 27%,#d8fbff 0 7%,#6dd9ee 8% 15%,transparent 16%),
+    radial-gradient(circle at 38% 32%,#273f65 0 17%,#101628 45%,#070910 78%);
+  box-shadow:
+    inset -8px -10px 13px rgba(0,0,0,.46),
+    0 0 0 4px rgba(93,216,236,.18),
+    0 0 24px rgba(89,217,238,.42),
+    0 0 38px rgba(224,91,190,.22);
 }
-.mythicHalo,.mythicRing,.mythicSpark{display:none}
+.mythicCore::after{
+  content:'★';
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#f7d45b;
+  font-size:23px;
+  text-shadow:0 2px 0 #9e6812,0 0 9px rgba(255,222,99,.56);
+}
+.mythicHalo,
+.mythicRing{
+  position:absolute;
+  display:block;
+  border-radius:50%;
+  pointer-events:none;
+}
+.mythicHalo{
+  width:86%;
+  height:42%;
+  border:2px solid rgba(95,220,239,.62);
+  transform:rotate(-20deg);
+}
+.mythicHalo.halo2{
+  width:42%;
+  height:88%;
+  border-color:rgba(232,100,199,.52);
+  transform:rotate(25deg);
+}
+.mythicRing{
+  width:78%;
+  height:78%;
+  border:2px dashed rgba(247,210,87,.6);
+  animation:mythicSpin 7s linear infinite;
+}
+.mythicRing.ring2{
+  width:96%;
+  height:96%;
+  border-color:rgba(104,224,242,.3);
+  animation-direction:reverse;
+  animation-duration:10s;
+}
+.mythicSpark{
+  position:absolute;
+  z-index:3;
+  display:block;
+  color:#ffe273;
+  font-size:12px;
+  text-shadow:0 0 8px rgba(255,224,103,.8);
+}
+.mythicSpark.ms1{left:5%;top:20%}
+.mythicSpark.ms2{right:4%;top:31%}
+.mythicSpark.ms3{right:16%;bottom:5%}
+@keyframes mythicSpin{to{transform:rotate(360deg)}}
 @keyframes mythicFloat{50%{transform:translateY(-5px) scale(1.04)}}
 .mythicText{
   flex:1 1 0;
@@ -929,8 +1028,8 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   font-weight:1000;
   letter-spacing:.08em;
 }
-.mythicRarity{color:#3d1b52;background:linear-gradient(90deg,#78e6ff,#ffa0d9,#ffd765)}
-.mythicText h2{font-size:22px}
+.mythicRarity{color:#2b2140;background:linear-gradient(90deg,#78e6ff,#f1bbda,#ffd765)}
+.mythicText h2{font-size:22px;white-space:nowrap}
 .mythicText p{
   font-size:10px;
   line-height:1.25;
@@ -967,6 +1066,21 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   text-align:center;
   overflow:hidden;
 }
+.impossibleText{
+  flex:1 1 0;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+.impossiblePurchase{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
 .cataclysmStoreCard{
   border-color:#ae403d;
   background:linear-gradient(145deg,#5b1716,#16090b 70%);
@@ -976,35 +1090,121 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   background:linear-gradient(145deg,#104522,#071b10 70%);
 }
 .impossibleVisual{
+  position:relative;
   flex:none;
   width:64px;
   height:64px;
   display:flex;
   align-items:center;
   justify-content:center;
+  animation:impossibleFloat 1.9s ease-in-out infinite;
 }
 .elementOrb,.gaiaCore{
+  position:relative;
+  z-index:2;
   width:54px;
   height:54px;
   border-radius:50%;
 }
 .elementOrb{
-  background:conic-gradient(#ff633f,#ffd35b,#57cfff,#9ff4ff,#ff633f);
-  border:4px solid #ffcf57;
-  box-shadow:0 0 20px rgba(255,96,57,.58);
+  border:4px solid #f5ce55;
+  background:
+    radial-gradient(circle at 32% 25%,#fff5ba 0 7%,transparent 8%),
+    conic-gradient(from 25deg,#e94535 0 31%,#ffd04a 31% 37%,#398ed1 37% 67%,#7ee9f3 67% 72%,#c52e4b 72% 100%);
+  box-shadow:
+    inset -7px -9px 12px rgba(48,8,13,.32),
+    0 0 0 4px rgba(255,206,80,.14),
+    0 0 24px rgba(255,87,50,.5),
+    0 0 36px rgba(75,205,239,.24);
+}
+.elementOrb::before{
+  content:'✦';
+  position:absolute;
+  inset:19%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid rgba(255,244,174,.8);
+  border-radius:50%;
+  color:#fff2a2;
+  background:rgba(91,20,31,.45);
+  font-size:20px;
+  text-shadow:0 0 7px #ffde5b;
 }
 .gaiaCore{
-  background:radial-gradient(circle at 35% 28%,#d4ff9d,#5cd66f 35%,#106c32 78%);
-  border:4px solid #65e883;
-  box-shadow:0 0 20px rgba(83,222,106,.45);
+  border:4px solid #a9df63;
+  background:
+    radial-gradient(circle at 33% 26%,#efffc5 0 8%,transparent 9%),
+    radial-gradient(circle at 38% 32%,#77dc72 0 20%,#287d48 48%,#0c402a 80%);
+  box-shadow:
+    inset -8px -10px 13px rgba(5,48,28,.36),
+    0 0 0 4px rgba(169,230,105,.14),
+    0 0 25px rgba(83,222,106,.4),
+    0 0 38px rgba(208,235,93,.18);
 }
-.elementArc,.elementSpark,.gaiaLeaf{display:none}
+.gaiaCore::before{
+  content:'◆';
+  position:absolute;
+  left:50%;
+  top:50%;
+  color:#d9f68c;
+  font-size:25px;
+  text-shadow:0 0 8px rgba(220,248,139,.6);
+  transform:translate(-50%,-50%) rotate(35deg) scaleX(.65);
+}
+.gaiaCore::after{
+  content:'';
+  position:absolute;
+  inset:16%;
+  border:2px dashed rgba(223,246,149,.6);
+  border-radius:50%;
+}
+.elementArc,
+.elementSpark,
+.gaiaLeaf{
+  position:absolute;
+  z-index:3;
+  display:block;
+  pointer-events:none;
+}
+.elementArc{
+  width:96%;
+  height:43%;
+  border:3px solid;
+  border-radius:50%;
+}
+.arcElectric{
+  border-color:rgba(255,225,80,.75);
+  transform:rotate(22deg);
+}
+.arcIce{
+  border-color:rgba(113,225,246,.68);
+  transform:rotate(-32deg);
+}
+.elementSpark{
+  color:#fff2a3;
+  font-size:11px;
+  text-shadow:0 0 7px rgba(255,221,78,.85);
+}
+.elementSpark.es1{left:2%;top:18%}
+.elementSpark.es2{right:0;top:34%;color:#9becfa}
+.elementSpark.es3{right:18%;bottom:0;color:#ffce58}
+.gaiaLeaf{
+  color:#d2ed74;
+  font-size:13px;
+  text-shadow:0 0 7px rgba(169,232,97,.72);
+}
+.gaiaLeaf.gl1{left:3%;top:20%;transform:rotate(-35deg) scaleX(.65)}
+.gaiaLeaf.gl2{right:1%;top:28%;transform:rotate(40deg) scaleX(.65)}
+.gaiaLeaf.gl3{left:17%;bottom:2%;transform:rotate(22deg) scaleX(.65)}
+.gaiaLeaf.gl4{right:18%;bottom:0;transform:rotate(-28deg) scaleX(.65)}
+@keyframes impossibleFloat{50%{transform:translateY(-4px) scale(1.035)}}
 .impossibleRarity{
   align-self:center;
   color:#f3eeee;
   background:rgba(255,255,255,.1);
 }
-.impossibleStoreCard h2{font-size:14px}
+.impossibleStoreCard h2{font-size:14px;white-space:nowrap}
 .impossibleStoreCard p{
   font-size:7.5px;
   line-height:1.2;
@@ -1026,6 +1226,159 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   font-size:10px;
   font-weight:900;
   color:#657783;
+}
+
+/* Original sealed collectible-pack artwork used in store and opening flow. */
+.foilPackArt{
+  position:relative;
+  flex:none;
+  width:94px;
+  height:126px;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  filter:drop-shadow(0 9px 10px rgba(27,70,94,.24));
+  transform:rotate(-2deg);
+}
+.foilPackSeal{
+  position:relative;
+  z-index:2;
+  height:13px;
+  flex:none;
+  border:2px solid #214f70;
+  border-radius:6px 6px 3px 3px;
+  background:repeating-linear-gradient(90deg,#f4ca4f 0 6px,#fff0a1 6px 9px,#e6a929 9px 14px);
+}
+.foilPackSealBottom{border-radius:3px 3px 6px 6px}
+.foilPackFace{
+  position:relative;
+  flex:1 1 auto;
+  margin:-2px 4px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  overflow:hidden;
+  border:3px solid #255c7b;
+  border-radius:5px;
+  color:white;
+  background:
+    linear-gradient(145deg,transparent 0 22%,rgba(101,222,240,.45) 23% 35%,transparent 36% 64%,rgba(246,197,70,.24) 65% 78%,transparent 79%),
+    linear-gradient(160deg,#2d95bb,#276b98 48%,#173f69 100%);
+  box-shadow:inset 7px 0 9px rgba(255,255,255,.12),inset -8px -8px 12px rgba(9,38,65,.28);
+}
+.foilPackFace::before,
+.foilPackFace::after{
+  content:'';
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+}
+.foilPackFace::before{
+  width:68%;
+  aspect-ratio:1;
+  border:2px solid rgba(255,230,113,.56);
+  box-shadow:0 0 0 5px rgba(80,208,230,.12);
+}
+.foilPackFace::after{
+  top:9%;
+  right:10%;
+  width:10px;
+  height:10px;
+  background:#fff1a2;
+  box-shadow:-48px 28px 0 -2px #d6f9ff,3px 62px 0 -2px #fff1a2;
+}
+.foilPackBalls{
+  position:relative;
+  z-index:1;
+  height:35px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+}
+.foilPackBall{
+  width:27px;
+  height:27px;
+  margin:0 -4px;
+  border:2px solid rgba(255,255,255,.78);
+  border-radius:50%;
+  box-shadow:0 3px 7px rgba(12,37,62,.28);
+}
+.foilPackBall.ballOne{background:radial-gradient(circle at 32% 27%,#fff8a8,#ffc83d 35%,#d88b0b 78%)}
+.foilPackBall.ballTwo{
+  z-index:2;
+  width:35px;
+  height:35px;
+  background:radial-gradient(circle at 32% 27%,#c5f3ff,#65b8da 34%,#2e7fa7 78%);
+}
+.foilPackBall.ballThree{background:radial-gradient(circle at 32% 27%,#ffd9f5,#d66acb 35%,#7942a8 78%)}
+.foilPackName{
+  position:relative;
+  z-index:1;
+  padding:2px 5px;
+  border-radius:4px;
+  color:#fff7c4;
+  background:rgba(13,43,73,.68);
+  font-size:10px;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.04em;
+}
+.foilPackStars{
+  position:relative;
+  z-index:1;
+  color:#ffd85a;
+  font-size:10px;
+  line-height:1;
+  letter-spacing:2px;
+}
+.foilPackLarge{
+  width:176px;
+  height:226px;
+}
+.foilPackLarge .foilPackSeal{height:19px;border-width:3px}
+.foilPackLarge .foilPackFace{margin:-3px 7px;border-width:4px;border-radius:8px;gap:8px}
+.foilPackLarge .foilPackBalls{height:66px}
+.foilPackLarge .foilPackBall{width:48px;height:48px;border-width:3px}
+.foilPackLarge .foilPackBall.ballTwo{width:65px;height:65px}
+.foilPackLarge .foilPackName{padding:5px 9px;font-size:18px}
+.foilPackLarge .foilPackStars{font-size:17px;letter-spacing:4px}
+.miniFoilPack{
+  position:relative;
+  width:18px;
+  height:23px;
+  flex:none;
+  display:block;
+  border:2px solid #245a78;
+  border-radius:3px;
+  background:linear-gradient(145deg,#45b7d4,#246e9a 55%,#183f68);
+  box-shadow:0 2px 3px rgba(28,73,98,.22);
+  font-size:0!important;
+}
+.miniFoilPack::before{
+  content:'';
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:9px;
+  height:9px;
+  border:1px solid #fff3a6;
+  border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#d8f8ff,#69bddc 40%,#377fa6 78%);
+  transform:translate(-50%,-50%);
+}
+.miniFoilPack::after{
+  content:'';
+  position:absolute;
+  left:-3px;
+  right:-3px;
+  top:-4px;
+  height:4px;
+  border:1px solid #b47b10;
+  border-radius:2px;
+  background:repeating-linear-gradient(90deg,#ffd65d 0 3px,#fff0a0 3px 5px);
+  box-shadow:0 25px 0 -1px #e4ad2e;
 }
 
 /* ============================================================
@@ -2071,6 +2424,7 @@ body.packOpen{overflow:hidden!important}
     font-size:34px;
     line-height:1.1;
     letter-spacing:0;
+    white-space:nowrap;
   }
 
   .packSub{
@@ -2277,6 +2631,420 @@ body.packOpen{overflow:hidden!important}
   }
 }
 
+/* Portrait store: readable vertical catalog with explicit scrolling. */
+@media(max-width:800px) and (orientation:portrait){
+  #storeScreen{
+    padding-right:max(4px,env(safe-area-inset-right));
+    overflow:hidden;
+  }
+
+  #storeScreen .menuApp{
+    height:calc(100dvh - 88px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    gap:12px;
+    padding-right:6px;
+    padding-bottom:24px;
+    overflow-x:hidden;
+    overflow-y:scroll;
+    overscroll-behavior-y:contain;
+    scrollbar-gutter:stable;
+    scrollbar-width:auto;
+    scrollbar-color:#5ba8c8 #dce7ed;
+  }
+
+  #storeScreen .menuApp::-webkit-scrollbar{width:10px}
+  #storeScreen .menuApp::-webkit-scrollbar-track{
+    border-radius:999px;
+    background:#dce7ed;
+  }
+  #storeScreen .menuApp::-webkit-scrollbar-thumb{
+    min-height:54px;
+    border:2px solid #dce7ed;
+    border-radius:999px;
+    background:#5ba8c8;
+  }
+
+  #storeScreen .menuHeader{
+    position:sticky;
+    top:0;
+    z-index:8;
+    min-height:68px;
+    padding:8px 4px;
+    background:rgba(237,242,246,.96);
+    backdrop-filter:blur(8px);
+  }
+  #storeScreen .menuHeader h1{
+    font-size:30px;
+    letter-spacing:0;
+  }
+  #storeScreen .bigWallet{
+    min-width:122px;
+    min-height:50px;
+    font-size:18px;
+  }
+
+  .storeHero{
+    flex:none;
+    min-height:250px;
+    display:grid;
+    grid-template-columns:108px minmax(0,1fr);
+    grid-template-areas:
+      "pack title"
+      "pack description"
+      "pack price"
+      "buy buy";
+    align-items:center;
+    column-gap:14px;
+    row-gap:8px;
+    padding:18px;
+    border-radius:20px;
+  }
+  .shopPackVisual{
+    grid-area:pack;
+    width:108px;
+  }
+  .shopPackBox{
+    width:96px;
+    height:104px;
+    font-size:46px;
+  }
+  .storeHero h2{
+    grid-area:title;
+    align-self:end;
+    font-size:26px;
+    line-height:1.05;
+    white-space:nowrap;
+  }
+  .storeHero p{
+    grid-area:description;
+    align-self:start;
+    font-size:15px;
+    line-height:1.4;
+    color:#5e707d;
+  }
+  .storeHero .priceLine{
+    grid-area:price;
+    justify-self:start;
+    font-size:24px;
+  }
+  .storeHero #buyPack{
+    grid-area:buy;
+    width:100%;
+    min-height:58px;
+    font-size:18px;
+  }
+
+  .storeSectionTitle{
+    min-height:54px;
+    padding:4px 6px;
+  }
+  .storeSectionTitle strong{
+    font-size:16px;
+    letter-spacing:.08em;
+  }
+  .storeSectionTitle span{
+    margin-top:3px;
+    font-size:13px;
+    line-height:1.3;
+  }
+  .premiumSpark{font-size:28px}
+
+  .mythicStoreCard{
+    flex:none;
+    min-height:290px;
+    display:grid;
+    grid-template-columns:120px minmax(0,1fr);
+    grid-template-areas:
+      "visual details"
+      "purchase purchase";
+    align-items:center;
+    gap:16px;
+    padding:20px 18px;
+    border-radius:22px;
+  }
+  .mythicVisual{
+    grid-area:visual;
+    width:116px;
+    height:116px;
+  }
+  .mythicCore{width:72px;height:72px}
+  .mythicText{
+    grid-area:details;
+    gap:8px;
+  }
+  .mythicRarity,
+  .impossibleRarity{
+    padding:5px 9px;
+    font-size:11px;
+    line-height:1.15;
+  }
+  .mythicText h2{
+    font-size:28px;
+    line-height:1.05;
+    white-space:nowrap;
+  }
+  .mythicText p{
+    font-size:15px;
+    line-height:1.4;
+  }
+  .mythicPurchase{
+    grid-area:purchase;
+    width:100%;
+    min-width:0;
+    flex-direction:row;
+    justify-content:space-between;
+    gap:14px;
+  }
+  .mythicPrice{font-size:24px}
+  .mythicBuyButton{
+    flex:1 1 auto;
+    width:auto;
+    min-height:58px;
+    font-size:17px;
+  }
+
+  .impossibleStoreGrid{
+    flex:none;
+    min-height:0;
+    flex-direction:column;
+    gap:14px;
+  }
+  .impossibleStoreCard{
+    flex:none;
+    min-height:290px;
+    display:grid;
+    grid-template-columns:120px minmax(0,1fr);
+    grid-template-areas:
+      "orb details"
+      "purchase purchase";
+    align-items:center;
+    gap:16px;
+    padding:20px 18px;
+    border-radius:22px;
+    text-align:left;
+  }
+  .impossibleVisual{
+    grid-area:orb;
+    width:116px;
+    height:116px;
+  }
+  .elementOrb,.gaiaCore{width:72px;height:72px}
+  .impossibleText{
+    grid-area:details;
+    align-items:flex-start;
+    gap:8px;
+  }
+  .impossibleRarity{
+    align-self:flex-start;
+  }
+  .impossibleText h2{
+    font-size:28px;
+    line-height:1.05;
+    white-space:nowrap;
+  }
+  .impossibleText p{
+    font-size:15px;
+    line-height:1.4;
+    opacity:.92;
+  }
+  .impossiblePurchase{
+    grid-area:purchase;
+    min-width:0;
+    flex-direction:row;
+    justify-content:space-between;
+    gap:14px;
+  }
+  .impossiblePrice{
+    flex:none;
+    font-size:24px;
+  }
+  .impossibleBuyButton{
+    flex:1 1 auto;
+    width:auto;
+    min-height:58px;
+    font-size:17px;
+  }
+
+  .storeNote{
+    position:sticky;
+    bottom:0;
+    z-index:6;
+    min-height:44px;
+    padding:8px 12px;
+    border-radius:14px;
+    background:rgba(255,255,255,.96);
+    box-shadow:var(--shadow-soft);
+    font-size:14px;
+  }
+  .storeNote:empty{display:none}
+
+  .storeRarityDivider{
+    min-height:48px;
+    padding:8px 10px;
+  }
+  .storeRarityDivider strong{font-size:15px}
+  .storeRarityDivider span:last-child{font-size:13px}
+}
+
+@media(max-width:380px) and (orientation:portrait){
+  .packTitle{font-size:29px}
+  .storeHero{
+    grid-template-columns:92px minmax(0,1fr);
+    column-gap:11px;
+    padding:15px;
+  }
+  .shopPackVisual{width:92px}
+  .shopPackBox{width:84px;height:94px;font-size:42px}
+  .storeHero h2{font-size:23px}
+  .storeHero p{font-size:14px}
+
+  .mythicStoreCard{
+    grid-template-columns:98px minmax(0,1fr);
+    gap:13px;
+    padding:17px 15px;
+  }
+  .mythicVisual{width:94px;height:94px}
+  .mythicCore{width:60px;height:60px}
+  .mythicText h2{font-size:24px}
+  .mythicText p{font-size:14px}
+
+  .impossibleStoreCard{
+    grid-template-columns:98px minmax(0,1fr);
+    gap:13px;
+    padding:17px 15px;
+  }
+  .impossibleVisual{width:94px;height:94px}
+  .elementOrb,.gaiaCore{width:60px;height:60px}
+  .impossibleText h2{font-size:22px}
+  .impossibleText p{font-size:14px}
+}
+
+@media(max-width:800px) and (max-height:700px) and (orientation:portrait){
+  .foilPackLarge{width:138px;height:178px}
+  .foilPackLarge .foilPackSeal{height:15px}
+  .foilPackLarge .foilPackBalls{height:48px}
+  .foilPackLarge .foilPackBall{width:36px;height:36px}
+  .foilPackLarge .foilPackBall.ballTwo{width:49px;height:49px}
+  .foilPackLarge .foilPackName{font-size:14px}
+  .foilPackLarge .foilPackStars{font-size:13px}
+}
+
+/* Stable HUD tracks: changing numbers never shift icons or sibling cards. */
+.gameStatusBar.hudCardRow .hudStatCard{
+  display:grid;
+  align-items:center;
+  justify-items:center;
+  width:auto;
+  min-width:0;
+}
+.hudBallsCard{grid-template-columns:49px minmax(0,1fr)}
+.hudTimerCard{grid-template-columns:52px minmax(0,1fr)}
+.gameStatusBar.hudCardRow .hudGoldCard{
+  grid-template-columns:50px minmax(0,1fr);
+  min-width:0;
+}
+.gameStatusBar.hudCardRow .hudStatCard>strong{
+  width:100%;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-align:center;
+}
+.hudGoldNumbers{
+  position:relative;
+  width:100%;
+  height:42px;
+  min-width:0;
+  display:grid;
+  place-items:center;
+}
+.hudGoldNumbers strong{
+  position:absolute;
+  left:0;
+  top:50%;
+  width:100%;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-align:center;
+  transform:translateY(-50%);
+}
+.hudGoldNumbers .runGain{
+  position:absolute;
+  left:50%;
+  bottom:-1px;
+  width:6ch;
+  text-align:center;
+  transform:translateX(-50%);
+  pointer-events:none;
+  font-variant-numeric:tabular-nums;
+}
+
+@media(max-width:800px) and (orientation:portrait){
+  .hudBallsCard{grid-template-columns:47px minmax(0,1fr)}
+  .hudTimerCard{grid-template-columns:49px minmax(0,1fr)}
+  .gameStatusBar.hudCardRow .hudGoldCard{grid-template-columns:48px minmax(0,1fr)}
+  .hudTimerCard strong{font-size:25px!important}
+  .hudGoldNumbers strong{font-size:27px!important}
+}
+
+@media(max-width:390px){
+  .hudBallsCard{grid-template-columns:42px minmax(0,1fr)}
+  .hudTimerCard{grid-template-columns:43px minmax(0,1fr)}
+  .gameStatusBar.hudCardRow .hudGoldCard{grid-template-columns:43px minmax(0,1fr)}
+  .hudTimerCard strong{font-size:17px!important}
+  .hudGoldNumbers strong{font-size:18px!important}
+}
+
+@media(max-width:330px){
+  .hudBallsCard{grid-template-columns:38px minmax(0,1fr)}
+  .hudTimerCard{grid-template-columns:39px minmax(0,1fr)}
+  .gameStatusBar.hudCardRow .hudGoldCard{grid-template-columns:39px minmax(0,1fr)}
+  .hudTimerCard strong,
+  .hudGoldNumbers strong{font-size:16px!important}
+}
+
+.hudGoldNumbers strong{
+  top:4px;
+  height:24px;
+  line-height:24px;
+  transform:none;
+}
+.hudGoldNumbers .runGain{
+  display:block!important;
+  bottom:2px;
+  color:#ba7907;
+  font-size:13px!important;
+  line-height:1;
+  font-weight:1000;
+  text-shadow:0 1px 0 #fff4b0;
+}
+.hudGoldNumbers .runGain.gainPop{animation:gainPop .34s ease-out}
+@keyframes gainPop{
+  0%{transform:translateX(-50%) scale(.72);opacity:.35}
+  55%{transform:translateX(-50%) scale(1.28);opacity:1}
+  100%{transform:translateX(-50%) scale(1);opacity:1}
+}
+.hudGoldNumbers{overflow:visible}
+.walletPill.coinCatch .coinCatchSpark{
+  position:absolute;
+  z-index:4;
+  display:block;
+  color:#ffd33e;
+  font-size:19px;
+  line-height:1;
+  opacity:0;
+  pointer-events:none;
+  text-shadow:0 0 8px #fff4a6;
+  animation:coinSparkLand .42s ease-out;
+}
+.walletPill.coinCatch .catch1{left:-9px;top:-8px}
+.walletPill.coinCatch .catch2{right:-8px;bottom:-7px;animation-delay:.04s}
+@keyframes coinSparkLand{
+  0%{transform:scale(.35) rotate(0);opacity:0}
+  28%{transform:scale(1.45) rotate(28deg);opacity:1}
+  100%{transform:scale(.8) rotate(70deg) translateY(-7px);opacity:0}
+}
+
 </style>
 </head>
 
@@ -2314,10 +3082,6 @@ body.packOpen{overflow:hidden!important}
             <span class="runGain">+<span id="coins">0</span></span>
             <span class="coinCatchSpark catch1">✦</span>
             <span class="coinCatchSpark catch2">✦</span>
-          </span>
-          <span class="hudPackCue">
-            <span class="packHudIcon">📦</span>
-            <span class="packHudPrice"><span class="miniCoin">◉</span><span id="gamePackPrice">25</span></span>
           </span>
           <span class="packHudSpark sparkA">✦</span>
           <span class="packHudSpark sparkB">✦</span>
@@ -2478,17 +3242,33 @@ body.packOpen{overflow:hidden!important}
     <div class="storeHero" id="storeHero">
       <div class="shopPackVisual">
         <div class="shopPackGlow"></div>
-        <div class="shopPackBox">📦</div>
+        <div class="foilPackArt foilPackStore" aria-hidden="true">
+          <div class="foilPackSeal foilPackSealTop"></div>
+          <div class="foilPackFace">
+            <div class="foilPackBalls">
+              <span class="foilPackBall ballOne"></span>
+              <span class="foilPackBall ballTwo"></span>
+              <span class="foilPackBall ballThree"></span>
+            </div>
+            <strong class="foilPackName">BALL PACK</strong>
+            <span class="foilPackStars">★★★</span>
+          </div>
+          <div class="foilPackSeal foilPackSealBottom"></div>
+        </div>
       </div>
       <h2>BALL PACK</h2>
-      <p>Common 34% • Rare 46% • Epic 16% • Legendary 4%</p>
+      <p>A sealed surprise pack containing a new ball for your collection.</p>
       <div class="priceLine"><span class="coinIcon">◉</span><strong id="storePackPrice">25</strong></div>
       <button class="primary wideAction" id="buyPack">BUY PACK</button>
     </div>
 
     <div class="storeSectionTitle">
-      <div><strong>PREMIUM BALLS</strong><span>Guaranteed unlock • never in packs</span></div>
+      <div><strong>DIRECT UNLOCKS</strong><span>Premium balls ordered by rarity tier</span></div>
       <div class="premiumSpark">✦</div>
+    </div>
+
+    <div class="storeRarityDivider mythicStoreDivider">
+      <span class="storeRarityPip"></span><strong>MYTHIC</strong><span>Celestial power</span>
     </div>
 
     <div class="mythicStoreCard">
@@ -2503,7 +3283,7 @@ body.packOpen{overflow:hidden!important}
         <div class="mythicSpark ms3">✦</div>
       </div>
       <div class="mythicText">
-        <div class="mythicRarity">MYTHIC STORE EXCLUSIVE</div>
+        <div class="mythicRarity">MYTHIC</div>
         <h2>APEX BALL</h2>
         <p>Ridiculously powerful. Giant start, double coin value, huge magnet pull, two-hit shield, ghost phase, and absurd growth.</p>
       </div>
@@ -2511,6 +3291,10 @@ body.packOpen{overflow:hidden!important}
         <div class="priceLine mythicPrice"><span class="coinIcon">◉</span><strong id="apexPriceLabel">5000</strong></div>
         <button class="primary wideAction mythicBuyButton" id="buyApexBall">BUY APEX</button>
       </div>
+    </div>
+
+    <div class="storeRarityDivider impossibleStoreDivider">
+      <span class="storeRarityPip"></span><strong>IMPOSSIBLE</strong><span>Elemental power</span>
     </div>
 
     <div class="impossibleStoreGrid">
@@ -2523,11 +3307,15 @@ body.packOpen{overflow:hidden!important}
           <div class="elementSpark es2">✦</div>
           <div class="elementSpark es3">✦</div>
         </div>
-        <div class="impossibleRarity">IMPOSSIBLE STORE EXCLUSIVE</div>
-        <h2>CATACLYSM BALL</h2>
-        <p>Fire core + electric shell + icy energy. Fast, protected, and almost unfair.</p>
-        <div class="priceLine impossiblePrice"><span class="coinIcon">◉</span><strong id="cataclysmPriceLabel">2500</strong></div>
-        <button class="primary wideAction impossibleBuyButton" id="buyCataclysmBall">BUY CATACLYSM</button>
+        <div class="impossibleText">
+          <div class="impossibleRarity">IMPOSSIBLE</div>
+          <h2>CATACLYSM BALL</h2>
+          <p>Fire core + electric shell + icy energy. Fast, protected, and almost unfair.</p>
+        </div>
+        <div class="impossiblePurchase">
+          <div class="priceLine impossiblePrice"><span class="coinIcon">◉</span><strong id="cataclysmPriceLabel">2500</strong></div>
+          <button class="primary wideAction impossibleBuyButton" id="buyCataclysmBall">BUY CATACLYSM</button>
+        </div>
       </div>
 
       <div class="impossibleStoreCard gaiaStoreCard">
@@ -2538,11 +3326,15 @@ body.packOpen{overflow:hidden!important}
           <div class="gaiaLeaf gl3">◆</div>
           <div class="gaiaLeaf gl4">◆</div>
         </div>
-        <div class="impossibleRarity">IMPOSSIBLE STORE EXCLUSIVE</div>
-        <h2>GAIA BALL</h2>
-        <p>Living nature energy. Huge start, coin magnet, bonus coin value and a protective shell.</p>
-        <div class="priceLine impossiblePrice"><span class="coinIcon">◉</span><strong id="gaiaPriceLabel">2500</strong></div>
-        <button class="primary wideAction impossibleBuyButton" id="buyGaiaBall">BUY GAIA</button>
+        <div class="impossibleText">
+          <div class="impossibleRarity">IMPOSSIBLE</div>
+          <h2>GAIA BALL</h2>
+          <p>Living nature energy. Huge start, coin magnet, bonus coin value and a protective shell.</p>
+        </div>
+        <div class="impossiblePurchase">
+          <div class="priceLine impossiblePrice"><span class="coinIcon">◉</span><strong id="gaiaPriceLabel">2500</strong></div>
+          <button class="primary wideAction impossibleBuyButton" id="buyGaiaBall">BUY GAIA</button>
+        </div>
       </div>
     </div>
 
@@ -2702,8 +3494,19 @@ body.packOpen{overflow:hidden!important}
     <div class="packSub" id="packSub">Tap the pack</div>
 
     <button class="bigPack" id="bigPack" aria-label="Open pack">
-      <div class="packTop"></div>
-      <div class="packBody">📦</div>
+      <div class="foilPackArt foilPackLarge" aria-hidden="true">
+        <div class="foilPackSeal foilPackSealTop"></div>
+        <div class="foilPackFace">
+          <div class="foilPackBalls">
+            <span class="foilPackBall ballOne"></span>
+            <span class="foilPackBall ballTwo"></span>
+            <span class="foilPackBall ballThree"></span>
+          </div>
+          <strong class="foilPackName">BALL PACK</strong>
+          <span class="foilPackStars">★★★</span>
+        </div>
+        <div class="foilPackSeal foilPackSealBottom"></div>
+      </div>
       <div class="packGlow"></div>
       <div class="tapPackBadge">TAP!</div>
     </button>
@@ -2816,7 +3619,6 @@ body.packOpen{overflow:hidden!important}
     storeFxLayer: document.getElementById('storeFxLayer'),
     packFxLayer: document.getElementById('packFxLayer'),
     packModal: document.getElementById('packModal'),
-    gamePackPrice: document.getElementById('gamePackPrice'),
     quickNav: document.getElementById('quickNav'),
     quickStore: document.getElementById('quickStore'),
     quickPlay: document.getElementById('quickPlay'),
@@ -3526,6 +4328,15 @@ body.packOpen{overflow:hidden!important}
   ];
 
   let walletCoins = 0;
+  function roundCoinAmount(value){
+    return Math.round((Number(value)||0)*100)/100;
+  }
+  function formatCoinAmount(value){
+    const rounded=roundCoinAmount(value);
+    return Number.isInteger(rounded)
+      ? String(rounded)
+      : rounded.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+  }
   let starterPackOpened = false;
   const ownedBalls = new Set();
   let activePackMode = null;
@@ -3785,7 +4596,8 @@ body.packOpen{overflow:hidden!important}
       message:'',
       messageT:0,
       tutorialActive:false,
-      lastWin:false
+      lastWin:false,
+      settled:false
     };
     setupEnemiesForLevel();
     spawnCoin(); spawnCoin();
@@ -3981,11 +4793,11 @@ body.packOpen{overflow:hidden!important}
   }
 
   function syncEconomyUI(){
-    ui.walletCoins.textContent=walletCoins;
-    ui.storeWalletCoins.textContent=walletCoins;
-    ui.collectionWalletCoins.textContent=walletCoins;
+    const pendingCoins=state && !state.settled ? state.scoreCoins : 0;
+    ui.walletCoins.textContent=formatCoinAmount(walletCoins+pendingCoins);
+    ui.storeWalletCoins.textContent=formatCoinAmount(walletCoins);
+    ui.collectionWalletCoins.textContent=formatCoinAmount(walletCoins);
     ui.storePackPrice.textContent=PACK_PRICE;
-    ui.gamePackPrice.textContent=PACK_PRICE;
     ui.apexPriceLabel.textContent='5000';
     ui.cataclysmPriceLabel.textContent=IMPOSSIBLE_BALL_PRICE;
     ui.gaiaPriceLabel.textContent=IMPOSSIBLE_BALL_PRICE;
@@ -4612,12 +5424,39 @@ body.packOpen{overflow:hidden!important}
     state.coins.splice(i,1);
     const typeData=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
     const value=(typeData.coinMult || 1) * (state.toxicLeft>0 ? 0.5 : 1);
-    state.scoreCoins += value;
+    state.scoreCoins=roundCoinAmount(state.scoreCoins+value);
     sfx('coinPickup');
 
+    spawnCoinPickupSpark(x,y);
     spawnCoinHudFlight(x,y,.48+Math.random()*.16);
-    state.message='+1 coin';
+    const gain=ui.coins.closest('.runGain');
+    gain?.classList.remove('gainPop');
+    if(gain) void gain.offsetWidth;
+    gain?.classList.add('gainPop');
+    state.message=`+${formatCoinAmount(value)} coin`;
     state.messageT=.35;
+  }
+
+  function spawnCoinPickupSpark(x,y){
+    const palette=['#fff6a8','#ffd84d','#ffb41f','#ffffff'];
+    for(let index=0;index<18;index++){
+      const angle=index*Math.PI*2/18+(Math.random()-.5)*.18;
+      const speed=95+Math.random()*185;
+      const life=.42+Math.random()*.25;
+      state.coinFx.push({
+        type:'coinSpark',
+        x,y,
+        vx:Math.cos(angle)*speed,
+        vy:Math.sin(angle)*speed,
+        life,
+        maxLife:life,
+        r:2.5+Math.random()*4,
+        rotation:angle,
+        spin:(Math.random()-.5)*11,
+        color:palette[index%palette.length]
+      });
+    }
+    addImpactRing(x,y,'#ffd447',58);
   }
 
   function addScreenShake(power=6,duration=.22){
@@ -4797,7 +5636,8 @@ body.packOpen{overflow:hidden!important}
         // Extras fly away into the HUD as bonus collections rather than lingering on screen.
         while(state.coins.length>MAX_COINS){
           const c=state.coins.pop();
-          state.scoreCoins++;
+          state.scoreCoins=roundCoinAmount(state.scoreCoins+1);
+          spawnCoinPickupSpark(c.x,c.y);
           spawnCoinHudFlight(c.x,c.y,.38);
         }
         // Fill back to exactly the normal cap if needed.
@@ -4932,17 +5772,17 @@ body.packOpen{overflow:hidden!important}
 
         e.trailTimer-=dt;
         if(e.trailTimer<=0){
-          e.trailTimer=e.boss ? .012 : (e.minion ? .018 : .022);
+          e.trailTimer=e.boss ? .010 : (e.minion ? .014 : .016);
           e.trail.push({x:e.x,y:e.y,life:1});
 
-          const trailCap=e.boss ? 38 : (e.minion ? 28 : 24);
+          const trailCap=e.boss ? 78 : (e.minion ? 62 : 54);
           while(e.trail.length>trailCap) e.trail.shift();
         }
       }
 
       // Fade trails even when an enemy is frozen.
       for(const t of e.trail){
-        t.life=Math.max(0,t.life-dt*(e.boss?1.05:(e.minion?1.35:1.48)));
+        t.life=Math.max(0,t.life-dt*(e.boss?.56:(e.minion?.7:.8)));
       }
       while(e.trail.length && e.trail[0].life<=0){
         e.trail.shift();
@@ -4996,7 +5836,14 @@ body.packOpen{overflow:hidden!important}
           state.coinFx.splice(i,1);
         }
       }else{
-        f.life-=dt;f.x+=f.vx*dt;f.y+=f.vy*dt;f.vx*=.96;f.vy*=.96;
+        f.life-=dt;f.x+=f.vx*dt;f.y+=f.vy*dt;
+        if(f.type==='coinSpark'){
+          f.vx*=.94;
+          f.vy=f.vy*.94+35*dt;
+          f.rotation+=f.spin*dt;
+        }else{
+          f.vx*=.96;f.vy*=.96;
+        }
         if(f.life<=0)state.coinFx.splice(i,1);
       }
     }
@@ -5079,36 +5926,32 @@ body.packOpen{overflow:hidden!important}
     setTimeout(clearConfetti,3300);
   }
 
-  function animateRewardTransfer(payout,walletBefore,walletAfter){
+  function animateRewardTransfer(runCoins,walletBefore,walletAfter,win){
     const token=++state.rewardAnimToken;
-    const duration=Math.min(1750,850+payout*22);
+    const walletDelta=roundCoinAmount(walletAfter-walletBefore);
+    const duration=Math.min(1600,700+Math.abs(walletDelta)*28);
     const start=performance.now();
 
     ui.coinTransfer.classList.add('transferring');
-    ui.resultRunCoins.textContent=payout;
-    ui.resultWalletCoins.textContent=walletBefore;
+    ui.resultRunCoins.textContent=(win?'+':'-')+formatCoinAmount(runCoins);
+    ui.resultWalletCoins.textContent=formatCoinAmount(walletBefore);
 
-    // Temporarily show the pre-payout wallet, then count upward.
-    ui.walletCoins.textContent=walletBefore;
-    ui.storeWalletCoins.textContent=walletBefore;
-    ui.collectionWalletCoins.textContent=walletBefore;
+    // Start from the total the player saw during play, then bank or roll it back.
+    ui.walletCoins.textContent=formatCoinAmount(walletBefore);
+    ui.storeWalletCoins.textContent=formatCoinAmount(walletCoins);
+    ui.collectionWalletCoins.textContent=formatCoinAmount(walletCoins);
 
     function frame(now){
       if(token!==state.rewardAnimToken) return;
 
       const t=Math.min(1,(now-start)/duration);
       const eased=1-Math.pow(1-t,3);
-      const moved=Math.min(payout,Math.floor(payout*eased));
-      const remaining=Math.max(0,payout-moved);
-      const shownWallet=walletBefore+moved;
+      const shownWallet=roundCoinAmount(walletBefore+walletDelta*eased);
 
-      ui.resultRunCoins.textContent=remaining;
-      ui.resultWalletCoins.textContent=shownWallet;
-      ui.walletCoins.textContent=shownWallet;
-      ui.storeWalletCoins.textContent=shownWallet;
-      ui.collectionWalletCoins.textContent=shownWallet;
+      ui.resultWalletCoins.textContent=formatCoinAmount(shownWallet);
+      ui.walletCoins.textContent=formatCoinAmount(shownWallet);
 
-      if(moved>0 && moved%3===0){
+      if(Math.abs(walletDelta)>0 && Math.floor(t*10)%3===0){
         ui.resultWalletBucket.classList.remove('walletPunch');
         void ui.resultWalletBucket.offsetWidth;
         ui.resultWalletBucket.classList.add('walletPunch');
@@ -5118,11 +5961,10 @@ body.packOpen{overflow:hidden!important}
         requestAnimationFrame(frame);
       }else{
         ui.coinTransfer.classList.remove('transferring');
-        ui.resultRunCoins.textContent='0';
-        ui.resultWalletCoins.textContent=walletAfter;
-        ui.walletCoins.textContent=walletAfter;
-        ui.storeWalletCoins.textContent=walletAfter;
-        ui.collectionWalletCoins.textContent=walletAfter;
+        ui.resultWalletCoins.textContent=formatCoinAmount(walletAfter);
+        ui.walletCoins.textContent=formatCoinAmount(walletAfter);
+        ui.storeWalletCoins.textContent=formatCoinAmount(walletAfter);
+        ui.collectionWalletCoins.textContent=formatCoinAmount(walletAfter);
         ui.resultWalletBucket.classList.add('walletPunch');
       }
     }
@@ -5130,7 +5972,7 @@ body.packOpen{overflow:hidden!important}
     requestAnimationFrame(frame);
   }
 
-  function showLevelCelebration(win,payout,walletBefore,walletAfter,stars,mult){
+  function showLevelCelebration(win,runCoins,payout,walletBefore,walletAfter,stars){
     ui.resultCard.classList.remove('celebrate');
     ui.completionBadge.classList.remove('show');
     void ui.resultCard.offsetWidth;
@@ -5146,16 +5988,19 @@ body.packOpen{overflow:hidden!important}
     }
 
     ui.rewardFormula.textContent=win
-      ? `+${payout} GOLD`
-      : `+${payout} GOLD`;
+      ? `+${formatCoinAmount(payout)} GOLD BANKED`
+      : `-${formatCoinAmount(runCoins)} GOLD`;
 
-    animateRewardTransfer(payout,walletBefore,walletAfter);
+    animateRewardTransfer(runCoins,walletBefore,walletAfter,win);
   }
 
   function finish(win){
     if(!state.running) return;
+    const runCoins=roundCoinAmount(state.scoreCoins);
+    const walletBefore=roundCoinAmount(walletCoins+runCoins);
     state.running=false;
     state.lastWin=win;
+    state.settled=true;
     stopGrowSound();
     sfx(win?'win':'fail');
     if(win){
@@ -5168,13 +6013,10 @@ body.packOpen{overflow:hidden!important}
     computeCoverage();
     const stars=win?starsForWin():0;
     const mult=win ? STAR_MULTIPLIERS[stars] : 1.00;
-    const payout=Math.round(state.scoreCoins*mult);
-
-    // Bank immediately in game state, but visually transfer level coins into
-    // the wallet so the reward has a satisfying conversion moment.
-    const walletBefore=walletCoins;
-    walletCoins += payout;
-    const walletAfter=walletCoins;
+    const payout=win ? roundCoinAmount(runCoins*mult) : 0;
+    if(win) walletCoins=roundCoinAmount(walletCoins+payout);
+    const walletAfter=roundCoinAmount(walletCoins);
+    state.scoreCoins=0;
 
     const cfg=enemyConfig(currentLevel);
     const nextCfg=enemyConfig(Math.min(MAX_LEVEL,currentLevel+1));
@@ -5202,7 +6044,7 @@ body.packOpen{overflow:hidden!important}
     ui.again.textContent=campaignComplete?'Replay final boss':(win?'NEXT LEVEL':'RETRY');
     ui.overlay.style.display='grid';
     syncUI();
-    showLevelCelebration(win,payout,walletBefore,walletAfter,stars,mult);
+    showLevelCelebration(win,runCoins,payout,walletBefore,walletAfter,stars);
   }
 
   function syncUI(){
@@ -5215,8 +6057,7 @@ body.packOpen{overflow:hidden!important}
     ui.difficulty.style.color=worldProfile.fill;
     ui.time.textContent=state.timeLeft.toFixed(1);
     ui.balls.textContent=state.ballsLeft;
-    ui.coins.textContent=(Math.round(state.scoreCoins*100)/100).toString();
-    ui.walletCoins.textContent=walletCoins;
+    ui.coins.textContent=formatCoinAmount(state.scoreCoins);
     syncEconomyUI();
     const displayedCoverage=state.active ? state.liveCoverage : state.coverage;
     ui.coverage.textContent=displayedCoverage.toFixed(1);
@@ -5488,48 +6329,35 @@ body.packOpen{overflow:hidden!important}
     // Active ball
     if(state.active) drawBall(state.active,true);
 
-    // Coin fly animation toward top-right
+    // Pop and pickup particles stay in arena space. Collected coins render only on the
+    // HUD FX canvas so there is one flight into the top gold icon.
     for(const f of state.coinFx){
-      if(f.type==='coin'){
-        const u=Math.min(1,f.t/f.d);
-        const e=1-Math.pow(1-u,2.6);
-        const pos=coinFlightPoint(f,e);
-        const tail1=coinFlightPoint(f,Math.max(0,e-.075));
-        const tail2=coinFlightPoint(f,Math.max(0,e-.15));
-
-        // Curved luminous tail that follows the same path.
+      if(f.type==='coin') continue;
+      if(f.type==='coinSpark'){
+        const alpha=Math.max(0,f.life/f.maxLife);
         ctx.save();
-        ctx.lineCap='round';
-
-        ctx.globalAlpha=.18*(1-u);
-        ctx.strokeStyle='#fff0a6';
-        ctx.lineWidth=11;
+        ctx.translate(f.x,f.y);
+        ctx.rotate(f.rotation);
+        ctx.globalAlpha=alpha;
+        ctx.strokeStyle=f.color;
+        ctx.shadowColor=f.color;
+        ctx.shadowBlur=10;
+        ctx.lineWidth=Math.max(1.2,f.r*.42);
         ctx.beginPath();
-        ctx.moveTo(tail2.x,tail2.y);
-        ctx.quadraticCurveTo(tail1.x,tail1.y,pos.x,pos.y);
+        ctx.moveTo(-f.r*1.7,0);
+        ctx.lineTo(f.r*1.7,0);
+        ctx.moveTo(0,-f.r*1.7);
+        ctx.lineTo(0,f.r*1.7);
         ctx.stroke();
-
-        ctx.globalAlpha=.68*(1-u);
-        ctx.strokeStyle='#ffd45c';
-        ctx.lineWidth=5;
+        ctx.fillStyle='#fff7bd';
         ctx.beginPath();
-        ctx.moveTo(tail2.x,tail2.y);
-        ctx.quadraticCurveTo(tail1.x,tail1.y,pos.x,pos.y);
-        ctx.stroke();
-
-        // Small sparkle at the back of the curved tail.
-        ctx.globalAlpha=.42*(1-u);
-        ctx.fillStyle='#fff5b8';
-        ctx.beginPath();
-        ctx.arc(tail2.x,tail2.y,3.2*(1-u)+1,0,Math.PI*2);
+        ctx.arc(0,0,Math.max(1,f.r*.45),0,Math.PI*2);
         ctx.fill();
         ctx.restore();
-
-        drawCoin(pos.x,pos.y,12*(1-.34*e),now*4+f.t*6);
-      }else{
-        ctx.save();ctx.globalAlpha=Math.max(0,f.life/.45);ctx.fillStyle=COLORS.ball;
-        ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,Math.PI*2);ctx.fill();ctx.restore();
+        continue;
       }
+      ctx.save();ctx.globalAlpha=Math.max(0,f.life/.45);ctx.fillStyle=COLORS.ball;
+      ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,Math.PI*2);ctx.fill();ctx.restore();
     }
 
     if(state.freezeLeft>0){
@@ -6000,6 +6828,14 @@ body.packOpen{overflow:hidden!important}
     ctx.restore();
   }
 
+  function traceEnemyTriangle(context,radius){
+    context.beginPath();
+    context.moveTo(radius*1.18,0);
+    context.lineTo(-radius*.76,radius*.92);
+    context.lineTo(-radius*.76,-radius*.92);
+    context.closePath();
+  }
+
   function drawEnemyTrail(e){
     if(!e.trail || e.trail.length<2) return;
 
@@ -6009,6 +6845,31 @@ body.packOpen{overflow:hidden!important}
     ctx.save();
     ctx.lineCap='round';
     ctx.lineJoin='round';
+
+    // Large outlined triangle echoes make the enemy's direction readable.
+    for(let i=0;i<n;i+=3){
+      const trailPoint=e.trail[i];
+      const nextPoint=e.trail[Math.min(i+1,n-1)];
+      const progress=(i+1)/n;
+      const alpha=trailPoint.life*progress*(e.boss?.56:(e.minion?.42:.36));
+      if(alpha<=0) continue;
+
+      const angle=nextPoint===trailPoint
+        ? Math.atan2(e.vy,e.vx)
+        : Math.atan2(nextPoint.y-trailPoint.y,nextPoint.x-trailPoint.x);
+
+      ctx.save();
+      ctx.translate(trailPoint.x,trailPoint.y);
+      ctx.rotate(angle);
+      ctx.globalAlpha=alpha;
+      ctx.strokeStyle=profile.edge;
+      ctx.shadowColor=profile.glow || profile.edge;
+      ctx.shadowBlur=e.boss ? 18 : 10;
+      ctx.lineWidth=Math.max(2.5,e.r*.2*progress+1.2);
+      traceEnemyTriangle(ctx,e.r*(.9+progress*.58));
+      ctx.stroke();
+      ctx.restore();
+    }
 
     // 1) Big soft glow ribbon behind the enemy.
     for(let i=1;i<n;i++){
@@ -6020,7 +6881,7 @@ body.packOpen{overflow:hidden!important}
 
       const widthBase=e.boss ? e.r*1.22 : (e.minion ? e.r*.88 : e.r*.72);
 
-      ctx.globalAlpha=life*progress*(e.boss?.19:(e.minion?.13:.10));
+      ctx.globalAlpha=life*progress*(e.boss?.28:(e.minion?.21:.17));
       ctx.strokeStyle=profile.glow || profile.trail;
       ctx.shadowColor=profile.glow || profile.trail;
       ctx.shadowBlur=e.boss ? 26 : (e.minion ? 18 : 14);
@@ -6041,7 +6902,7 @@ body.packOpen{overflow:hidden!important}
 
       const widthBase=e.boss ? e.r*.96 : (e.minion ? e.r*.68 : e.r*.56);
 
-      ctx.globalAlpha=life*progress*(e.boss?.44:(e.minion?.31:.25));
+      ctx.globalAlpha=life*progress*(e.boss?.58:(e.minion?.44:.38));
       ctx.shadowBlur=0;
       ctx.strokeStyle=profile.trail;
       ctx.lineWidth=Math.max(2.5, widthBase*progress*1.18);
@@ -6077,15 +6938,18 @@ body.packOpen{overflow:hidden!important}
       const alpha=t.life*progress*(e.boss?.62:(e.minion?.34:.26));
       if(alpha<=0) continue;
 
-      const rr=Math.max(1.8, e.r*(e.boss?.23:(e.minion?.16:.13))*progress);
+      const rr=Math.max(2.2, e.r*(e.boss?.28:(e.minion?.2:.17))*progress);
 
       ctx.globalAlpha=alpha;
       ctx.shadowColor=profile.glow || profile.edge;
       ctx.shadowBlur=e.boss ? 18 : 10;
       ctx.fillStyle=(i%4===0 && e.boss) ? '#fff0a8' : profile.edge;
-      ctx.beginPath();
-      ctx.arc(t.x,t.y,rr,0,Math.PI*2);
+      ctx.save();
+      ctx.translate(t.x,t.y);
+      ctx.rotate(Math.atan2(e.vy,e.vx));
+      traceEnemyTriangle(ctx,rr);
       ctx.fill();
+      ctx.restore();
     }
 
     // 5) Tiny star flashes on boss trails to make them feel special.
@@ -6115,84 +6979,80 @@ body.packOpen{overflow:hidden!important}
   }
 
   function drawEnemy(e){
+    const profile=e.boss
+      ? (BOSS_PROFILES[e.bossIndex] || BOSS_PROFILES[1])
+      : (BOSS_PROFILES[e.worldIndex] || BOSS_PROFILES[1]);
+    const angle=Math.atan2(e.vy,e.vx);
+    const drawR=e.r*(state.enemyGrowLeft>0?1.30:1);
+    const fill=state.freezeLeft>0
+      ? '#8bcbed'
+      : (e.boss ? profile.fill : (e.minion ? profile.minionFill : profile.fill));
+    const edge=state.freezeLeft>0
+      ? '#5daed8'
+      : (e.boss ? profile.edge : (e.minion ? profile.minionEdge : profile.edge));
+
     ctx.save();
     ctx.translate(e.x,e.y);
+    ctx.rotate(angle);
 
-    if(e.boss){
-      const profile=BOSS_PROFILES[e.bossIndex] || BOSS_PROFILES[1];
-      const pulse=1+.04*Math.sin(performance.now()/105);
+    // Oversized outline sits behind the body and visibly follows it.
+    ctx.save();
+    ctx.translate(-drawR*.35,0);
+    ctx.globalAlpha=e.boss?.42:.3;
+    ctx.strokeStyle=profile.glow || edge;
+    ctx.shadowColor=profile.glow || edge;
+    ctx.shadowBlur=e.boss?22:14;
+    ctx.lineWidth=e.boss?9:7;
+    traceEnemyTriangle(ctx,drawR*(e.boss?1.42:1.32));
+    ctx.stroke();
+    ctx.restore();
 
-      ctx.globalAlpha=.34;
-      ctx.strokeStyle=profile.edge;
-      ctx.lineWidth=7;
-      ctx.beginPath();
-      ctx.arc(0,0,(e.r+10)*pulse,0,Math.PI*2);
-      ctx.stroke();
+    const highlight=state.freezeLeft>0 ? '#d6f8ff' : profile.edge;
+    const bodyGradient=ctx.createRadialGradient(-drawR*.25,-drawR*.3,drawR*.08,0,0,drawR*1.1);
+    bodyGradient.addColorStop(0,highlight);
+    bodyGradient.addColorStop(.34,fill);
+    bodyGradient.addColorStop(1,edge);
 
-      ctx.globalAlpha=1;
-      ctx.shadowColor=profile.glow;
-      ctx.shadowBlur=18;
-      ctx.fillStyle=state.freezeLeft>0?'#8bcbed':profile.fill;
-      ctx.strokeStyle=state.freezeLeft>0?'#5daed8':profile.edge;
-      ctx.lineWidth=5;
-      ctx.beginPath();
-      ctx.arc(0,0,e.r,0,Math.PI*2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.shadowBlur=0;
-
-      // Crown.
-      ctx.fillStyle='#ffbd4a';
-      ctx.beginPath();
-      ctx.moveTo(-14,-e.r+1);
-      ctx.lineTo(-8,-e.r-14);
-      ctx.lineTo(0,-e.r-4);
-      ctx.lineTo(8,-e.r-14);
-      ctx.lineTo(14,-e.r+1);
-      ctx.closePath();
-      ctx.fill();
-
-      // Eyes.
-      ctx.fillStyle='white';
-      ctx.beginPath();
-      ctx.arc(-9,-4,4.8,0,Math.PI*2);
-      ctx.arc(9,-4,4.8,0,Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle=COLORS.text;
-      ctx.beginPath();
-      ctx.arc(-9,-4,2.1,0,Math.PI*2);
-      ctx.arc(9,-4,2.1,0,Math.PI*2);
-      ctx.fill();
-
-      ctx.restore();
-      return;
-    }
-
-    const profile=BOSS_PROFILES[e.worldIndex] || BOSS_PROFILES[1];
-    ctx.fillStyle=state.freezeLeft>0
-      ? '#8bcbed'
-      : (e.minion ? profile.minionFill : profile.fill);
-    ctx.strokeStyle=state.freezeLeft>0
-      ? '#5daed8'
-      : (e.minion ? profile.minionEdge : profile.edge);
-    ctx.lineWidth=3;
-    const drawR=e.r*(state.enemyGrowLeft>0?1.30:1);
-    ctx.beginPath();
-    ctx.arc(0,0,drawR,0,Math.PI*2);
+    ctx.globalAlpha=1;
+    ctx.fillStyle=bodyGradient;
+    ctx.strokeStyle=edge;
+    ctx.lineWidth=e.boss?6:4;
+    ctx.shadowColor=profile.glow || edge;
+    ctx.shadowBlur=e.boss?20:10;
+    traceEnemyTriangle(ctx,drawR*(e.boss?1.14:1));
     ctx.fill();
     ctx.stroke();
+    ctx.shadowBlur=0;
 
-    ctx.fillStyle='white';
+    // Bright leading edge reinforces the direction of travel.
+    ctx.globalAlpha=.72;
+    ctx.strokeStyle=e.boss?'#fff0a8':'rgba(255,255,255,.92)';
+    ctx.lineWidth=e.boss?4:3;
     ctx.beginPath();
-    ctx.arc(-5,-3,3.2,0,Math.PI*2);
-    ctx.arc(5,-3,3.2,0,Math.PI*2);
+    ctx.moveTo(drawR*(e.boss?1.04:.9),0);
+    ctx.lineTo(-drawR*.48,drawR*.61);
+    ctx.stroke();
+    ctx.globalAlpha=1;
+
+    // Simple glossy highlight, matching the visual language of player balls.
+    ctx.fillStyle='rgba(255,255,255,.78)';
+    ctx.beginPath();
+    ctx.arc(drawR*.08,-drawR*.28,Math.max(2.5,drawR*.13),0,Math.PI*2);
     ctx.fill();
 
-    ctx.fillStyle=COLORS.text;
-    ctx.beginPath();
-    ctx.arc(-5,-3,1.4,0,Math.PI*2);
-    ctx.arc(5,-3,1.4,0,Math.PI*2);
-    ctx.fill();
+    if(e.boss){
+      ctx.fillStyle='#ffbd4a';
+      ctx.strokeStyle='#9c5b08';
+      ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(-drawR*.56,-drawR*.2);
+      ctx.lineTo(-drawR*.14,0);
+      ctx.lineTo(-drawR*.56,drawR*.2);
+      ctx.lineTo(-drawR*.38,0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
 
     ctx.restore();
   }
@@ -6623,3 +7483,17 @@ body.packOpen{overflow:hidden!important}
     for(const key of Object.keys(BOOSTERS)){
       unlockedBoosters.add(key);
       boosterCooldowns[key]=0;
+    }
+    updateBoosterUI();
+    syncUI();
+  });
+
+  // Prevent right-click menu from interrupting the toy.
+  canvas.addEventListener('contextmenu',e=>e.preventDefault());
+
+  reset();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
