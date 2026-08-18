@@ -1527,6 +1527,17 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   background:#effaff;
   box-shadow:0 0 0 .1875rem rgba(83,169,202,.10);
 }
+.ballCard.collectionEquipTarget{
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  transition:transform .12s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.ballCard.collectionEquipTarget:active{transform:scale(.985)}
+.ballCard[role="button"]:focus-visible{
+  outline:.2rem solid color-mix(in srgb,var(--rarity-color,#4ba6ca) 75%,#2387ad);
+  outline-offset:.16rem;
+}
 .lockBadge{
   display:flex;
   align-items:center;
@@ -4448,6 +4459,7 @@ body.packOpen{overflow:hidden!important}
   }
 
   .collectionGrid{
+    --collection-center-space:max(2.5rem,calc((100dvh - 31.75rem)/2 + 1.5rem));
     flex:none;
     width:100%;
     height:auto;
@@ -4457,7 +4469,7 @@ body.packOpen{overflow:hidden!important}
     flex-wrap:nowrap;
     align-items:stretch;
     gap:1rem;
-    padding:.375rem .5rem 1rem;
+    padding:.375rem .5rem var(--collection-center-space);
     overflow:visible;
     scroll-snap-type:none;
     scrollbar-width:none;
@@ -8089,7 +8101,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       <div class="pill bigWallet"><span class="coinIcon">◉</span><span id="collectionWalletCoins">0</span></div>
     </div>
 
-    <div class="collectionBrowseHint">SCROLL TO BROWSE <span>↓</span> DETAILS + PERKS IN EVERY CARD</div>
+    <div class="collectionBrowseHint">SCROLL TO BROWSE <span>↓</span> TAP ANY UNLOCKED BALL TO EQUIP</div>
 
     <div class="collectionGrid" aria-label="Ball collection carousel">
       <div class="ballCard" id="normalCard">
@@ -8903,6 +8915,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       short:'Shield',
       rarity:'Rare',
       growthMult:0.98,
+      shieldHits:1,
       fill:'#8a91df',
       edge:'#5963bb',
       highlight:'#c9cdf8',
@@ -9899,6 +9912,13 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       card.classList.toggle('lockedCard',!owned);
       card.classList.toggle('equipped',equipped);
       card.classList.toggle('previewed',collectionPreviewType===type);
+      card.classList.toggle('collectionEquipTarget',owned);
+      card.setAttribute('role','button');
+      card.tabIndex=0;
+      card.setAttribute('aria-pressed',equipped?'true':'false');
+      card.setAttribute('aria-label',owned
+        ? (equipped ? `${BALL_TYPES[type].name}, equipped` : `Equip ${BALL_TYPES[type].name}`)
+        : `${BALL_TYPES[type].name}, locked. View details`);
 
       const description=card.querySelector('p');
       const stat=card.querySelector('.statRow');
@@ -10011,6 +10031,61 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     syncHomeUI();
   }
 
+  let collectionScrollAnimation=0;
+  function stopCollectionScrollAnimation(){
+    cancelAnimationFrame(collectionScrollAnimation);
+    collectionScrollAnimation=0;
+  }
+
+  function centerCollectionCard(type=selectedBallType,smooth=true){
+    const card=document.getElementById(`${type}Card`);
+    const scroller=ui.collectionScreen.querySelector('.menuApp');
+    if(!card || !scroller) return;
+
+    stopCollectionScrollAnimation();
+    if(!ui.collectionScreen.classList.contains('active')) return;
+
+    const scrollerRect=scroller.getBoundingClientRect();
+    const cardRect=card.getBoundingClientRect();
+    const browseHint=ui.collectionScreen.querySelector('.collectionBrowseHint');
+    const hintRect=browseHint?.getBoundingClientRect();
+    const hintTop=Number.parseFloat(browseHint ? getComputedStyle(browseHint).top : '');
+    const hintBottom=hintRect && Number.isFinite(hintTop)
+      ? scrollerRect.top+hintTop+hintRect.height
+      : hintRect?.bottom || scrollerRect.top;
+    const visibleTop=Math.max(scrollerRect.top,hintBottom);
+    const visibleCenter=visibleTop+(scrollerRect.bottom-visibleTop)/2;
+    const isFirstCard=card.parentElement?.firstElementChild===card;
+    const centeredTop=scroller.scrollTop+(cardRect.top+cardRect.height/2-visibleCenter);
+    const targetTop=isFirstCard?0:centeredTop;
+    const maxTop=Math.max(0,scroller.scrollHeight-scroller.clientHeight);
+    const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const destination=Math.max(0,Math.min(maxTop,targetTop));
+    const startTop=scroller.scrollTop;
+    const distance=destination-startTop;
+
+    if(!smooth || reduceMotion || Math.abs(distance)<1){
+      scroller.scrollTop=destination;
+      return;
+    }
+
+    const startedAt=performance.now();
+    const duration=Math.min(560,Math.max(300,260+Math.abs(distance)*.085));
+    const animateScroll=now=>{
+      const progress=Math.min(1,(now-startedAt)/duration);
+      const eased=progress<.5
+        ? 2*progress*progress
+        : 1-Math.pow(-2*progress+2,2)/2;
+      scroller.scrollTop=startTop+distance*eased;
+
+      if(progress<1) collectionScrollAnimation=requestAnimationFrame(animateScroll);
+      else collectionScrollAnimation=0;
+    };
+    collectionScrollAnimation=requestAnimationFrame(animateScroll);
+  }
+
+  ui.collectionScreen.querySelector('.menuApp')?.addEventListener('pointerdown',stopCollectionScrollAnimation,{passive:true});
+
   function showScreen(name){
     const leavingGame=currentScreen==='game' && name!=='game';
     if(leavingGame){
@@ -10031,6 +10106,12 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     ui.quickStore.classList.toggle('active',name==='store');
     ui.quickPlay.classList.toggle('active',name==='game');
     ui.quickCollection.classList.toggle('active',name==='collection');
+
+    if(name==='collection'){
+      collectionPreviewType=selectedBallType;
+      updateCollectionUI();
+      centerCollectionCard(selectedBallType,true);
+    }
 
     if(name==='game'){
       // Home keeps the game screen at display:none. Measure only after making
@@ -10701,6 +10782,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       const isTouch=ev.pointerType==='touch' || !!ev.touches;
       const startX=Math.max(startR,Math.min(W-startR,p.x));
       const startY=Math.max(startR,Math.min(H-startR,p.y));
+      const shieldCharges=Math.max(0,Math.floor(typeData.shieldHits || (selectedBallType==='shield' ? 1 : 0)));
       state.active={
         x:startX,
         y:startY,
@@ -10715,7 +10797,10 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
         startR,
         alive:true,
         type:selectedBallType,
-        shieldHits:typeData.shieldHits || (selectedBallType==='shield' ? 1 : 0),
+        shieldHits:shieldCharges,
+        maxShieldHits:shieldCharges,
+        shieldCooldown:0,
+        shieldFlash:0,
         ghostLeft:typeData.ghostTime || 0,
         growthAge:0,
         spawnPunch:1
@@ -10835,6 +10920,30 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     if(state.ballsLeft<=0) finish(false);
   }
 
+  function activeShieldBoundary(ball,shieldHits=ball?.shieldHits||0){
+    const layers=Math.max(0,Math.floor(shieldHits||0));
+    return (ball?.r||0)+(layers>0 ? 10+(layers-1)*8 : 0);
+  }
+
+  function bounceEnemyFromActive(enemy,ball,padding=7,boundaryRadius=activeShieldBoundary(ball)){
+    const dx=enemy.x-ball.x, dy=enemy.y-ball.y;
+    const rawDistance=Math.hypot(dx,dy);
+    let nx,ny;
+    if(rawDistance>.001){
+      nx=dx/rawDistance;
+      ny=dy/rawDistance;
+    }else{
+      const velocity=Math.hypot(enemy.vx,enemy.vy);
+      nx=velocity>.001 ? enemy.vx/velocity : 1;
+      ny=velocity>.001 ? enemy.vy/velocity : 0;
+    }
+    enemy.x=ball.x+nx*(boundaryRadius+enemy.r+padding);
+    enemy.y=ball.y+ny*(boundaryRadius+enemy.r+padding);
+    const speed=Math.max(105,Math.hypot(enemy.vx,enemy.vy));
+    enemy.vx=nx*speed;
+    enemy.vy=ny*speed;
+  }
+
   function collectCoins(ball){
     // During frenzy the magnet system owns coin movement/collection.
     if(state.frenzyLeft>0) return;
@@ -10929,6 +11038,43 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
   function addImpactRing(x,y,color='#ffffff',maxR=80){
     state.impactRings.push({x,y,r:8,maxR,life:1,color});
+  }
+
+  function shieldLayerColor(type,layerIndex){
+    if(type==='apex') return layerIndex===0 ? '#78ebff' : '#f06de0';
+    if(type==='cataclysm') return layerIndex===0 ? '#8fe9ff' : '#ffb657';
+    if(type==='gaia') return layerIndex===0 ? '#b9f59f' : '#63dfa0';
+    return layerIndex===0 ? '#d8f4ff' : '#a8aef7';
+  }
+
+  function spawnShieldBreakFx(ball,chargesBeforeHit){
+    const brokenLayer=Math.max(0,chargesBeforeHit-1);
+    const breakRadius=activeShieldBoundary(ball,chargesBeforeHit);
+    const mainColor=shieldLayerColor(ball.type,brokenLayer);
+    const palette=[mainColor,'#ffffff','#9cecff','#b9bfff'];
+    const particleCount=26+brokenLayer*8;
+
+    for(let index=0;index<particleCount;index++){
+      const angle=index*Math.PI*2/particleCount+(Math.random()-.5)*.12;
+      const speed=115+Math.random()*185+brokenLayer*25;
+      const life=.42+Math.random()*.24;
+      state.coinFx.push({
+        type:'shieldShard',
+        x:ball.x+Math.cos(angle)*breakRadius,
+        y:ball.y+Math.sin(angle)*breakRadius,
+        vx:Math.cos(angle)*speed,
+        vy:Math.sin(angle)*speed,
+        life,
+        maxLife:life,
+        r:2.8+Math.random()*4.2,
+        rotation:angle,
+        spin:(Math.random()-.5)*12,
+        color:palette[index%palette.length]
+      });
+    }
+
+    addImpactRing(ball.x,ball.y,mainColor,breakRadius+50);
+    addImpactRing(ball.x,ball.y,'#ffffff',breakRadius+30);
   }
 
   function triggerBossAbility(){
@@ -11213,6 +11359,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       b.growthAge=(b.growthAge||0)+dt;
       b.spawnPunch=Math.max(0,(b.spawnPunch||0)-dt*4.8);
       if(b.ghostLeft>0) b.ghostLeft=Math.max(0,b.ghostLeft-dt);
+      if(b.shieldCooldown>0) b.shieldCooldown=Math.max(0,b.shieldCooldown-dt);
+      if(b.shieldFlash>0) b.shieldFlash=Math.max(0,b.shieldFlash-dt);
       followPointerTarget(b,dt);
 
       if(state.gravityLeft>0){
@@ -11343,26 +11491,33 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
         }
       }
 
-      if(state.active && dist(e.x,e.y,state.active.x,state.active.y)<e.r*(state.enemyGrowLeft>0?1.30:1)+state.active.r){
-        if(state.active.type==='ghost' && state.active.ghostLeft>0){
-          // Ghost Ball phases through enemies briefly after spawning.
-        }else if((state.active.shieldHits||0) > 0){
-          state.active.shieldHits--;
-          state.message='SHIELD!';
-          state.messageT=.55;
+      const activeCollisionRadius=state.active ? activeShieldBoundary(state.active) : 0;
+      if(state.active && dist(e.x,e.y,state.active.x,state.active.y)<e.r*(state.enemyGrowLeft>0?1.30:1)+activeCollisionRadius){
+        const activeBall=state.active;
+        if(activeBall.ghostLeft>0){
+          if(activeBall.type!=='ghost'){
+            // Shield-bearing hybrids keep their protection without visually overlapping enemies.
+            bounceEnemyFromActive(e,activeBall,8,activeCollisionRadius);
+          }
+        }else if((activeBall.shieldCooldown||0)>0){
+          // A short grace window keeps a crowd from consuming multiple layers at once.
+          bounceEnemyFromActive(e,activeBall,8);
+        }else if((activeBall.shieldHits||0) > 0){
+          const chargesBeforeHit=activeBall.shieldHits;
+          const brokenShieldBoundary=activeShieldBoundary(activeBall,chargesBeforeHit);
+          activeBall.shieldHits=Math.max(0,chargesBeforeHit-1);
+          activeBall.shieldCooldown=.28;
+          activeBall.shieldFlash=.34;
+          state.message=activeBall.shieldHits>0
+            ? `SHIELD BROKEN • ${activeBall.shieldHits} LEFT`
+            : 'SHIELD BROKEN!';
+          state.messageT=.72;
           sfx('shield');
-          addScreenShake(4,.13);
-          flashScreen('#d9e2ff',.05);
-
-          // Bounce enemy away to prevent immediate repeat collision.
-          const dx=e.x-state.active.x, dy=e.y-state.active.y;
-          const dd=Math.max(1,Math.hypot(dx,dy));
-          const nx=dx/dd, ny=dy/dd;
-          e.x=state.active.x+nx*(state.active.r+e.r+5);
-          e.y=state.active.y+ny*(state.active.r+e.r+5);
-          const sp=Math.max(90,Math.hypot(e.vx,e.vy));
-          e.vx=nx*sp;
-          e.vy=ny*sp;
+          addScreenShake(5,.16);
+          flashScreen(shieldLayerColor(activeBall.type,chargesBeforeHit-1),.07);
+          spawnShieldBreakFx(activeBall,chargesBeforeHit);
+          bounceEnemyFromActive(e,activeBall,10,brokenShieldBoundary);
+          if(navigator.vibrate) navigator.vibrate([18,22,34]);
         }else{
           popActive();
         }
@@ -11382,6 +11537,10 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
         if(f.type==='coinSpark'){
           f.vx*=.94;
           f.vy=f.vy*.94+35*dt;
+          f.rotation+=f.spin*dt;
+        }else if(f.type==='shieldShard'){
+          f.vx*=.95;
+          f.vy*=.95;
           f.rotation+=f.spin*dt;
         }else{
           f.vx*=.96;f.vy*=.96;
@@ -11935,6 +12094,27 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
         ctx.restore();
         continue;
       }
+      if(f.type==='shieldShard'){
+        const alpha=Math.max(0,f.life/f.maxLife);
+        ctx.save();
+        ctx.translate(f.x,f.y);
+        ctx.rotate(f.rotation);
+        ctx.globalAlpha=alpha;
+        ctx.fillStyle=f.color;
+        ctx.strokeStyle='#ffffff';
+        ctx.shadowColor=f.color;
+        ctx.shadowBlur=12;
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(f.r*1.8,0);
+        ctx.lineTo(-f.r*.75,f.r*.7);
+        ctx.lineTo(-f.r*.35,-f.r*.8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+        continue;
+      }
       ctx.save();ctx.globalAlpha=Math.max(0,f.life/.45);ctx.fillStyle=COLORS.ball;
       ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,Math.PI*2);ctx.fill();ctx.restore();
     }
@@ -12027,14 +12207,53 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       ctx.restore();
     }
 
-    if((type==='shield' || type==='apex' || type==='cataclysm' || type==='gaia') && (b.shieldHits||0) > 0){
+    if(active && (b.shieldHits||0) > 0){
+      const shieldCount=Math.max(0,Math.floor(b.shieldHits||0));
+      const shieldFlash=Math.min(1,(b.shieldFlash||0)/.34);
       ctx.save();
-      ctx.globalAlpha=.32;
-      ctx.strokeStyle='#b9bef8';
-      ctx.lineWidth=6;
+
+      ctx.globalAlpha=.07+.05*Math.sin(now*5);
+      ctx.fillStyle=shieldLayerColor(type,0);
       ctx.beginPath();
-      ctx.arc(b.x,b.y,b.r+10,0,Math.PI*2);
-      ctx.stroke();
+      ctx.arc(b.x,b.y,b.r+7,0,Math.PI*2);
+      ctx.fill();
+
+      for(let layer=0;layer<shieldCount;layer++){
+        const color=shieldLayerColor(type,layer);
+        const radius=b.r+10+layer*8+shieldFlash*4;
+        ctx.globalAlpha=.72+.16*Math.sin(now*4.8+layer*1.4);
+        ctx.strokeStyle=color;
+        ctx.shadowColor=color;
+        ctx.shadowBlur=12+layer*3;
+        ctx.lineWidth=4.5-layer*.35+shieldFlash*2;
+        ctx.setLineDash(layer===0 ? [5,4] : [11,6]);
+        ctx.lineDashOffset=(layer===0 ? -1 : 1)*now*28;
+        ctx.beginPath();
+        ctx.arc(b.x,b.y,radius,0,Math.PI*2);
+        ctx.stroke();
+      }
+
+      ctx.setLineDash([]);
+      const pipGap=14;
+      const pipY=b.y-b.r-20-(shieldCount-1)*4;
+      for(let layer=0;layer<shieldCount;layer++){
+        const pipX=b.x+(layer-(shieldCount-1)/2)*pipGap;
+        const color=shieldLayerColor(type,layer);
+        ctx.globalAlpha=.95;
+        ctx.fillStyle=color;
+        ctx.strokeStyle='#ffffff';
+        ctx.shadowColor=color;
+        ctx.shadowBlur=10;
+        ctx.lineWidth=1.5;
+        ctx.beginPath();
+        ctx.moveTo(pipX,pipY-5);
+        ctx.lineTo(pipX+5,pipY);
+        ctx.lineTo(pipX,pipY+5);
+        ctx.lineTo(pipX-5,pipY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
       ctx.restore();
     }
 
@@ -12686,19 +12905,24 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   function selectBallType(type){
     if(!ownedBalls.has(type)) return;
 
-    const changed=selectedBallType!==type;
+    // Match the disabled EQUIPPED button: tapping the already-selected ball
+    // should not restart its celebration or launch another long auto-scroll.
+    if(selectedBallType===type){
+      collectionPreviewType=type;
+      return;
+    }
+
     selectedBallType=type;
     collectionPreviewType=type;
     updateCollectionUI();
+    centerCollectionCard(type,true);
 
     const data=BALL_TYPES[type];
     ui.storeMessage.textContent=`${data.name} equipped`;
     setTimeout(()=>{ui.storeMessage.textContent='';},700);
 
-    if(changed){
-      sfx('purchase');
-      requestAnimationFrame(()=>celebrateEquippedBall(type));
-    }
+    sfx('purchase');
+    requestAnimationFrame(()=>celebrateEquippedBall(type));
   }
 
   const collectionCardsByType={
@@ -12757,14 +12981,28 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     },1050);
   }
 
+  function activateCollectionCard(type){
+    if(ownedBalls.has(type)){
+      selectBallType(type);
+      return;
+    }
+
+    collectionPreviewType=type;
+    updateCollectionUI();
+    ui.collectionDetailPanel.classList.remove('detailPulse');
+    void ui.collectionDetailPanel.offsetWidth;
+    ui.collectionDetailPanel.classList.add('detailPulse');
+  }
+
   for(const [type,card] of Object.entries(collectionCardsByType)){
     card.addEventListener('click',(ev)=>{
       if(ev.target.closest('button')) return;
-      collectionPreviewType=type;
-      updateCollectionUI();
-      ui.collectionDetailPanel.classList.remove('detailPulse');
-      void ui.collectionDetailPanel.offsetWidth;
-      ui.collectionDetailPanel.classList.add('detailPulse');
+      activateCollectionCard(type);
+    });
+    card.addEventListener('keydown',(ev)=>{
+      if(ev.target.closest('button') || (ev.key!=='Enter' && ev.key!==' ')) return;
+      ev.preventDefault();
+      activateCollectionCard(type);
     });
   }
 
