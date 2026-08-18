@@ -39,6 +39,8 @@ body{
 }
 button,input{font:inherit}
 button{
+  position:relative;
+  isolation:isolate;
   border:0;
   color:var(--text);
   font-weight:900;
@@ -253,7 +255,38 @@ h1,h2,p{margin:0}
   width:100%;
   padding:0 .25rem;
 }
-.topProgressHead{display:none}
+.topProgressHead{
+  min-height:1.6rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.5rem;
+  padding:0 .2rem .08rem;
+}
+.progressCaption{
+  min-width:0;
+  overflow:hidden;
+  color:#46616d;
+  font-size:.67rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.045em;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.coverageReadout{
+  flex:none;
+  padding:.2rem .48rem;
+  border:.07rem solid #bad1d8;
+  border-radius:999rem;
+  color:#28728a;
+  background:#edf8fa;
+  font-size:.61rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.04em;
+}
+.liveStars{display:none}
 .segmentedProgressTrack{
   display:flex;
   align-items:center;
@@ -3148,7 +3181,7 @@ body.packOpen{overflow:hidden!important}
   100%{transform:scale(.8) rotate(70deg) translateY(-.4375rem);opacity:0}
 }
 
-/* Proportional portrait game shell: HUD 10.5%, progress 5%, arena ~72.5%, dock 10.5%. */
+/* Proportional portrait game shell with room for the progress title and stars. */
 @media(orientation:portrait){
   #gameScreen{
     padding:
@@ -3161,7 +3194,7 @@ body.packOpen{overflow:hidden!important}
     position:relative;
     height:calc(100dvh - max(.5rem,1dvh));
     display:grid;
-    grid-template-rows:10.5% 5% minmax(0,1fr) 10.5%;
+    grid-template-rows:10.5% clamp(3.5rem,7.5dvh,7rem) minmax(0,1fr) 10.5%;
     gap:.5dvh;
   }
   .gameHudTop,
@@ -3169,7 +3202,7 @@ body.packOpen{overflow:hidden!important}
   .boardWrap,
   .boosterDock{width:100%;min-width:0;max-width:100%}
   .gameHudTop{grid-row:1;height:100%;min-height:0}
-  .topProgress{grid-row:2;height:100%;min-height:0;padding:0 clamp(.125rem,.7vw,.75rem);justify-content:center}
+  .topProgress{grid-row:2;height:100%;min-height:0;padding:0 clamp(.125rem,.7vw,.75rem);justify-content:flex-start}
   .boardWrap{grid-row:3;height:100%;min-height:0;border-radius:clamp(.875rem,2.4dvh,3rem)}
   .boosterDock{grid-row:4;height:100%;min-height:0}
   #boosterStatus{
@@ -3235,7 +3268,8 @@ body.packOpen{overflow:hidden!important}
     font-size:clamp(.6875rem,min(1.8dvh,3.5vw),3.875rem)!important;
   }
 
-  .segmentedProgressTrack{height:100%;min-height:0}
+  .topProgressHead{flex:none}
+  .segmentedProgressTrack{flex:1 1 0;height:auto;min-height:0}
   .progressSegment{
     height:clamp(.875rem,2.5dvh,5.625rem);
     border-width:clamp(.125rem,.2dvh,.3125rem) 0;
@@ -6456,6 +6490,370 @@ body:has(#collectionScreen.active) #quickCollection.active{
     font-size:.72rem;
   }
 }
+
+/* Defeat has its own red slow-motion beat before the result card. */
+.defeatPrelude{
+  display:none;
+  position:absolute;
+  inset:0;
+  z-index:18;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  border-radius:inherit;
+  pointer-events:none;
+}
+.defeatPrelude.show{display:flex}
+.defeatPrelude::before{
+  content:'';
+  position:absolute;
+  inset:-12%;
+  background:
+    radial-gradient(circle at 50% 48%,transparent 0 20%,rgba(145,10,25,.16) 46%,rgba(78,4,16,.82) 82%),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 .08rem,transparent .08rem .34rem),
+    rgba(214,38,55,.16);
+  animation:defeatRedCollapse 1.15s cubic-bezier(.12,.75,.2,1) both;
+}
+.defeatImpact{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.2rem;
+  color:white;
+  text-align:center;
+  text-shadow:0 .18rem 0 #73101e,0 0 1.3rem #ff3e51;
+  animation:defeatImpactHit 1.15s cubic-bezier(.12,.78,.2,1) both;
+}
+.defeatImpact strong{
+  font-size:clamp(2.7rem,15vw,6.5rem);
+  line-height:.82;
+  font-weight:1000;
+  letter-spacing:.03em;
+}
+.defeatImpact span{
+  padding:.36rem .72rem;
+  border:.1rem solid rgba(255,255,255,.55);
+  border-radius:999rem;
+  color:#ffe8e8;
+  background:rgba(91,8,20,.72);
+  font-size:.72rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.12em;
+}
+.boardWrap.defeatSlowdown #game{
+  animation:defeatArenaCrunch 1.15s cubic-bezier(.12,.75,.2,1) both;
+}
+.overlay.defeatResult{
+  background:radial-gradient(circle at 50% 44%,rgba(214,65,77,.28),rgba(58,12,22,.84));
+  backdrop-filter:blur(.4rem) saturate(.72);
+}
+.resultCard.defeat{
+  border-color:#c93e4b;
+  background:linear-gradient(160deg,#fff7f5,#f8d8d9 58%,#eab6ba);
+  box-shadow:inset 0 0 0 .12rem rgba(255,255,255,.72),0 .42rem 0 #922b38,0 1.2rem 3rem rgba(62,7,18,.42),0 0 1.8rem rgba(218,49,66,.3);
+}
+.resultCard.defeat.celebrate{animation:defeatCardSlam .55s cubic-bezier(.12,.8,.22,1.16)}
+.resultCard.defeat .completionBadge{
+  border-color:#c93b48;
+  color:#7c1622;
+  background:#ffb9bd;
+  box-shadow:0 .18rem 0 #a92f3b;
+}
+.resultCard.defeat .result{color:#a51f2d;text-shadow:0 .1rem 0 white}
+.resultCard.defeat .celebrationStars{color:#9f5960;text-shadow:0 .1rem 0 #fff}
+.resultCard.defeat .rewardBucket{
+  border-color:#d7a9ac;
+  background:#f9e7e7;
+  filter:saturate(.72);
+}
+.resultCard.defeat .rewardFormula{color:#b22d3b}
+.resultCard.defeat .resultContinue{
+  border-color:#8f2633;
+  background:linear-gradient(180deg,#ef6972,#cc3d4b 58%,#a42635);
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.35),0 .28rem 0 #761c28,0 .55rem 1rem rgba(112,23,36,.2);
+  text-shadow:0 .1rem 0 #7e1d2a;
+}
+@keyframes defeatRedCollapse{
+  0%{opacity:0;transform:scale(1.3)}
+  18%{opacity:1}
+  72%{opacity:.92;transform:scale(1)}
+  100%{opacity:1;transform:scale(.94)}
+}
+@keyframes defeatImpactHit{
+  0%{opacity:0;transform:scale(2.4) rotate(-6deg);filter:blur(.35rem)}
+  18%{opacity:1;transform:scale(.88) rotate(2deg);filter:blur(0)}
+  32%{transform:scale(1.12) rotate(-1deg)}
+  58%{transform:scale(1) rotate(0)}
+  100%{opacity:.72;transform:scale(.84) translateY(.5rem)}
+}
+@keyframes defeatArenaCrunch{
+  0%{transform:scale(1);filter:saturate(1) brightness(1)}
+  22%{transform:scale(1.018);filter:saturate(1.45) brightness(.88) contrast(1.1)}
+  100%{transform:scale(.975);filter:saturate(.48) brightness(.52) contrast(1.18)}
+}
+@keyframes defeatCardSlam{
+  0%{opacity:0;transform:translateY(-2.5rem) scale(1.16) rotate(-2deg)}
+  52%{opacity:1;transform:translateY(.35rem) scale(.97) rotate(1deg)}
+  76%{transform:translateY(-.12rem) scale(1.015) rotate(0)}
+  100%{transform:translateY(0) scale(1)}
+}
+
+/* Quiet invitation on every enabled tap target; stronger when a purchase is ready. */
+button:not(:disabled){isolation:isolate}
+button:not(:disabled):not(.bigPack):not(.gameUtilityBackdrop):not(.firstPackMilestoneBackdrop)::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:4;
+  border-radius:inherit;
+  background:linear-gradient(108deg,transparent 32%,rgba(255,255,255,.08) 42%,rgba(255,255,255,.74) 50%,rgba(255,255,255,.08) 58%,transparent 68%);
+  background-position:135% 0;
+  background-size:250% 100%;
+  opacity:0;
+  pointer-events:none;
+  animation:tapTargetGlint 5.6s ease-in-out var(--tap-glint-delay,0s) infinite;
+}
+button:nth-of-type(3n+2){--tap-glint-delay:.9s}
+button:nth-of-type(3n){--tap-glint-delay:1.8s}
+button:not(:disabled):not(.bigPack):not(.gameUtilityBackdrop):not(.firstPackMilestoneBackdrop):active::after{
+  animation:none;
+  background-position:50% 0;
+  opacity:.42;
+}
+button.purchaseReady:not(:disabled)::before{
+  content:'';
+  position:absolute;
+  inset:.08rem;
+  z-index:3;
+  border:.1rem solid rgba(255,244,157,.72);
+  border-radius:inherit;
+  box-shadow:0 0 0 rgba(255,197,44,0);
+  opacity:.35;
+  pointer-events:none;
+  animation:purchaseReadyHalo 1.9s ease-in-out infinite;
+}
+button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
+
+/* Store CTAs get a brighter, staggered sparkle without making the whole shop blink at once. */
+#storeScreen .shopBuyInvite:not(:disabled):not(.shopBuyOwned){
+  --shop-invite-delay:0s;
+  translate:0 0;
+  will-change:translate;
+  animation:shopBuyNudge 3.4s ease-in-out var(--shop-invite-delay) infinite;
+}
+#storeScreen #buyApexBall{--shop-invite-delay:.55s}
+#storeScreen #buyCataclysmBall{--shop-invite-delay:1.1s}
+#storeScreen #buyGaiaBall{--shop-invite-delay:1.65s}
+#storeScreen .shopBuyInvite:not(:disabled):not(.shopBuyOwned)::after{
+  background:
+    radial-gradient(circle at 16% 27%,#fff 0 .08rem,transparent .17rem),
+    radial-gradient(circle at 83% 70%,#fff3a0 0 .1rem,transparent .2rem),
+    linear-gradient(108deg,transparent 29%,rgba(255,248,177,.12) 40%,rgba(255,255,255,.95) 50%,rgba(255,232,91,.16) 60%,transparent 71%);
+  background-repeat:no-repeat;
+  background-position:0 0,0 0,135% 0;
+  background-size:100% 100%,100% 100%,250% 100%;
+  animation:shopBuyTwinkle 2.8s ease-in-out var(--shop-invite-delay) infinite;
+}
+#storeScreen .shopBuyInvite.purchaseReady:not(:disabled)::before{
+  border-color:rgba(255,248,170,.95);
+  animation-duration:1.25s;
+}
+#storeScreen .shopBuyInvite:not(:disabled):not(.shopBuyOwned):active{
+  translate:0 .08rem;
+  animation:none;
+}
+#storeScreen .shopBuyInvite:not(:disabled):not(.shopBuyOwned):active::after{animation:none}
+#storeScreen .shopBuyInvite.shopBuyOwned,
+#storeScreen .shopBuyInvite.shopBuyOwned::after{animation:none;opacity:.72}
+@keyframes tapTargetGlint{
+  0%,66%{background-position:135% 0;opacity:0}
+  70%{opacity:.7}
+  84%{background-position:-135% 0;opacity:.42}
+  88%,100%{background-position:-135% 0;opacity:0}
+}
+@keyframes purchaseReadyHalo{
+  0%,100%{opacity:.28;box-shadow:0 0 0 rgba(255,197,44,0)}
+  50%{opacity:1;box-shadow:0 0 1rem rgba(255,197,44,.72),inset 0 0 .7rem rgba(255,248,186,.42)}
+}
+@keyframes shopBuyNudge{
+  0%,66%,100%{translate:0 0}
+  70%{translate:0 -.1rem}
+  74%{translate:-.07rem 0}
+  78%{translate:.07rem 0}
+  82%{translate:0 0}
+}
+@keyframes shopBuyTwinkle{
+  0%,56%{background-position:0 0,0 0,135% 0;opacity:0}
+  62%{opacity:.95}
+  79%{background-position:0 0,0 0,-135% 0;opacity:.6}
+  86%,100%{background-position:0 0,0 0,-135% 0;opacity:0}
+}
+
+/* First paid-pack milestone. */
+.firstPackMilestoneOverlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:420;
+  place-items:center;
+  padding:max(1rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));
+  overflow:hidden;
+  background:radial-gradient(circle at 50% 42%,rgba(255,220,83,.26),transparent 42%),rgba(32,49,57,.72);
+  backdrop-filter:blur(.55rem);
+}
+.firstPackMilestoneOverlay[aria-hidden="false"]{display:grid}
+.firstPackMilestoneBackdrop{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.firstPackMilestoneFx{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  pointer-events:none;
+}
+.firstPackMilestoneCard{
+  position:relative;
+  isolation:isolate;
+  z-index:2;
+  width:min(92vw,24rem);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.72rem;
+  padding:1.15rem 1.05rem 1.25rem;
+  overflow:hidden;
+  border:.2rem solid #e6a91d;
+  border-radius:1.65rem;
+  background:linear-gradient(160deg,#fffef2 0,#fff5c8 56%,#f5d96b 100%);
+  box-shadow:inset 0 0 0 .14rem rgba(255,255,255,.84),0 .42rem 0 #b77c12,0 1.5rem 3.5rem rgba(25,37,42,.4),0 0 2.2rem rgba(255,206,45,.46);
+  text-align:center;
+  animation:firstPackMilestoneBoom .78s cubic-bezier(.16,.88,.22,1.22) both;
+}
+.firstPackMilestoneCard::before{
+  content:'';
+  position:absolute;
+  z-index:-2;
+  width:34rem;
+  height:34rem;
+  top:-16rem;
+  left:50%;
+  transform:translateX(-50%);
+  opacity:.24;
+  background:repeating-conic-gradient(from 8deg,#f0b821 0 8deg,transparent 8deg 18deg);
+  animation:firstPackRays 9s linear infinite;
+}
+.firstPackMilestoneCard::after{
+  content:'';
+  position:absolute;
+  inset:.4rem;
+  z-index:-1;
+  border:.08rem solid rgba(190,133,20,.34);
+  border-radius:1.18rem;
+  pointer-events:none;
+}
+.firstPackBoomWord{
+  margin-bottom:-.28rem;
+  color:#9d5f08;
+  font-size:.72rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.17em;
+}
+.firstPackCoin{
+  position:relative;
+  width:7.25rem;
+  height:7.25rem;
+  display:grid;
+  place-items:center;
+  border:.38rem solid #e69a0d;
+  border-radius:50%;
+  color:#a96708;
+  background:radial-gradient(circle at 34% 27%,#fffbd5 0 8%,#ffe46f 9% 35%,#ffc52e 62%,#eda00d 100%);
+  box-shadow:inset 0 0 0 .34rem #ffe97b,inset 0 -.5rem .65rem rgba(166,92,0,.18),0 .45rem 0 #ad6d08,0 .8rem 1.2rem rgba(137,82,0,.27),0 0 1.6rem rgba(255,196,24,.7);
+  animation:firstPackCoinFloat 1.8s ease-in-out infinite;
+}
+.firstPackCoinStar{
+  font-size:3.7rem;
+  line-height:1;
+  text-shadow:0 .16rem 0 #d58e0a,0 0 .45rem #fff9b0;
+}
+.firstPackCoinAmount{
+  position:absolute;
+  right:-.7rem;
+  bottom:-.2rem;
+  min-width:3.15rem;
+  padding:.35rem .48rem;
+  border:.14rem solid #fff8bd;
+  border-radius:999rem;
+  color:white;
+  background:linear-gradient(180deg,#e75e4e,#bd3032);
+  box-shadow:0 .22rem 0 #8f2225,0 .35rem .65rem rgba(84,28,21,.25);
+  font-size:1.1rem;
+  line-height:1;
+  font-weight:1000;
+}
+.firstPackMilestoneEyebrow{
+  color:#a66b0b;
+  font-size:.7rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.12em;
+}
+.firstPackMilestoneTitle{
+  max-width:19rem;
+  color:#3a4f58;
+  font-size:clamp(1.55rem,7vw,2.05rem);
+  line-height:.96;
+  font-weight:1000;
+}
+.firstPackMilestoneCopy{
+  max-width:19rem;
+  color:#62747a;
+  font-size:.88rem;
+  line-height:1.3;
+  font-weight:850;
+}
+.firstPackMilestoneStore{
+  width:100%;
+  min-height:3.8rem;
+  border:.16rem solid #23763c;
+  border-radius:.95rem;
+  color:white;
+  background:linear-gradient(180deg,#62d67e,#36b75a 58%,#258b43);
+  box-shadow:inset 0 .16rem 0 rgba(255,255,255,.48),0 .3rem 0 #1c6c34,0 .75rem 1.2rem rgba(34,116,56,.22);
+  font-size:1.05rem;
+  text-shadow:0 .1rem 0 #1c7137;
+}
+.firstPackMilestoneLater{
+  min-height:2.5rem;
+  padding:.45rem 1rem;
+  color:#6d7475;
+  background:transparent;
+  font-size:.74rem;
+  letter-spacing:.04em;
+}
+@keyframes firstPackMilestoneBoom{
+  0%{opacity:0;transform:scale(.28) rotate(-7deg);filter:brightness(1.8)}
+  48%{opacity:1;transform:scale(1.08) rotate(2deg);filter:brightness(1.16)}
+  72%{transform:scale(.975) rotate(-1deg);filter:brightness(1)}
+  100%{transform:scale(1) rotate(0)}
+}
+@keyframes firstPackCoinFloat{
+  0%,100%{transform:translateY(0) rotate(-2deg)}
+  50%{transform:translateY(-.35rem) rotate(2deg)}
+}
+@keyframes firstPackRays{to{transform:translateX(-50%) rotate(360deg)}}
+
 @media(prefers-reduced-motion:reduce){
   #storeScreen.purchaseScreenShake,
   #storeScreen .purchaseBoom,
@@ -6481,7 +6879,17 @@ body:has(#collectionScreen.active) #quickCollection.active{
   .packOverlay.packTransitionIn,
   .packOverlay.packTransitionIn .packModal,
   .packEquipConfirmation,
-  .packEquipSpark{animation-duration:.01ms!important;animation-iteration-count:1!important}
+  .packEquipSpark,
+  #storeScreen .shopBuyInvite,
+  button::before,
+  button::after,
+  .firstPackMilestoneCard,
+  .firstPackMilestoneCard::before,
+  .firstPackCoin,
+  .defeatPrelude::before,
+  .defeatImpact,
+  .boardWrap.defeatSlowdown #game,
+  .resultCard.defeat.celebrate{animation-duration:.01ms!important;animation-iteration-count:1!important}
 }
 
 </style>
@@ -6589,9 +6997,9 @@ body:has(#collectionScreen.active) #quickCollection.active{
 
     <div class="topProgress">
       <div class="topProgressHead">
-        <span class="progressCaption">PROGRESS</span>
+        <span class="progressCaption" id="levelChallenge">LEVEL 1 • FIRST FILL</span>
         <span class="liveStars" id="progressStars">☆☆☆</span>
-        <strong class="coverageReadout">FILL THE AREA</strong>
+        <strong class="coverageReadout" id="levelGoal">GOAL 30%</strong>
           <span id="coverage" hidden>0</span>
       </div>
       <div class="segmentedProgressTrack" id="segmentedProgressTrack">
@@ -6612,8 +7020,15 @@ body:has(#collectionScreen.active) #quickCollection.active{
       </div>
     </div>
 
-    <div class="boardWrap">
+    <div class="boardWrap" id="boardWrap">
       <canvas id="game" width="600" height="600"></canvas>
+
+      <div class="defeatPrelude" id="defeatPrelude" aria-hidden="true">
+        <div class="defeatImpact">
+          <strong>BRRRT!</strong>
+          <span>AREA LOST</span>
+        </div>
+      </div>
 
       <div class="tutorialCoach" id="tutorialCoach" aria-hidden="true">
         <div class="tutorialIntroBadge">HOW TO PLAY</div>
@@ -6726,7 +7141,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
       <h2>SURPRISE BALL PACK</h2>
       <p>A sealed surprise pack containing a new ball for your collection.</p>
       <div class="priceLine"><span class="coinIcon">◉</span><strong id="storePackPrice">25</strong></div>
-      <button class="primary wideAction" id="buyPack">BUY PACK</button>
+      <button class="primary wideAction shopBuyInvite" id="buyPack">BUY PACK</button>
     </div>
 
     <div class="storeSectionTitle">
@@ -6756,7 +7171,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
       </div>
       <div class="mythicPurchase">
         <div class="priceLine mythicPrice"><span class="coinIcon">◉</span><strong id="apexPriceLabel">5000</strong></div>
-        <button class="primary wideAction mythicBuyButton" id="buyApexBall">BUY APEX</button>
+        <button class="primary wideAction mythicBuyButton shopBuyInvite" id="buyApexBall">BUY APEX</button>
       </div>
     </div>
 
@@ -6781,7 +7196,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
         </div>
         <div class="impossiblePurchase">
           <div class="priceLine impossiblePrice"><span class="coinIcon">◉</span><strong id="cataclysmPriceLabel">2500</strong></div>
-          <button class="primary wideAction impossibleBuyButton" id="buyCataclysmBall">BUY CATACLYSM</button>
+          <button class="primary wideAction impossibleBuyButton shopBuyInvite" id="buyCataclysmBall">BUY CATACLYSM</button>
         </div>
       </div>
 
@@ -6800,7 +7215,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
         </div>
         <div class="impossiblePurchase">
           <div class="priceLine impossiblePrice"><span class="coinIcon">◉</span><strong id="gaiaPriceLabel">2500</strong></div>
-          <button class="primary wideAction impossibleBuyButton" id="buyGaiaBall">BUY GAIA</button>
+          <button class="primary wideAction impossibleBuyButton shopBuyInvite" id="buyGaiaBall">BUY GAIA</button>
         </div>
       </div>
     </div>
@@ -7014,6 +7429,23 @@ body:has(#collectionScreen.active) #quickCollection.active{
   </div>
 </div>
 
+<div class="firstPackMilestoneOverlay" id="firstPackMilestoneOverlay" aria-hidden="true">
+  <button class="firstPackMilestoneBackdrop" id="firstPackMilestoneBackdrop" type="button" aria-label="Keep playing"></button>
+  <div class="firstPackMilestoneFx" id="firstPackMilestoneFx" aria-hidden="true"></div>
+  <section class="firstPackMilestoneCard" role="dialog" aria-modal="true" aria-labelledby="firstPackMilestoneTitle">
+    <div class="firstPackBoomWord">BOOM • 25 GOLD!</div>
+    <div class="firstPackCoin" aria-hidden="true">
+      <span class="firstPackCoinStar">★</span>
+      <strong class="firstPackCoinAmount">25</strong>
+    </div>
+    <div class="firstPackMilestoneEyebrow">FIRST SHOP MILESTONE</div>
+    <h2 class="firstPackMilestoneTitle" id="firstPackMilestoneTitle">YOUR FIRST PACK IS READY!</h2>
+    <p class="firstPackMilestoneCopy">You earned enough gold. Open the store and reveal your next ball.</p>
+    <button class="firstPackMilestoneStore purchaseReady" id="firstPackMilestoneStore" type="button">GO TO STORE • OPEN A PACK</button>
+    <button class="firstPackMilestoneLater" id="firstPackMilestoneLater" type="button">KEEP PLAYING</button>
+  </section>
+</div>
+
 <script>
 (() => {
   const canvas = document.getElementById('game');
@@ -7038,11 +7470,15 @@ body:has(#collectionScreen.active) #quickCollection.active{
     storeWalletCoins: document.getElementById('storeWalletCoins'),
     collectionWalletCoins: document.getElementById('collectionWalletCoins'),
     tutorialCoach: document.getElementById('tutorialCoach'),
+    boardWrap: document.getElementById('boardWrap'),
+    defeatPrelude: document.getElementById('defeatPrelude'),
     coverage: document.getElementById('coverage'),
     progressFill1: document.getElementById('progressFill1'),
     progressFill2: document.getElementById('progressFill2'),
     progressFill3: document.getElementById('progressFill3'),
     progressStars: document.getElementById('progressStars'),
+    levelChallenge: document.getElementById('levelChallenge'),
+    levelGoal: document.getElementById('levelGoal'),
     overlay: document.getElementById('overlay'),
     resultTitle: document.getElementById('resultTitle'),
     resultCard: document.getElementById('resultCard'),
@@ -7165,7 +7601,13 @@ body:has(#collectionScreen.active) #quickCollection.active{
     bossWarningName: document.getElementById('bossWarningName'),
     bossWarningMechanic: document.getElementById('bossWarningMechanic'),
     bossWarningDesc: document.getElementById('bossWarningDesc'),
-    bossFightButton: document.getElementById('bossFightButton')
+    bossFightButton: document.getElementById('bossFightButton'),
+
+    firstPackMilestoneOverlay: document.getElementById('firstPackMilestoneOverlay'),
+    firstPackMilestoneBackdrop: document.getElementById('firstPackMilestoneBackdrop'),
+    firstPackMilestoneFx: document.getElementById('firstPackMilestoneFx'),
+    firstPackMilestoneStore: document.getElementById('firstPackMilestoneStore'),
+    firstPackMilestoneLater: document.getElementById('firstPackMilestoneLater')
   };
 
   let W = canvas.width, H = canvas.height;
@@ -7465,6 +7907,14 @@ body:has(#collectionScreen.active) #quickCollection.active{
         tone(1319,.20,{type:'sine',vol:.065,delay:.53});
         tone(1568,.24,{type:'sine',vol:.05,delay:.64});
         noiseBurst(.18,{vol:.032,delay:.42,filterFreq:4200,filterType:'highpass',q:.4});
+        break;
+
+      case 'defeatImpact':
+        // Abrupt bassy "BRRRT" impact that kicks off the slow-motion collapse.
+        noiseBurst(.42,{vol:.10,filterFreq:310,filterType:'lowpass',q:1.8});
+        noiseBurst(.16,{vol:.055,delay:.06,filterFreq:1250,filterType:'bandpass',q:5});
+        tone(155,.34,{type:'sawtooth',vol:.075,toFreq:58});
+        tone(82,.62,{type:'square',vol:.085,delay:.05,toFreq:43});
         break;
 
       case 'fail':
@@ -7832,6 +8282,19 @@ body:has(#collectionScreen.active) #quickCollection.active{
     return worldProfileForLevel(level);
   }
 
+  const EARLY_LEVEL_CHALLENGES = [
+    'FIRST FILL',
+    'KEEP MOVING',
+    'FOUR CORNERS',
+    'TIGHT SPACES',
+    'SWARM ARRIVES',
+    'FIND THE GAP',
+    'CROWD CONTROL',
+    'HUNTER PRESSURE',
+    'SURVIVE SEVEN',
+    'FIRST TRIAL'
+  ];
+
 
   const BOOSTERS = {
     moreBalls:{icon:'➕', name:'+3 Balls', cooldown:10, unlockLevel:20, color:'#62ddff'},
@@ -7870,6 +8333,13 @@ body:has(#collectionScreen.active) #quickCollection.active{
   ];
 
   let walletCoins = 0;
+  let firstPackMilestoneSeen=false;
+  let firstPackMilestoneQueued=false;
+  let firstPackMilestoneTimer=0;
+  let resumeGameAfterFirstPackMilestone=false;
+  try{
+    firstPackMilestoneSeen=localStorage.getItem('ballFillFirstPackMilestoneSeenV1')==='1';
+  }catch(e){}
   function roundCoinAmount(value){
     return Math.round((Number(value)||0)*100)/100;
   }
@@ -7969,17 +8439,23 @@ body:has(#collectionScreen.active) #quickCollection.active{
     const stage=((level-1)%20)+1;              // 1..20
     const boss=stage===20;
 
-    // ABSOLUTE LEVEL controls speed, so speed never resets after a boss.
-    // Level 1 = ×1.00
-    // Level 20 ~= ×1.34
-    // Level 40 ~= ×1.70
-    // Level 60 ~= ×2.06
-    // Level 80+ approaches the ×2.40 cap.
-    const speedMult=Math.min(2.40, 1 + (level-1)*0.018);
+    // Give the opening ten levels an immediate pace boost, then taper that
+    // bonus away by level 20 so bosses and later worlds keep their balance.
+    const legacySpeedMult=1 + (level-1)*0.018;
+    const earlySpeedBonus=level<=10
+      ? 0.08
+      : (level<20 ? 0.08*((20-level)/10) : 0);
+    const speedMult=Math.min(2.40,legacySpeedMult+earlySpeedBonus);
 
-    // Reaction / steering toward the active ball also rises with absolute level.
-    // It is capped so late levels are aggressive without becoming impossible.
-    const seekStrength=Math.min(0.72, 0.14 + (level-1)*0.006);
+    // Early enemies react during a normal two-second hold instead of drifting
+    // past it. This bonus also converges with the original curve at level 20.
+    const legacySeekStrength=0.14 + (level-1)*0.006;
+    const earlySeekBonus=level<=10
+      ? 0.06
+      : (level<20 ? 0.06*((20-level)/10) : 0);
+    const seekStrength=Math.min(0.72,legacySeekStrength+earlySeekBonus);
+    const challenge=EARLY_LEVEL_CHALLENGES[level-1]
+      || (boss ? 'BOSS BATTLE' : `WORLD ${world+1} PUSH`);
 
     if(boss){
       // Boss fights: one boss plus a few minions.
@@ -7995,13 +8471,17 @@ body:has(#collectionScreen.active) #quickCollection.active{
         count:1+minions,
         minions,
         speedMult,
-        seekStrength
+        seekStrength,
+        challenge
       };
     }
 
-    // Reset the NUMBER of enemies after each boss,
-    // then build back up from 2 to 7 during the next 19 levels.
-    const count=Math.min(7, 2 + Math.floor((stage-1)/3));
+    // Three moving threats make the first screen feel alive. Add one enemy
+    // every two levels so the opening ten levels have a clear rising rhythm:
+    // 3,3,4,4,5,5,6,6,7,7. Later worlds retain their established curve.
+    const count=world===0
+      ? Math.min(7,3 + Math.floor((stage-1)/2))
+      : Math.min(7,2 + Math.floor((stage-1)/3));
 
     return {
       level,
@@ -8011,7 +8491,8 @@ body:has(#collectionScreen.active) #quickCollection.active{
       count,
       minions:0,
       speedMult,
-      seekStrength
+      seekStrength,
+      challenge
     };
   }
 
@@ -8067,10 +8548,11 @@ body:has(#collectionScreen.active) #quickCollection.active{
       return;
     }
 
+    const earlyPaceBlend=Math.max(0,Math.min(1,(20-currentLevel)/10));
     for(let i=0;i<cfg.count;i++){
       const p=randomPoint(55);
       const angle=Math.random()*Math.PI*2;
-      const baseSpeed=68 + Math.random()*20;
+      const baseSpeed=(68+8*earlyPaceBlend) + Math.random()*(20+2*earlyPaceBlend);
       const speed=baseSpeed*cfg.speedMult;
 
       spawnEnemy(
@@ -8096,8 +8578,12 @@ body:has(#collectionScreen.active) #quickCollection.active{
     if(state) state.rewardAnimToken=(state.rewardAnimToken||0)+1;
     clearConfetti();
     ui.coinTransfer?.classList.remove('transferring');
-    ui.resultCard?.classList.remove('celebrate');
+    ui.resultCard?.classList.remove('celebrate','defeat');
     ui.completionBadge?.classList.remove('show');
+    ui.overlay?.classList.remove('defeatResult');
+    ui.boardWrap?.classList.remove('defeatSlowdown');
+    ui.defeatPrelude?.classList.remove('show');
+    ui.defeatPrelude?.setAttribute('aria-hidden','true');
 
     state = {
       running:starterPackOpened,
@@ -8143,6 +8629,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
       boosterFeedbackText:'',
       boosterFeedbackColor:'#63d8ff',
       tutorialActive:false,
+      defeatSequence:null,
       lastWin:false,
       settled:false
     };
@@ -8425,7 +8912,10 @@ body:has(#collectionScreen.active) #quickCollection.active{
     const canBuyPack=starterPackOpened && walletCoins>=PACK_PRICE;
     ui.buyPack.disabled=!starterPackOpened;
     ui.gameToStore.classList.toggle('canBuy',canBuyPack);
+    ui.gameToStore.classList.toggle('purchaseReady',canBuyPack);
+    ui.quickStore.classList.toggle('purchaseReady',canBuyPack && currentScreen!=='store');
     ui.storeHero.classList.toggle('canBuyPack',canBuyPack);
+    ui.buyPack.classList.toggle('purchaseReady',canBuyPack);
 
     const apexOwned=ownedBalls.has('apex');
     const cataclysmOwned=ownedBalls.has('cataclysm');
@@ -8438,9 +8928,16 @@ body:has(#collectionScreen.active) #quickCollection.active{
     ui.buyApexBall.disabled=false;
     ui.buyCataclysmBall.disabled=false;
     ui.buyGaiaBall.disabled=false;
+    ui.buyApexBall.classList.toggle('shopBuyOwned',apexOwned);
+    ui.buyCataclysmBall.classList.toggle('shopBuyOwned',cataclysmOwned);
+    ui.buyGaiaBall.classList.toggle('shopBuyOwned',gaiaOwned);
+    ui.buyApexBall.classList.toggle('purchaseReady',!apexOwned && walletCoins>=5000);
+    ui.buyCataclysmBall.classList.toggle('purchaseReady',!cataclysmOwned && walletCoins>=IMPOSSIBLE_BALL_PRICE);
+    ui.buyGaiaBall.classList.toggle('purchaseReady',!gaiaOwned && walletCoins>=IMPOSSIBLE_BALL_PRICE);
 
     const canChainPack=activePackMode==='paid' && walletCoins>=PACK_PRICE;
     ui.buyAnotherPack.disabled=!canChainPack;
+    ui.buyAnotherPack.classList.toggle('purchaseReady',canChainPack);
     ui.buyAnotherPack.textContent='BUY ANOTHER';
     ui.buyAnotherPack.setAttribute('aria-label',`Buy another pack for ${PACK_PRICE} coins`);
   }
@@ -8517,6 +9014,73 @@ body:has(#collectionScreen.active) #quickCollection.active{
     setTimeout(()=>{
       pieces.forEach(el=>el.remove());
     },quick?1500:2700);
+  }
+
+  function showFirstPackMilestone(){
+    firstPackMilestoneQueued=false;
+    firstPackMilestoneTimer=0;
+    if(firstPackMilestoneSeen || walletCoins<PACK_PRICE) return;
+
+    firstPackMilestoneSeen=true;
+    try{localStorage.setItem('ballFillFirstPackMilestoneSeenV1','1');}catch(e){}
+
+    resumeGameAfterFirstPackMilestone=!!(state && state.running && currentScreen==='game');
+    if(resumeGameAfterFirstPackMilestone){
+      state.running=false;
+      stopGrowSound(true);
+    }
+
+    ui.firstPackMilestoneFx.innerHTML='';
+    ui.firstPackMilestoneOverlay.setAttribute('aria-hidden','false');
+    document.body.classList.add('firstPackMilestoneOpen');
+    shopConfetti(ui.firstPackMilestoneFx,125,true,true);
+    sfx('purchase');
+    if(navigator.vibrate) navigator.vibrate([30,35,55,40,85]);
+    requestAnimationFrame(()=>ui.firstPackMilestoneStore.focus({preventScroll:true}));
+  }
+
+  function scheduleFirstPackMilestone(previousBalance,nextBalance){
+    if(
+      firstPackMilestoneSeen ||
+      firstPackMilestoneQueued ||
+      previousBalance>=PACK_PRICE ||
+      nextBalance<PACK_PRICE
+    ) return;
+
+    firstPackMilestoneQueued=true;
+    clearTimeout(firstPackMilestoneTimer);
+    // The level reward crossed 25 gold: put the store prompt over the result immediately.
+    showFirstPackMilestone();
+  }
+
+  function closeFirstPackMilestone(shouldResume=true){
+    const resumeInterruptedGame=resumeGameAfterFirstPackMilestone;
+    ui.firstPackMilestoneOverlay.setAttribute('aria-hidden','true');
+    ui.firstPackMilestoneFx.innerHTML='';
+    document.body.classList.remove('firstPackMilestoneOpen');
+    resumeGameAfterFirstPackMilestone=false;
+
+    if(
+      shouldResume &&
+      resumeInterruptedGame &&
+      state &&
+      currentScreen==='game' &&
+      ui.overlay.style.display!=='grid' &&
+      ui.bossWarningOverlay.style.display!=='grid' &&
+      !state.tutorialActive
+    ){
+      state.running=true;
+      state.last=performance.now();
+      if(state.active && soundEnabled) startGrowSound();
+    }
+  }
+
+  function openStoreFromFirstPackMilestone(){
+    const resumeInterruptedGame=resumeGameAfterFirstPackMilestone;
+    closeFirstPackMilestone(false);
+    // Let showScreen remember an interrupted live game so PLAY can resume it.
+    if(resumeInterruptedGame && state) state.running=true;
+    showScreen('store');
   }
 
   function radialJuiceBurst(container,className,count,x,y,colors,minDistance,maxDistance){
@@ -9390,7 +9954,77 @@ body:has(#collectionScreen.active) #quickCollection.active{
     }
   }
 
+  function beginDefeatSequence(){
+    if(!state || !state.running || state.settled || state.defeatSequence) return;
+
+    const reducedMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    state.running=false;
+    state.defeatSequence={elapsed:0,duration:reducedMotion ? .18 : 1.15};
+    stopGrowSound(true);
+    addScreenShake(12,.42);
+    flashScreen('#ef334b',.24);
+    addImpactRing(
+      state.active?.x ?? W*.5,
+      state.active?.y ?? H*.5,
+      '#ff4054',
+      Math.max(W,H)*.34
+    );
+
+    ui.boardWrap.classList.add('defeatSlowdown');
+    ui.defeatPrelude.classList.add('show');
+    ui.defeatPrelude.setAttribute('aria-hidden','false');
+    sfx('defeatImpact');
+    if(navigator.vibrate) navigator.vibrate([55,28,85,35,120]);
+  }
+
+  function updateDefeatSequence(dt){
+    const sequence=state.defeatSequence;
+    if(!sequence) return;
+
+    sequence.elapsed=Math.min(sequence.duration,sequence.elapsed+dt);
+    const progress=sequence.elapsed/sequence.duration;
+    const slowMotion=.018+.28*Math.pow(1-progress,2.2);
+
+    // Preserve the final board state but let enemy momentum decay visibly.
+    if(state.freezeLeft<=0){
+      for(const enemy of state.enemies){
+        enemy.x+=enemy.vx*dt*slowMotion;
+        enemy.y+=enemy.vy*dt*slowMotion;
+        if(enemy.x<enemy.r){enemy.x=enemy.r;enemy.vx=Math.abs(enemy.vx)}
+        if(enemy.x>W-enemy.r){enemy.x=W-enemy.r;enemy.vx=-Math.abs(enemy.vx)}
+        if(enemy.y<enemy.r){enemy.y=enemy.r;enemy.vy=Math.abs(enemy.vy)}
+        if(enemy.y>H-enemy.r){enemy.y=H-enemy.r;enemy.vy=-Math.abs(enemy.vy)}
+      }
+    }
+
+    if(state.shakeT>0){
+      state.shakeT=Math.max(0,state.shakeT-dt);
+      if(state.shakeT<=0) state.shakePower=0;
+    }
+    if(state.screenFlashT>0) state.screenFlashT=Math.max(0,state.screenFlashT-dt);
+    for(let index=state.impactRings.length-1;index>=0;index--){
+      const ring=state.impactRings[index];
+      ring.life-=dt*.9;
+      ring.r+=(ring.maxR-ring.r)*dt*2.4;
+      if(ring.life<=0) state.impactRings.splice(index,1);
+    }
+
+    if(progress>=1){
+      state.defeatSequence=null;
+      finalizeFinish(false);
+      setTimeout(()=>{
+        ui.boardWrap.classList.remove('defeatSlowdown');
+        ui.defeatPrelude.classList.remove('show');
+        ui.defeatPrelude.setAttribute('aria-hidden','true');
+      },120);
+    }
+  }
+
   function update(dt){
+    if(state.defeatSequence){
+      updateDefeatSequence(dt);
+      return;
+    }
     if(!state.running) return;
 
     state.timeLeft-=dt;
@@ -9804,6 +10438,8 @@ body:has(#collectionScreen.active) #quickCollection.active{
       ui.completionBadge.classList.add('show');
       launchConfetti();
     }else{
+      ui.completionBadge.textContent='RUN ENDED';
+      ui.completionBadge.classList.add('show');
       clearConfetti();
     }
 
@@ -9815,8 +10451,19 @@ body:has(#collectionScreen.active) #quickCollection.active{
   }
 
   function finish(win){
+    if(!state || state.settled || state.defeatSequence) return;
+    if(!win){
+      beginDefeatSequence();
+      return;
+    }
     if(!state.running) return;
+    finalizeFinish(true);
+  }
+
+  function finalizeFinish(win){
+    if(!state || state.settled) return;
     const runCoins=roundCoinAmount(state.scoreCoins);
+    const bankedWalletBefore=roundCoinAmount(walletCoins);
     const walletBefore=roundCoinAmount(walletCoins+runCoins);
     state.running=false;
     state.lastWin=win;
@@ -9845,7 +10492,7 @@ body:has(#collectionScreen.active) #quickCollection.active{
 
     ui.resultTitle.textContent=campaignComplete
       ? '200 LEVELS COMPLETE'
-      : (win?`LEVEL ${currentLevel} COMPLETE`:`LEVEL ${currentLevel} — TRY AGAIN`);
+      : (win?`LEVEL ${currentLevel} COMPLETE`:`LEVEL ${currentLevel} — DEFEAT`);
 
     ui.stars.textContent=win?('★'.repeat(stars)+'☆'.repeat(3-stars)):'☆☆☆';
 
@@ -9853,23 +10500,34 @@ body:has(#collectionScreen.active) #quickCollection.active{
       ? `<strong>${bossReward.icon} BOOSTER UNLOCKED</strong><br>${bossReward.name}`
       : '';
 
+    const earlyPackProgress=win && currentLevel<=10
+      ? (walletAfter>=PACK_PRICE
+          ? '<strong>PACK READY!</strong><br>Open the store to reveal a new ball.'
+          : `<strong>${formatCoinAmount(PACK_PRICE-walletAfter)} GOLD TO NEXT PACK</strong><br>Keep filling to grow your collection.`)
+      : '';
+
     // Keep the normal result card intentionally minimal for small phones.
     // Only surface special rewards / campaign milestones here.
     ui.resultText.innerHTML=win
       ? (campaignComplete
           ? '<strong>ALL BOSSES DEFEATED!</strong>'
-          : rewardLine)
+          : (rewardLine || earlyPackProgress))
       : '<strong>TRY AGAIN!</strong>';
 
     ui.again.textContent=campaignComplete?'Replay final boss':(win?'NEXT LEVEL':'RETRY');
+    ui.overlay.classList.toggle('defeatResult',!win);
+    ui.resultCard.classList.toggle('defeat',!win);
     ui.overlay.style.display='grid';
     syncUI();
     showLevelCelebration(win,runCoins,payout,walletBefore,walletAfter,stars);
+    if(win) scheduleFirstPackMilestone(bankedWalletBefore,walletAfter);
   }
 
   function syncUI(){
     const cfg=enemyConfig(currentLevel);
     ui.level.textContent=currentLevel;
+    ui.levelChallenge.textContent=`LEVEL ${currentLevel} • ${cfg.challenge}`;
+    ui.levelGoal.textContent=`GOAL ${TARGET}%`;
     const worldProfile=worldProfileForLevel(currentLevel);
     ui.difficulty.textContent=cfg.boss
       ? `${worldProfile.name} • ${cfg.minions} minions • Speed ×${cfg.speedMult.toFixed(2)}`
@@ -9889,7 +10547,10 @@ body:has(#collectionScreen.active) #quickCollection.active{
     ui.progressFill2.style.width=seg2+'%';
     ui.progressFill3.style.width=seg3+'%';
 
-    const liveStars=liveStarCount(displayedCoverage);
+    // Resource efficiency contributes to the live rating, but a star cannot
+    // light up before its matching fill milestone has actually been reached.
+    const coverageStarGate=Math.min(3,Math.floor((displayedCoverage/(TARGET/3))+1e-6));
+    const liveStars=Math.min(liveStarCount(displayedCoverage),coverageStarGate);
     ui.progressStars.textContent='★'.repeat(liveStars)+'☆'.repeat(3-liveStars);
 
     document.querySelector('.starMarker1')?.classList.toggle('earned',liveStars>=1);
@@ -11027,6 +11688,16 @@ body:has(#collectionScreen.active) #quickCollection.active{
   ui.packEquipReward.addEventListener('click',equipPackReward);
   ui.buyAnotherPack.addEventListener('click',buyAnotherPackFromReveal);
   ui.packContinue.addEventListener('click',closePackOverlay);
+
+  ui.firstPackMilestoneStore.addEventListener('click',openStoreFromFirstPackMilestone);
+  ui.firstPackMilestoneLater.addEventListener('click',()=>closeFirstPackMilestone(true));
+  ui.firstPackMilestoneBackdrop.addEventListener('click',()=>closeFirstPackMilestone(true));
+  document.addEventListener('keydown',(ev)=>{
+    if(ev.key==='Escape' && ui.firstPackMilestoneOverlay.getAttribute('aria-hidden')==='false'){
+      ev.preventDefault();
+      closeFirstPackMilestone(true);
+    }
+  });
 
   ui.restart.addEventListener('click',reset);
   ui.again.addEventListener('click',()=>{
