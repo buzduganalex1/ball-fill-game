@@ -1527,17 +1527,6 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   background:#effaff;
   box-shadow:0 0 0 .1875rem rgba(83,169,202,.10);
 }
-.ballCard.collectionEquipTarget{
-  cursor:pointer;
-  touch-action:manipulation;
-  -webkit-tap-highlight-color:transparent;
-  transition:transform .12s ease,border-color .18s ease,box-shadow .18s ease;
-}
-.ballCard.collectionEquipTarget:active{transform:scale(.985)}
-.ballCard[role="button"]:focus-visible{
-  outline:.2rem solid color-mix(in srgb,var(--rarity-color,#4ba6ca) 75%,#2387ad);
-  outline-offset:.16rem;
-}
 .lockBadge{
   display:flex;
   align-items:center;
@@ -8101,7 +8090,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       <div class="pill bigWallet"><span class="coinIcon">◉</span><span id="collectionWalletCoins">0</span></div>
     </div>
 
-    <div class="collectionBrowseHint">SCROLL TO BROWSE <span>↓</span> TAP ANY UNLOCKED BALL TO EQUIP</div>
+    <div class="collectionBrowseHint">SCROLL TO BROWSE <span>↓</span> PRESS EQUIP TO SELECT A BALL</div>
 
     <div class="collectionGrid" aria-label="Ball collection carousel">
       <div class="ballCard" id="normalCard">
@@ -9780,10 +9769,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
   function applyGrowthBurst(ball){
     if(!ball) return false;
-    const previousRadius=ball.r;
-    const limit=maxGrowthRadius(ball);
-    ball.r=Math.min(limit,ball.r+55);
-    if(ball.r<=previousRadius+.5) return false;
+    const result=growBallIntoAvailableSpace(ball,ball.r+55,72);
+    if(!result.grew) return false;
 
     flashScreen(BOOSTERS.instantGrow.color,.1);
     addImpactRing(ball.x,ball.y,BOOSTERS.instantGrow.color,ball.r+42);
@@ -9912,13 +9899,11 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       card.classList.toggle('lockedCard',!owned);
       card.classList.toggle('equipped',equipped);
       card.classList.toggle('previewed',collectionPreviewType===type);
-      card.classList.toggle('collectionEquipTarget',owned);
-      card.setAttribute('role','button');
-      card.tabIndex=0;
-      card.setAttribute('aria-pressed',equipped?'true':'false');
-      card.setAttribute('aria-label',owned
-        ? (equipped ? `${BALL_TYPES[type].name}, equipped` : `Equip ${BALL_TYPES[type].name}`)
-        : `${BALL_TYPES[type].name}, locked. View details`);
+      card.classList.remove('collectionEquipTarget');
+      card.removeAttribute('role');
+      card.removeAttribute('tabindex');
+      card.removeAttribute('aria-pressed');
+      card.removeAttribute('aria-label');
 
       const description=card.querySelector('p');
       const stat=card.querySelector('.statRow');
@@ -10110,7 +10095,6 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     if(name==='collection'){
       collectionPreviewType=selectedBallType;
       updateCollectionUI();
-      centerCollectionCard(selectedBallType,true);
     }
 
     if(name==='game'){
@@ -10962,7 +10946,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   }
 
   function maxGrowthRadius(ball){
-    // A growing ball stops exactly when its edge reaches a wall or locked ball.
+    // Instant clearance at the current center. The growth solver below can
+    // improve this by nudging the center into nearby free space.
     let maxR = Math.min(
       ball.x,          // left wall
       W-ball.x,        // right wall
@@ -10976,6 +10961,120 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     }
 
     return Math.max(BALL_MIN, maxR);
+  }
+
+  function ballFitsAt(x,y,r,tolerance=.15){
+    if(
+      x<r-tolerance || x>W-r+tolerance ||
+      y<r-tolerance || y>H-r+tolerance
+    ) return false;
+
+    return !state.placed.some(
+      placed=>dist(x,y,placed.x,placed.y)<r+placed.r+2-tolerance
+    );
+  }
+
+  function findNearbyGrowthFit(ball,targetR,maxShift){
+    if(targetR<=0 || targetR>Math.min(W,H)/2) return null;
+
+    const clampX=x=>Math.max(targetR,Math.min(W-targetR,x));
+    const clampY=y=>Math.max(targetR,Math.min(H-targetR,y));
+    let x=clampX(ball.x);
+    let y=clampY(ball.y);
+
+    // Project out of walls and locked balls. Repeating lets the ball slide
+    // around combinations such as a wall plus a neighbouring large ball.
+    for(let pass=0;pass<12;pass++){
+      let adjusted=false;
+      const wallX=clampX(x), wallY=clampY(y);
+      if(Math.abs(wallX-x)>.01 || Math.abs(wallY-y)>.01) adjusted=true;
+      x=wallX;
+      y=wallY;
+
+      for(const placed of state.placed){
+        let dx=x-placed.x, dy=y-placed.y;
+        let d=Math.hypot(dx,dy);
+        const required=targetR+placed.r+2;
+        if(d>=required-.05) continue;
+
+        if(d<.001){
+          // Exact-center overlaps need a deterministic escape direction.
+          dx=W/2-placed.x;
+          dy=H/2-placed.y;
+          d=Math.hypot(dx,dy);
+          if(d<.001){ dx=1; dy=0; d=1; }
+        }
+
+        const push=required-d+.08;
+        x+=dx/d*push;
+        y+=dy/d*push;
+        adjusted=true;
+      }
+
+      x=clampX(x);
+      y=clampY(y);
+      if(ballFitsAt(x,y,targetR)){
+        const shift=Math.hypot(x-ball.x,y-ball.y);
+        if(shift<=maxShift+.5) return {x,y,shift};
+      }
+      if(!adjusted) break;
+    }
+
+    // Projection can get pinned when two collision normals oppose each other.
+    // Search a small ring of nearby positions so the ball can slide around
+    // the obstruction instead of remaining stuck against it.
+    const inwardAngle=Math.atan2(H/2-ball.y,W/2-ball.x);
+    for(let radius=2;radius<=maxShift;radius+=2){
+      for(let step=0;step<24;step++){
+        const offsetStep=step===0 ? 0 : Math.ceil(step/2)*(step%2 ? 1 : -1);
+        const angle=inwardAngle+offsetStep*(Math.PI*2/24);
+        const candidateX=clampX(ball.x+Math.cos(angle)*radius);
+        const candidateY=clampY(ball.y+Math.sin(angle)*radius);
+        const shift=Math.hypot(candidateX-ball.x,candidateY-ball.y);
+        if(shift<=maxShift+.5 && ballFitsAt(candidateX,candidateY,targetR)){
+          return {x:candidateX,y:candidateY,shift};
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function growBallIntoAvailableSpace(ball,desiredR,shiftLimit){
+    const startR=ball.r;
+    if(desiredR<=startR+.001) return {grew:false,shifted:false};
+
+    const requestedShift=shiftLimit ?? Math.min(48,Math.max(14,10+(desiredR-startR)*6));
+    let bestR=startR;
+    let bestFit=null;
+    let fit=findNearbyGrowthFit(ball,desiredR,requestedShift);
+
+    if(fit){
+      bestR=desiredR;
+      bestFit=fit;
+    }else{
+      // If the full frame step does not fit, preserve partial growth instead
+      // of freezing. Six passes are sub-pixel accurate for normal frame deltas.
+      let low=startR;
+      let high=desiredR;
+      for(let pass=0;pass<6;pass++){
+        const candidateR=(low+high)/2;
+        const candidateFit=findNearbyGrowthFit(ball,candidateR,requestedShift);
+        if(candidateFit){
+          low=candidateR;
+          bestR=candidateR;
+          bestFit=candidateFit;
+        }else high=candidateR;
+      }
+    }
+
+    if(!bestFit || bestR<=startR+.01) return {grew:false,shifted:false};
+
+    const shifted=bestFit.shift>.08;
+    ball.x=bestFit.x;
+    ball.y=bestFit.y;
+    ball.r=bestR;
+    return {grew:true,shifted};
   }
 
   function frenzyMagnetTarget(){
@@ -11374,21 +11473,13 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
         }
       }
 
+      const bossGrowthMult=(state.frostDebuffLeft>0 ? 0.40 : 1) * (state.toxicLeft>0 ? 0.70 : 1);
+      const typeGrowthMult=BALL_TYPES[b.type || 'normal']?.growthMult || 1;
+      const nextArea=Math.PI*b.r*b.r + W*H*BALL_COVERAGE_GROWTH*typeGrowthMult*bossGrowthMult*dt;
+      const growthResult=growBallIntoAvailableSpace(b,Math.sqrt(nextArea/Math.PI));
       const limit=maxGrowthRadius(b);
 
-      // Grow until touching the nearest wall/locked ball, then stop.
-      const isPhysicallyGrowing=b.r < limit-0.35;
-      if(b.r < limit){
-        const bossGrowthMult=(state.frostDebuffLeft>0 ? 0.40 : 1) * (state.toxicLeft>0 ? 0.70 : 1);
-        const typeGrowthMult=BALL_TYPES[b.type || 'normal']?.growthMult || 1;
-        const nextArea=Math.PI*b.r*b.r + W*H*BALL_COVERAGE_GROWTH*typeGrowthMult*bossGrowthMult*dt;
-        b.r=Math.min(
-          limit,
-          Math.sqrt(nextArea/Math.PI)
-        );
-      }
-
-      updateGrowSound(b,limit,isPhysicallyGrowing);
+      updateGrowSound(b,limit,growthResult.grew);
       collectCoins(b);
       state.liveCoverage=measureCoverage([...state.placed,b],72);
       if(state.liveCoverage>=TARGET){
@@ -11400,7 +11491,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       }
 
       // Small status hint when growth is physically blocked.
-      if(b.r >= limit-0.5){
+      if(!growthResult.grew){
         state.message='Growth blocked — move or release';
         state.messageT=.12;
       }
@@ -12979,31 +13070,6 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       burst.remove();
       badge.remove();
     },1050);
-  }
-
-  function activateCollectionCard(type){
-    if(ownedBalls.has(type)){
-      selectBallType(type);
-      return;
-    }
-
-    collectionPreviewType=type;
-    updateCollectionUI();
-    ui.collectionDetailPanel.classList.remove('detailPulse');
-    void ui.collectionDetailPanel.offsetWidth;
-    ui.collectionDetailPanel.classList.add('detailPulse');
-  }
-
-  for(const [type,card] of Object.entries(collectionCardsByType)){
-    card.addEventListener('click',(ev)=>{
-      if(ev.target.closest('button')) return;
-      activateCollectionCard(type);
-    });
-    card.addEventListener('keydown',(ev)=>{
-      if(ev.target.closest('button') || (ev.key!=='Enter' && ev.key!==' ')) return;
-      ev.preventDefault();
-      activateCollectionCard(type);
-    });
   }
 
   ui.equipNormal.addEventListener('click',()=>selectBallType('normal'));
