@@ -305,19 +305,6 @@ h1,h2,p{margin:0}
   background:#fff7cf;
   transform:scale(1.06);
 }
-.bossMechanicStatus{
-  display:none;
-  width:100%;
-  padding:.3125rem .5rem;
-  border-radius:.5625rem;
-  background:#fff6dc;
-  border:.0625rem solid #e7c56c;
-  font-size:.5rem;
-  font-weight:900;
-  text-align:center;
-}
-.bossMechanicStatus.show{display:flex;justify-content:center}
-
 /* arena */
 .boardWrap{
   flex:1 1 0;
@@ -678,14 +665,69 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   font-size:1.8125rem;
 }
 .boosterToast{
+  --booster-accent:#63d8ff;
+  position:absolute;
+  left:10%;
+  right:10%;
+  bottom:7rem;
+  z-index:15;
   display:flex;
   align-items:center;
   justify-content:center;
-  min-height:0;
-  font-size:.625rem;
-  font-weight:900;
+  width:max-content;
+  max-width:80%;
+  min-height:2.75rem;
+  margin-inline:auto;
+  padding:.5rem 1rem;
+  border:.125rem solid var(--booster-accent);
+  border-radius:999px;
+  color:#f8fdff;
+  background:linear-gradient(180deg,rgba(29,54,69,.96),rgba(13,31,43,.96));
+  box-shadow:
+    0 .25rem .875rem rgba(8,24,34,.36),
+    0 0 1.125rem color-mix(in srgb,var(--booster-accent) 55%,transparent),
+    inset 0 0 .75rem color-mix(in srgb,var(--booster-accent) 20%,transparent);
+  opacity:0;
+  transform:translateY(.75rem) scale(.9);
+  pointer-events:none;
+  text-align:center;
+  font-size:clamp(.6875rem,2.8vw,.875rem);
+  line-height:1.15;
+  font-weight:1000;
+  letter-spacing:.055em;
+  text-shadow:0 .0625rem .125rem rgba(0,0,0,.55);
 }
 .boosterToast:empty{display:none}
+.boosterToast.boosterActivated{
+  animation:boosterToastPop 1.35s cubic-bezier(.2,.85,.25,1) both;
+}
+.boosterToast.boosterCountdown{
+  min-height:2rem;
+  padding:.3125rem .75rem;
+  opacity:.92;
+  transform:none;
+  border-color:#a68bff;
+  background:rgba(45,38,79,.9);
+  box-shadow:0 .1875rem .625rem rgba(17,12,39,.28),0 0 .75rem rgba(166,139,255,.35);
+}
+.bottomBar button.boosterUsed{
+  position:relative;
+  z-index:3;
+  border-color:var(--booster-accent,#63d8ff);
+  animation:boosterButtonUsed .68s cubic-bezier(.2,.9,.25,1);
+}
+@keyframes boosterToastPop{
+  0%{opacity:0;transform:translateY(.9rem) scale(.82)}
+  16%{opacity:1;transform:translateY(-.18rem) scale(1.06)}
+  27%,76%{opacity:1;transform:translateY(0) scale(1)}
+  100%{opacity:0;transform:translateY(-.7rem) scale(.96)}
+}
+@keyframes boosterButtonUsed{
+  0%{transform:translateY(0) scale(1);filter:brightness(1)}
+  34%{transform:translateY(-.35rem) scale(1.16);filter:brightness(1.28);box-shadow:0 .25rem 0 #c5d0d8,0 0 1.35rem var(--booster-accent,#63d8ff)}
+  62%{transform:translateY(.08rem) scale(.97);filter:brightness(1.08)}
+  100%{transform:translateY(0) scale(1);filter:brightness(1)}
+}
 
 /* ============================================================
    UTILITY / ADMIN — OVERLAY EXCEPTIONS
@@ -714,19 +756,19 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   display:flex;
   flex-direction:column;
   align-items:flex-end;
-  gap:.625rem;
+  gap:.75rem;
 }
 .utilityAction{
-  width:10.5rem;
-  min-height:3.25rem;
+  width:11.5rem;
+  min-height:3.75rem;
   display:flex;
   align-items:center;
-  padding:0 .875rem;
+  padding:0 1rem;
   border:.125rem solid #bdd0da;
-  border-radius:1rem;
+  border-radius:1.125rem;
   background:white;
   box-shadow:0 .375rem 0 #a9bdc8;
-  font-size:.6875rem;
+  font-size:.8125rem;
   animation:utilityIn .25s ease-out both;
 }
 .utilitySound{animation-delay:.05s}
@@ -736,15 +778,15 @@ canvas.growthPressed{filter:saturate(1.08) contrast(1.02)}
   to{transform:translateY(0) scale(1);opacity:1}
 }
 .utilityCloseButton{
-  width:3.375rem;
-  height:3.375rem;
+  width:3.75rem;
+  height:3.75rem;
   display:flex;
   align-items:center;
   justify-content:center;
   border-radius:50%;
   color:white;
   background:#466574;
-  font-size:1.125rem;
+  font-size:1.25rem;
 }
 .adminPanel{
   display:none;
@@ -1812,53 +1854,106 @@ body.packOpen{overflow:hidden!important}
   backdrop-filter:blur(.375rem);
 }
 .bossWarningCard{
+  --boss-fill:#9f263d;
+  --boss-edge:#ff6c78;
+  --boss-glow:#ff4d62;
+  position:relative;
+  overflow:hidden;
   width:min(92vw,26.875rem);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:.5625rem;
-  padding:1.4375rem 1.25rem;
-  border:.1875rem solid var(--boss-edge,#ff6874);
-  border-radius:1.625rem;
+  padding:1.6875rem 1.5rem 1.4375rem;
+  border:.1875rem solid var(--boss-edge);
+  border-radius:1.75rem;
   color:white;
-  background:linear-gradient(155deg,#18202b,#090c11);
-  box-shadow:0 1.375rem 3.4375rem rgba(0,0,0,.4);
+  background:
+    radial-gradient(circle at 50% -10%,color-mix(in srgb,var(--boss-glow) 38%,transparent),transparent 46%),
+    linear-gradient(155deg,#18202b,#090c11 72%);
+  box-shadow:
+    0 0 0 .375rem color-mix(in srgb,var(--boss-edge) 12%,transparent),
+    0 1.5rem 3.75rem rgba(0,0,0,.42),
+    0 0 2.8125rem color-mix(in srgb,var(--boss-glow) 24%,transparent);
   text-align:center;
+  animation:bossWarningSlam .48s cubic-bezier(.16,.88,.24,1.28) both;
 }
+.bossWarningCard::before{
+  content:"";
+  position:absolute;
+  inset:-5rem;
+  background:repeating-conic-gradient(
+    from 0deg,
+    transparent 0 9deg,
+    color-mix(in srgb,var(--boss-edge) 9%,transparent) 10deg 15deg,
+    transparent 16deg 29deg
+  );
+  animation:bossWarningRays 9s linear infinite;
+  pointer-events:none;
+}
+.bossWarningCard>*{position:relative;z-index:1}
 .bossWarningBurst{
-  width:3.625rem;
-  height:3.625rem;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  width:3.875rem;
+  height:3.875rem;
+  margin:0 auto .3125rem;
+  display:grid;
+  place-items:center;
   border-radius:50%;
-  background:var(--boss-fill,#96283b);
-  border:.1875rem solid var(--boss-edge,#ff6874);
-  font-size:1.9375rem;
+  background:color-mix(in srgb,var(--boss-fill) 68%,#111);
+  border:.1875rem solid var(--boss-edge);
+  box-shadow:0 0 1.375rem color-mix(in srgb,var(--boss-glow) 58%,transparent);
+  font-size:2.125rem;
+  animation:bossWarningPulse .85s ease-in-out infinite alternate;
 }
 .bossWarningEyebrow{
-  color:var(--boss-edge,#ff6874);
+  margin-top:.5rem;
+  color:var(--boss-edge);
   font-size:.625rem;
   font-weight:1000;
-  letter-spacing:.18em;
+  letter-spacing:.22em;
 }
-.bossWarningCard h2{font-size:1.75rem}
+.bossWarningCard h2{
+  margin:.3125rem 0 .375rem;
+  font-size:1.875rem;
+  line-height:1;
+}
 .bossWarningMechanic{
+  display:inline-block;
   padding:.3125rem .5625rem;
   border-radius:62.4375rem;
-  background:rgba(255,255,255,.1);
+  color:#fff;
+  background:color-mix(in srgb,var(--boss-fill) 45%,transparent);
+  border:.0625rem solid color-mix(in srgb,var(--boss-edge) 58%,transparent);
   font-size:.5625rem;
   font-weight:1000;
-  letter-spacing:.1em;
+  letter-spacing:.12em;
 }
 .bossWarningCard p{
+  margin:.625rem auto .4375rem;
   max-width:20.625rem;
-  font-size:.75rem;
-  line-height:1.3;
-  color:#d9e1e7;
+  color:#d9e0e7;
+  font-size:.8125rem;
+  line-height:1.35;
 }
-.bossWarningTip{font-size:.6875rem;font-weight:900;color:#fff1b1}
-.bossFightButton{min-width:13.75rem}
+.bossWarningTip{
+  margin:.6875rem 0 .9375rem;
+  color:#fff2ba;
+  font-size:.75rem;
+  font-weight:900;
+}
+.bossFightButton{
+  width:min(100%,15.625rem);
+  height:3rem;
+  margin:0 auto;
+  border-color:var(--boss-edge)!important;
+  background:linear-gradient(145deg,var(--boss-edge),var(--boss-fill))!important;
+  box-shadow:
+    0 .3125rem 0 color-mix(in srgb,var(--boss-fill) 70%,#000),
+    0 0 1.375rem color-mix(in srgb,var(--boss-glow) 30%,transparent)!important;
+}
+@keyframes bossWarningSlam{
+  0%{opacity:0;transform:scale(.72) translateY(1.25rem)}
+  75%{opacity:1;transform:scale(1.035) translateY(-.125rem)}
+  100%{transform:scale(1) translateY(0)}
+}
+@keyframes bossWarningRays{to{transform:rotate(360deg)}}
+@keyframes bossWarningPulse{to{transform:scale(1.08);filter:brightness(1.22)}}
 
 /* ============================================================
    HUD COIN FX — deliberate overlay exception so coins fly OVER HUD
@@ -3805,19 +3900,2324 @@ body.packOpen{overflow:hidden!important}
   }
 }
 
+/* Mobile utility menu and admin sheet: large, reachable touch targets. */
+@media(max-width:50rem) and (orientation:portrait){
+  .gameUtilityOverlay{
+    align-items:flex-end;
+    justify-content:center;
+    padding:
+      max(.75rem,env(safe-area-inset-top))
+      max(.75rem,env(safe-area-inset-right))
+      calc(clamp(5.5rem,12dvh,7.5rem) + env(safe-area-inset-bottom))
+      max(.75rem,env(safe-area-inset-left));
+  }
+  .gameUtilityActions{
+    width:min(23rem,100%);
+    align-items:stretch;
+    gap:.875rem;
+  }
+  .utilityAction{
+    width:100%;
+    min-height:4.25rem;
+    justify-content:flex-start;
+    padding:0 1.25rem;
+    border-radius:1.25rem;
+    font-size:1rem;
+    letter-spacing:.02em;
+  }
+  .utilityCloseButton{
+    width:4rem;
+    height:4rem;
+    align-self:flex-end;
+    font-size:1.375rem;
+  }
+  .gameUtilityMenuButton{
+    flex-basis:clamp(3.75rem,min(9dvh,17vw),5.25rem);
+    width:clamp(3.75rem,min(9dvh,17vw),5.25rem);
+    height:clamp(3.75rem,min(9dvh,17vw),5.25rem);
+    font-size:clamp(1.625rem,5dvh,2.5rem);
+  }
+
+  .adminPanel{
+    inset:auto
+      max(.5rem,env(safe-area-inset-right))
+      max(.5rem,env(safe-area-inset-bottom))
+      max(.5rem,env(safe-area-inset-left));
+    width:auto;
+    max-height:calc(100dvh - max(1rem,env(safe-area-inset-top)) - max(1rem,env(safe-area-inset-bottom)));
+    overflow:hidden;
+    border-radius:1.5rem;
+    box-shadow:
+      0 0 0 624.9375rem rgba(15,25,34,.62),
+      0 1.25rem 3.125rem rgba(20,37,49,.34);
+  }
+  .adminPanel[open]{
+    display:flex;
+    flex-direction:column;
+  }
+  .adminPanel summary{
+    flex:none;
+    min-height:3.5rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:.75rem 1rem;
+    color:#31586c;
+    background:linear-gradient(180deg,#f9fcfd,#e9f2f6);
+    border-bottom:.125rem solid #c7d7df;
+    font-size:1rem;
+    font-weight:1000;
+    letter-spacing:.04em;
+    pointer-events:none;
+  }
+  .adminGrid{
+    min-height:0;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:.75rem;
+    padding:1rem;
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  .adminGrid>*{
+    min-width:0;
+    flex:none;
+  }
+  .adminGrid label{
+    grid-column:1/-1;
+    gap:.5rem;
+    font-size:.875rem;
+  }
+  .adminGrid input{
+    min-height:3.5rem;
+    padding:.625rem .875rem;
+    border-radius:.875rem;
+    font-size:1.125rem;
+    font-weight:900;
+  }
+  .adminPreview{
+    grid-column:1/-1;
+    min-height:3.75rem;
+    display:flex;
+    align-items:center;
+    padding:.75rem .875rem;
+    border:.125rem solid #d2dee5;
+    border-radius:1rem;
+    background:#f5f9fb;
+    font-size:.875rem;
+    line-height:1.35;
+  }
+  .adminGrid button{
+    min-height:3.75rem;
+    padding:.625rem .75rem;
+    border-radius:1rem;
+    box-shadow:0 .25rem 0 #c2d0d8;
+    font-size:.875rem;
+    line-height:1.15;
+  }
+  .adminGrid button:active{
+    transform:translateY(.1875rem);
+    box-shadow:0 .0625rem 0 #c2d0d8;
+  }
+  .adminCloseButton,
+  #adminBoosters{
+    grid-column:1/-1;
+  }
+  .adminCloseButton{
+    color:white;
+    background:#466574!important;
+    border-color:#345361!important;
+    box-shadow:0 .25rem 0 #2f4955!important;
+  }
+}
+
+.collectionBrowseHint{display:none}
+
+/* Mobile collection: readable swipeable cards instead of the compressed grid. */
+@media(max-width:50rem) and (orientation:portrait){
+  #collectionScreen{
+    height:100dvh;
+    min-height:0;
+    padding:
+      max(.5rem,env(safe-area-inset-top))
+      max(.5rem,env(safe-area-inset-right))
+      calc(5.75rem + env(safe-area-inset-bottom))
+      max(.5rem,env(safe-area-inset-left));
+    overflow:hidden;
+  }
+  #collectionScreen .menuApp{
+    width:100%;
+    height:100%;
+    min-height:0;
+    gap:.625rem;
+    padding:0 0 .75rem;
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior-y:contain;
+    scrollbar-width:thin;
+    scrollbar-color:#69acc8 #dbe6ec;
+  }
+  #collectionScreen .menuHeader{
+    position:sticky;
+    top:0;
+    z-index:8;
+    flex:none;
+    width:100%;
+    height:auto;
+    min-height:3.75rem;
+    padding:.375rem .25rem;
+    background:rgba(237,242,246,.94);
+    backdrop-filter:blur(.625rem);
+  }
+  #collectionScreen .screenEyebrow{
+    font-size:.6875rem;
+    letter-spacing:.14em;
+  }
+  #collectionScreen .menuHeader h1{
+    font-size:1.625rem;
+    line-height:1;
+  }
+  #collectionScreen .bigWallet{
+    min-width:6.5rem;
+    min-height:3rem;
+    padding:.5rem .75rem;
+    gap:.375rem;
+    border-width:.125rem;
+    border-radius:1rem;
+    font-size:1rem;
+  }
+  #collectionScreen .bigWallet .coinIcon{
+    width:1.875rem;
+    height:1.875rem;
+    border-width:.125rem;
+    font-size:.75rem;
+  }
+
+  .collectionBrowseHint{
+    flex:none;
+    min-height:2rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.4rem;
+    padding:.375rem .75rem;
+    border:.0625rem solid #cad9e1;
+    border-radius:.75rem;
+    color:#567080;
+    background:#f7fafc;
+    font-size:.75rem;
+    line-height:1;
+    font-weight:1000;
+    letter-spacing:.035em;
+  }
+  .collectionBrowseHint span{
+    color:#348caf;
+    font-size:1.125rem;
+  }
+
+  .collectionGrid{
+    flex:0 0 auto;
+    width:100%;
+    height:clamp(25rem,53dvh,29rem);
+    min-height:0;
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:stretch;
+    gap:.875rem;
+    padding:.25rem .75rem .75rem;
+    overflow-x:auto;
+    overflow-y:hidden;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x mandatory;
+    scroll-padding-inline:.75rem;
+    scrollbar-width:auto;
+    scrollbar-color:#5aa9c9 #d9e5eb;
+  }
+  .collectionGrid::-webkit-scrollbar{height:.625rem}
+  .collectionGrid::-webkit-scrollbar-track{
+    border-radius:999px;
+    background:#d9e5eb;
+  }
+  .collectionGrid::-webkit-scrollbar-thumb{
+    min-width:4rem;
+    border:.125rem solid #d9e5eb;
+    border-radius:999px;
+    background:#5aa9c9;
+  }
+
+  .ballCard{
+    position:relative;
+    flex:0 0 min(78vw,19rem);
+    width:min(78vw,19rem);
+    height:100%;
+    min-width:0;
+    min-height:0;
+    container-type:normal;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:.5rem;
+    padding:1rem;
+    border-width:.125rem;
+    border-radius:1.5rem;
+    scroll-snap-align:center;
+    scroll-snap-stop:always;
+    overflow:hidden;
+  }
+  .ballCard:not(:has(.lockBadge))::before{display:none}
+  .ballCard.previewed{
+    border-color:#4ba6ca;
+    box-shadow:0 0 0 .1875rem rgba(75,166,202,.16),0 .75rem 1.5rem rgba(46,78,96,.14);
+  }
+  .ballCard.lockedCard{
+    opacity:1;
+    background:#f5f7f9;
+  }
+  .ballCard.lockedCard .collectionBall{
+    opacity:.68;
+    filter:saturate(.58);
+  }
+  .lockBadge{
+    position:absolute;
+    top:.75rem;
+    right:.75rem;
+    z-index:2;
+    width:2.5rem;
+    height:2.5rem;
+    min-height:0;
+    padding:.5rem;
+    border:.0625rem solid #c6d2d9;
+    border-radius:50%;
+    color:#637681;
+    background:rgba(255,255,255,.92);
+    box-shadow:0 .1875rem .5rem rgba(50,72,84,.12);
+    font-size:1rem;
+    line-height:1.4rem;
+    text-align:center;
+  }
+  .collectionBall{
+    flex:none;
+    width:clamp(7.5rem,38vw,9.5rem);
+    height:clamp(7.5rem,38vw,9.5rem);
+    margin:.125rem 0 .25rem;
+    border-width:.25rem;
+    box-shadow:0 .75rem 1.25rem rgba(48,86,106,.2);
+  }
+  .rarityLabel{
+    min-height:1.75rem;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:.375rem .75rem;
+    border-radius:999px;
+    font-size:.75rem;
+    line-height:1;
+    font-weight:1000;
+    letter-spacing:.09em;
+  }
+  .ballCard h2{
+    width:100%;
+    min-height:0;
+    margin:0;
+    font-size:1.35rem;
+    line-height:1.1;
+  }
+  .ballCard p{
+    width:100%;
+    min-height:3.75rem;
+    display:block;
+    margin:0;
+    color:#5f7481;
+    font-size:.9375rem;
+    line-height:1.35;
+    font-weight:750;
+  }
+  .ballCard .statRow{
+    width:100%;
+    min-height:2.5rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:.75rem;
+    padding:.625rem .75rem;
+    border:.0625rem solid #d6e1e7;
+    border-radius:.75rem;
+    color:#607582;
+    background:#f4f8fa;
+    font-size:.875rem;
+    line-height:1;
+    font-weight:850;
+  }
+  .ballCard .statRow strong{color:#315f75}
+  .equipButton{
+    width:100%;
+    min-height:3.25rem;
+    margin-top:auto;
+    padding:.625rem .875rem;
+    border-width:.125rem;
+    border-radius:1rem;
+    font-size:1rem;
+    line-height:1;
+  }
+
+  .collectionDetailPanel{
+    flex:none;
+    width:100%;
+    height:auto;
+    min-height:9.25rem;
+    display:grid!important;
+    grid-template-columns:minmax(7.75rem,38%) minmax(0,1fr);
+    align-items:center;
+    gap:1rem;
+    padding:1rem;
+    border-width:.125rem;
+    border-radius:1.25rem;
+    container-type:normal;
+    box-shadow:var(--shadow-soft);
+  }
+  .collectionDetailHead{
+    width:auto;
+    min-width:0;
+    align-items:flex-start;
+    gap:.375rem;
+  }
+  .collectionDetailHead>span:first-child{
+    color:#748793;
+    font-size:.6875rem;
+    line-height:1;
+    letter-spacing:.1em;
+  }
+  .collectionDetailHead strong{
+    font-size:1.125rem;
+    line-height:1.15;
+  }
+  .collectionDetailRarity{
+    align-self:flex-start;
+    padding:.3125rem .5625rem;
+    border-radius:999px;
+    font-size:.6875rem!important;
+    line-height:1;
+    font-weight:1000!important;
+    letter-spacing:.07em;
+  }
+  .collectionDetailHead .collectionDetailRarity.commonRarity{color:#657783;background:#edf2f5}
+  .collectionDetailHead .collectionDetailRarity.rareRarity{color:#267ca3;background:#e6f6fc}
+  .collectionDetailHead .collectionDetailRarity.epicRarity{color:#81359f;background:#f4e7fb}
+  .collectionDetailHead .collectionDetailRarity.legendaryRarity{color:#9b5b08;background:#fff2cf}
+  .collectionDetailHead .collectionDetailRarity.mythicRarityTag{color:#7d247e;background:#fce4fb}
+  .collectionDetailHead .collectionDetailRarity.impossibleRarityTag{color:#a42828;background:#ffe4df}
+  .collectionDetailDesc{
+    min-width:0;
+    color:#536d7b;
+    font-size:1rem;
+    line-height:1.4;
+    font-weight:750;
+  }
+  .collectionDetailPanel.previewLocked{
+    border-color:#d5dde2;
+    background:#f7f9fa;
+  }
+}
+
+@media(max-width:22rem) and (orientation:portrait){
+  .ballCard{
+    flex-basis:82vw;
+    width:82vw;
+    padding:.875rem;
+  }
+  .collectionBall{
+    width:7.5rem;
+    height:7.5rem;
+  }
+  .collectionDetailPanel{
+    grid-template-columns:1fr;
+    gap:.625rem;
+  }
+  .collectionDetailHead{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+  }
+  .collectionDetailHead>span:first-child{grid-column:1/-1}
+}
+
+/* Vertical mobile collection catalog with animated rarity frames. */
+@media(max-width:50rem) and (orientation:portrait){
+  #collectionScreen .menuApp{
+    scroll-snap-type:none;
+  }
+  .collectionBrowseHint{
+    position:sticky;
+    top:3.875rem;
+    z-index:7;
+    min-height:2.25rem;
+    background:rgba(247,250,252,.95);
+    backdrop-filter:blur(.5rem);
+  }
+  .collectionBrowseHint span{
+    color:#348caf;
+    animation:collectionScrollArrow 1.15s ease-in-out infinite;
+  }
+
+  .collectionGrid{
+    flex:none;
+    width:100%;
+    height:auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    flex-wrap:nowrap;
+    align-items:stretch;
+    gap:1rem;
+    padding:.375rem .5rem 1rem;
+    overflow:visible;
+    scroll-snap-type:none;
+    scrollbar-width:none;
+  }
+  .collectionGrid::-webkit-scrollbar{display:none}
+
+  .ballCard{
+    --rarity-color:#8aa8b8;
+    --ball-accent:var(--rarity-color);
+    --ball-scale:1;
+    position:relative;
+    isolation:isolate;
+    flex:none;
+    width:100%;
+    height:auto;
+    min-height:20rem;
+    container-type:normal;
+    display:grid;
+    grid-template-columns:minmax(7.5rem,42%) minmax(0,1fr);
+    grid-template-areas:
+      "ball rarity"
+      "ball title"
+      "ball description"
+      "benefit benefit"
+      "action action";
+    grid-template-rows:auto auto minmax(4.5rem,auto) auto auto;
+    align-items:center;
+    align-content:start;
+    gap:.625rem 1rem;
+    padding:1.125rem;
+    border:.1875rem solid var(--rarity-color);
+    border-radius:1.5rem;
+    background:
+      radial-gradient(circle at 16% 26%,color-mix(in srgb,var(--rarity-color) 16%,transparent),transparent 38%),
+      linear-gradient(150deg,#ffffff 0%,color-mix(in srgb,var(--rarity-color) 8%,#f7fbfd) 100%);
+    box-shadow:
+      0 .75rem 1.5rem rgba(44,66,80,.14),
+      0 0 .875rem color-mix(in srgb,var(--rarity-color) 38%,transparent),
+      inset 0 0 1.25rem color-mix(in srgb,var(--rarity-color) 10%,transparent);
+    text-align:left;
+    scroll-snap-align:none;
+    overflow:hidden;
+    animation:collectionRarityGlow 3.2s ease-in-out infinite;
+  }
+  .ballCard:has(.commonRarity){--rarity-color:#85a9ba}
+  .ballCard:has(.rareRarity){--rarity-color:#28a9df}
+  .ballCard:has(.epicRarity){--rarity-color:#ad59de}
+  .ballCard:has(.legendaryRarity){--rarity-color:#ffad22}
+  .ballCard:has(.mythicRarityTag){--rarity-color:#ed56d8}
+  .ballCard:has(.impossibleRarityTag){--rarity-color:#ff624d}
+  #normalCard{--ball-accent:#3990ba}
+  #swiftCard{--ball-accent:#25a8d2}
+  #shieldCard{--ball-accent:#5963bb}
+  #magnetCard{--ball-accent:#8641a2}
+  #coinCard{--ball-accent:#d78e0b}
+  #giantCard{--ball-accent:#a84e25}
+  #ghostCard{--ball-accent:#72a7b4}
+  #legendaryCard{--ball-accent:#f39a2f}
+  #apexCard{--ball-accent:#e964df}
+  #cataclysmCard{--ball-accent:#ff713f}
+  #gaiaCard{--ball-accent:#4fca69}
+  .ballCard:nth-child(2n){animation-delay:-.8s}
+  .ballCard:nth-child(3n){animation-delay:-1.6s}
+  .collectionGrid .ballCard::before{
+    content:'';
+    position:absolute;
+    inset:.375rem;
+    z-index:-1;
+    display:block!important;
+    width:auto;
+    height:auto;
+    border:.0625rem solid color-mix(in srgb,var(--rarity-color) 55%,white);
+    border-radius:1.125rem;
+    opacity:.72;
+    pointer-events:none;
+    animation:collectionFrameLine 3.2s ease-in-out infinite;
+  }
+  .ballCard.previewed{
+    border-color:var(--rarity-color);
+    outline:.1875rem solid color-mix(in srgb,var(--rarity-color) 28%,transparent);
+    outline-offset:.125rem;
+  }
+  .ballCard.lockedCard{
+    opacity:1;
+    background:
+      radial-gradient(circle at 16% 26%,color-mix(in srgb,var(--rarity-color) 12%,transparent),transparent 38%),
+      linear-gradient(150deg,#f8fafb,color-mix(in srgb,var(--rarity-color) 6%,#f1f5f7));
+  }
+  .collectionGrid .ballCard.lockedCard::after{
+    content:'🔒\A LOCKED';
+    position:absolute;
+    inset:.375rem;
+    z-index:5;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:1rem;
+    border-radius:1.125rem;
+    color:#ffffff;
+    background:
+      radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--rarity-color) 24%,transparent),transparent 38%),
+      linear-gradient(180deg,rgba(28,47,59,.28),rgba(20,37,48,.6));
+    backdrop-filter:blur(.075rem) saturate(.82);
+    box-shadow:inset 0 0 2rem color-mix(in srgb,var(--rarity-color) 18%,rgba(18,35,45,.45));
+    white-space:pre;
+    text-align:center;
+    font-size:1.125rem;
+    line-height:1.65;
+    font-weight:1000;
+    letter-spacing:.11em;
+    text-shadow:0 .125rem .25rem rgba(0,0,0,.65),0 0 .75rem var(--rarity-color);
+    pointer-events:none;
+    animation:collectionLockOverlay 2.8s ease-in-out infinite;
+  }
+  .ballCard.lockedCard .lockBadge{display:none!important}
+  .ballCard.lockedCard .rarityLabel{
+    position:relative;
+    z-index:6;
+    box-shadow:0 0 .875rem var(--rarity-color);
+  }
+  .ballCard.lockedCard .collectionBall{
+    opacity:.92;
+    filter:saturate(1);
+  }
+
+  .lockBadge{
+    top:.75rem;
+    right:.75rem;
+    border-color:color-mix(in srgb,var(--rarity-color) 55%,#d3dde3);
+    color:var(--rarity-color);
+    box-shadow:0 0 .75rem color-mix(in srgb,var(--rarity-color) 35%,transparent);
+  }
+  .collectionBall{
+    grid-area:ball;
+    position:relative;
+    justify-self:center;
+    align-self:center;
+    flex:none;
+    width:clamp(7rem,34vw,9rem);
+    height:clamp(7rem,34vw,9rem);
+    margin:0;
+    border-width:.25rem;
+    border-color:color-mix(in srgb,var(--ball-accent) 84%,#264c60);
+    box-shadow:
+      0 .875rem 1.25rem rgba(38,67,83,.22),
+      0 0 1.4rem color-mix(in srgb,var(--ball-accent) 68%,transparent),
+      0 0 0 .1875rem color-mix(in srgb,var(--ball-accent) 22%,transparent),
+      inset -.5rem -.75rem 1rem rgba(16,45,62,.16),
+      inset .4rem .4rem .875rem rgba(255,255,255,.34);
+    isolation:isolate;
+    overflow:visible;
+    animation:collectionBallFloat 2.8s ease-in-out infinite;
+  }
+  .giantCollectionBall{--ball-scale:1.08}
+  .ballCard:nth-child(2n) .collectionBall{animation-delay:-.55s}
+  .ballCard:nth-child(3n) .collectionBall{animation-delay:-1.1s}
+  .ballCard:nth-child(4n) .collectionBall{animation-delay:-1.65s}
+  .collectionBall::before{
+    content:'';
+    position:absolute;
+    inset:9%;
+    z-index:2;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 29% 23%,rgba(255,255,255,.76) 0 8%,rgba(255,255,255,.25) 15%,transparent 27%),
+      linear-gradient(118deg,transparent 17%,rgba(255,255,255,.08) 32%,rgba(255,255,255,.48) 45%,rgba(255,255,255,.06) 58%,transparent 72%);
+    mix-blend-mode:screen;
+    opacity:.62;
+    pointer-events:none;
+    animation:collectionBallGleam 3.1s ease-in-out infinite;
+  }
+  .collectionBall::after{
+    content:'';
+    position:absolute;
+    inset:-.75rem;
+    z-index:-1;
+    border:.125rem dashed color-mix(in srgb,var(--ball-accent) 78%,white);
+    border-radius:50%;
+    opacity:.4;
+    pointer-events:none;
+    animation:collectionBallAura 2.65s ease-in-out infinite;
+  }
+  .legendaryCollectionBall::after,
+  .apexCollectionBall::after,
+  .cataclysmCollectionBall::after,
+  .gaiaCollectionBall::after{
+    border-style:double;
+    border-width:.25rem;
+    opacity:.65;
+  }
+  .apexInnerGlow{
+    position:absolute;
+    inset:22%;
+    display:block;
+    border-radius:50%;
+    background:radial-gradient(circle,#ffffff 0,#74dfff 22%,#e55bdd 52%,transparent 72%);
+    box-shadow:0 0 1.125rem #f15ce1;
+    opacity:.62;
+    animation:apexCollectionPulse 1.7s ease-in-out infinite;
+  }
+
+  .rarityLabel{
+    grid-area:rarity;
+    justify-self:start;
+    align-self:end;
+    border:.0625rem solid color-mix(in srgb,var(--rarity-color) 70%,white);
+    box-shadow:0 0 .625rem color-mix(in srgb,var(--rarity-color) 24%,transparent);
+  }
+  .ballCard h2{
+    grid-area:title;
+    align-self:start;
+    justify-content:flex-start;
+    text-align:left;
+  }
+  .ballCard p{
+    grid-area:description;
+    min-height:0;
+    align-self:start;
+    color:#506a79;
+    font-size:1rem;
+    line-height:1.4;
+    text-align:left;
+  }
+  .ballCard .statRow{
+    grid-area:benefit;
+    min-height:3.25rem;
+    padding:.75rem .875rem;
+    border:.125rem solid color-mix(in srgb,var(--rarity-color) 42%,#d6e1e7);
+    background:color-mix(in srgb,var(--rarity-color) 8%,#f7fafb);
+    font-size:.8125rem;
+    line-height:1.2;
+  }
+  .ballCard .statRow span{
+    flex:none;
+    color:#6a7f8b;
+    font-size:.6875rem;
+    letter-spacing:.07em;
+  }
+  .ballCard .statRow strong{
+    color:color-mix(in srgb,var(--rarity-color) 72%,#294e60);
+    text-align:right;
+  }
+  .equipButton{
+    grid-area:action;
+    min-height:3.5rem;
+    border-color:color-mix(in srgb,var(--rarity-color) 65%,#3682a2);
+    box-shadow:0 .25rem 0 color-mix(in srgb,var(--rarity-color) 48%,#347995),0 0 .75rem color-mix(in srgb,var(--rarity-color) 24%,transparent);
+  }
+  .collectionDetailPanel{display:none!important}
+}
+
+@media(max-width:22rem) and (orientation:portrait){
+  .collectionBrowseHint{
+    font-size:.6875rem;
+    line-height:1.12;
+  }
+  .ballCard{
+    width:100%;
+    min-height:19rem;
+    grid-template-columns:6.75rem minmax(0,1fr);
+    gap:.5625rem .75rem;
+    padding:.875rem;
+    border-radius:1.25rem;
+  }
+  .collectionBall{
+    width:6.75rem;
+    height:6.75rem;
+  }
+  .ballCard p{font-size:.9375rem}
+  .ballCard .statRow{
+    align-items:flex-start;
+    gap:.5rem;
+  }
+}
+
+@keyframes collectionScrollArrow{
+  0%,100%{transform:translateY(-.125rem)}
+  50%{transform:translateY(.1875rem)}
+}
+@keyframes collectionRarityGlow{
+  0%,100%{
+    box-shadow:0 .75rem 1.5rem rgba(44,66,80,.14),0 0 1.05rem color-mix(in srgb,var(--rarity-color) 46%,transparent),0 0 0 .0625rem color-mix(in srgb,var(--rarity-color) 34%,transparent),inset 0 0 1.1rem color-mix(in srgb,var(--rarity-color) 10%,transparent)
+  }
+  50%{
+    box-shadow:0 .9rem 1.7rem rgba(44,66,80,.17),0 0 2rem color-mix(in srgb,var(--rarity-color) 78%,transparent),0 0 0 .1875rem color-mix(in srgb,var(--rarity-color) 38%,transparent),inset 0 0 1.75rem color-mix(in srgb,var(--rarity-color) 22%,transparent)
+  }
+}
+@keyframes collectionFrameLine{
+  0%,100%{opacity:.48;box-shadow:inset 0 0 .375rem color-mix(in srgb,var(--rarity-color) 10%,transparent)}
+  50%{opacity:1;box-shadow:inset 0 0 .875rem color-mix(in srgb,var(--rarity-color) 42%,transparent)}
+}
+@keyframes collectionBallFloat{
+  0%,100%{transform:translateY(.2rem) scale(var(--ball-scale))}
+  50%{transform:translateY(-.45rem) scale(var(--ball-scale))}
+}
+@keyframes collectionBallGleam{
+  0%,100%{opacity:.38;transform:translate(-5%,4%) scale(.94)}
+  50%{opacity:.78;transform:translate(5%,-4%) scale(1.05)}
+}
+@keyframes collectionBallAura{
+  0%,100%{opacity:.24;transform:scale(.9)}
+  50%{opacity:.62;transform:scale(1.08)}
+}
+@keyframes apexCollectionPulse{
+  0%,100%{transform:scale(.86);opacity:.42}
+  50%{transform:scale(1.12);opacity:.78}
+}
+@keyframes collectionLockOverlay{
+  0%,100%{background-color:rgba(20,37,48,.04)}
+  50%{background-color:color-mix(in srgb,var(--rarity-color) 9%,rgba(20,37,48,.12))}
+}
+@media(prefers-reduced-motion:reduce){
+  .ballCard,
+  .collectionBall,
+  .collectionBall::before,
+  .collectionBall::after,
+  .ballCard.lockedCard::after,
+  .collectionBrowseHint span,
+  .apexInnerGlow{animation:none!important}
+}
+
+/* Canonical ball images are injected from BALL_ASSET_PATHS for every surface. */
+.collectionBall,
+.mythicCore,
+.elementOrb,
+.gaiaCore,
+.rewardBall{
+  background-color:transparent;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+}
+.mythicCore,
+.elementOrb,
+.gaiaCore,
+.rewardBall{border-color:transparent}
+.mythicCore::after,
+.elementOrb::before,
+.gaiaCore::before,
+.gaiaCore::after,
+.apexInnerGlow{display:none!important}
+
+/* ============================================================
+   SHOP REDESIGN — CHUNKY MOBILE GAME CATALOG
+   ============================================================ */
+#storeScreen{
+  position:relative;
+  padding:0;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% -8%,rgba(74,105,142,.45),transparent 29rem),
+    linear-gradient(180deg,#1d3453 0,#122238 100%);
+}
+#storeScreen::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.2;
+  background-image:
+    linear-gradient(rgba(255,255,255,.035) .0625rem,transparent .0625rem),
+    linear-gradient(90deg,rgba(255,255,255,.035) .0625rem,transparent .0625rem);
+  background-size:1.5rem 1.5rem;
+}
+#storeScreen .menuApp{
+  position:relative;
+  z-index:1;
+  width:min(100%,30rem);
+  height:100dvh;
+  margin:0 auto;
+  gap:.72rem;
+  padding:0 .62rem calc(6.4rem + env(safe-area-inset-bottom));
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior-y:contain;
+  scrollbar-width:none;
+}
+#storeScreen .menuApp::-webkit-scrollbar{display:none}
+
+#storeScreen .menuHeader{
+  position:sticky;
+  order:0;
+  top:0;
+  z-index:20;
+  width:calc(100% + 1.24rem);
+  min-height:5.4rem;
+  margin:0 -.62rem .08rem;
+  padding:max(.65rem,env(safe-area-inset-top)) .85rem .65rem;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:end;
+  color:#fff7d0;
+  background:
+    radial-gradient(circle at 50% 120%,rgba(255,130,95,.2),transparent 48%),
+    linear-gradient(180deg,#a7203f 0,#821531 100%);
+  border:0;
+  border-bottom:.34rem solid #ffc133;
+  box-shadow:
+    0 .18rem 0 #7d321e,
+    0 .42rem 0 #f18a25,
+    0 .65rem 1.25rem rgba(4,13,26,.35);
+  backdrop-filter:none;
+}
+#storeScreen .menuHeader::after{
+  content:'';
+  grid-column:3;
+}
+#storeScreen .menuHeader>div:first-child{
+  grid-column:2;
+  grid-row:1;
+  display:block;
+  text-align:center;
+}
+#storeScreen .menuHeader h1{
+  color:#fff8c9;
+  font-size:2.25rem;
+  line-height:1;
+  letter-spacing:-.045em;
+  text-transform:none;
+  -webkit-text-stroke:.075rem #702411;
+  text-shadow:
+    0 .15rem 0 #a34019,
+    0 .26rem 0 #5e1a13,
+    0 .38rem .25rem rgba(49,9,17,.5);
+}
+#storeScreen .bigWallet{
+  grid-column:1;
+  grid-row:1;
+  justify-self:start;
+  min-width:6.65rem;
+  min-height:2.75rem;
+  padding:.35rem .62rem;
+  gap:.45rem;
+  color:#741f29;
+  background:linear-gradient(180deg,#fff9e9,#f2ddbc);
+  border:.15rem solid #9e3a32;
+  border-radius:.7rem;
+  box-shadow:inset 0 .12rem 0 #fff,0 .18rem 0 #5e1722;
+  font-size:1.08rem;
+  font-weight:1000;
+}
+#storeScreen .bigWallet .coinIcon,
+#storeScreen .priceLine .coinIcon{
+  color:#fff3a1;
+  background:radial-gradient(circle at 35% 30%,#fff49b 0 9%,#ffd43e 10% 52%,#f49b16 53% 100%);
+  border-color:#ca6b0a;
+  box-shadow:inset 0 0 0 .11rem rgba(255,248,143,.65),0 .12rem 0 rgba(111,46,11,.35);
+}
+#storeScreen .bigWallet .coinIcon::before,
+#storeScreen .priceLine .coinIcon::before{
+  content:'★';
+  font-size:.58rem;
+}
+#storeScreen .bigWallet .coinIcon,
+#storeScreen .priceLine .coinIcon{font-size:0}
+
+#storeScreen .storeSectionTitle,
+#storeScreen .storeRarityDivider{
+  position:relative;
+  flex:none;
+  width:100%;
+  height:auto;
+  min-height:2.9rem;
+  padding:.52rem .85rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  color:#fff6da;
+  border:.15rem solid #eb8d4c;
+  border-radius:.75rem;
+  background:linear-gradient(180deg,#ba2c50 0,#90203f 100%);
+  box-shadow:
+    inset 0 0 0 .12rem #74152f,
+    inset 0 .14rem 0 rgba(255,255,255,.18),
+    0 .18rem 0 #4b1725,
+    0 .34rem .55rem rgba(5,15,28,.3);
+  text-align:center;
+}
+#storeScreen .storeSectionTitle{order:1}
+#storeScreen .storeHero{order:2}
+#storeScreen .mythicStoreDivider{order:3}
+#storeScreen .mythicStoreCard{order:4}
+#storeScreen .impossibleStoreDivider{order:5}
+#storeScreen .impossibleStoreGrid{order:6}
+#storeScreen .instantHint{order:7}
+#storeScreen .storeNote{order:8}
+#storeScreen .storeSectionTitle>div:first-child{
+  display:flex;
+  align-items:center;
+}
+#storeScreen .storeSectionTitle strong,
+#storeScreen .storeRarityDivider strong{
+  color:inherit;
+  font-size:1.14rem;
+  line-height:1;
+  letter-spacing:.01em;
+  text-shadow:0 .13rem 0 rgba(65,20,29,.62);
+}
+#storeScreen .storeSectionTitle span,
+#storeScreen .storeRarityDivider span:last-child,
+#storeScreen .premiumSpark,
+#storeScreen .storeRarityPip{display:none}
+#storeScreen .mythicStoreDivider{
+  border-color:#7e72ff;
+  background:linear-gradient(180deg,#5d4be1 0,#3e2eb5 100%);
+  box-shadow:
+    inset 0 0 0 .12rem #2a207f,
+    inset 0 .14rem 0 rgba(255,255,255,.22),
+    0 .18rem 0 #17104e,
+    0 .34rem .55rem rgba(5,15,28,.32);
+}
+#storeScreen .impossibleStoreDivider{
+  border-color:#f7b12d;
+  background:linear-gradient(180deg,#ffbd39 0,#ee8c1b 100%);
+  box-shadow:
+    inset 0 0 0 .12rem #c26410,
+    inset 0 .14rem 0 rgba(255,255,255,.35),
+    0 .18rem 0 #63320d,
+    0 .34rem .55rem rgba(5,15,28,.3);
+}
+#storeScreen .impossibleStoreDivider strong{
+  color:#6e271c;
+  text-shadow:0 .08rem 0 rgba(255,255,255,.55);
+}
+
+#storeScreen .storeHero,
+#storeScreen .mythicStoreCard,
+#storeScreen .impossibleStoreCard{
+  position:relative;
+  isolation:isolate;
+  width:100%;
+  min-width:0;
+  flex:none;
+  overflow:hidden;
+  border:.18rem solid #f6a82e;
+  border-radius:1.15rem;
+  background:
+    radial-gradient(circle at 14% 5%,rgba(255,255,255,.95),transparent 8rem),
+    linear-gradient(145deg,#fffaf0 0,#ffe9c8 70%,#f6cf97 100%);
+  box-shadow:
+    inset 0 0 0 .16rem #93441f,
+    inset 0 .18rem 0 rgba(255,255,255,.9),
+    0 .28rem 0 #77311d,
+    0 .5rem .75rem rgba(5,14,28,.4);
+}
+#storeScreen .storeHero::after,
+#storeScreen .mythicStoreCard::after,
+#storeScreen .impossibleStoreCard::after{
+  content:'';
+  position:absolute;
+  z-index:-1;
+  inset:.35rem;
+  pointer-events:none;
+  border:.08rem solid rgba(139,66,32,.25);
+  border-radius:.72rem;
+}
+#storeScreen .storeHero{
+  min-height:12.8rem;
+  display:grid;
+  grid-template-columns:7.35rem minmax(0,1fr);
+  grid-template-rows:auto 1fr auto;
+  grid-template-areas:
+    "pack title"
+    "pack description"
+    "price buy";
+  align-items:center;
+  gap:.35rem .72rem;
+  padding:1rem .88rem .95rem;
+}
+#storeScreen .storeHero::before{
+  content:'';
+  position:absolute;
+  z-index:-1;
+  left:-2rem;
+  top:-3.2rem;
+  width:13rem;
+  height:13rem;
+  opacity:.7;
+  background:repeating-conic-gradient(from -12deg,rgba(255,188,45,.45) 0 9deg,transparent 9deg 20deg);
+  border-radius:50%;
+}
+#storeScreen .shopPackVisual{
+  grid-area:pack;
+  grid-row:1/3;
+  width:100%;
+  height:8rem;
+}
+#storeScreen .foilPackStore{
+  width:5.15rem;
+  height:6.9rem;
+  filter:drop-shadow(0 .38rem .22rem rgba(73,33,16,.28));
+}
+#storeScreen .storeHero h2{
+  grid-area:title;
+  align-self:end;
+  color:#70251c;
+  font-size:1.55rem;
+  line-height:1;
+  white-space:normal;
+  text-shadow:0 .08rem 0 #fff;
+}
+#storeScreen .storeHero p{
+  grid-area:description;
+  align-self:start;
+  color:#7b4a39;
+  font-size:.84rem;
+  line-height:1.25;
+  font-weight:850;
+}
+#storeScreen .storeHero .priceLine{
+  grid-area:price;
+  justify-self:center;
+  color:#7b2b1c;
+  font-size:1.25rem;
+}
+
+#storeScreen .primary,
+#storeScreen .wideAction{
+  min-height:3.18rem;
+  padding:.55rem .82rem;
+  color:#fffbe3;
+  background:linear-gradient(180deg,#78df38 0,#2fa214 58%,#17760c 100%);
+  border:.16rem solid #26790e;
+  border-radius:.78rem;
+  box-shadow:
+    inset 0 .16rem 0 rgba(255,255,255,.55),
+    inset 0 0 0 .1rem #59c62a,
+    0 .22rem 0 #124f08,
+    0 .32rem .45rem rgba(33,87,12,.28);
+  font-size:.88rem;
+  line-height:1.05;
+  text-shadow:0 .12rem 0 #174f0c;
+}
+#storeScreen .primary:active,
+#storeScreen .wideAction:active{
+  transform:translateY(.18rem);
+  box-shadow:inset 0 .1rem 0 rgba(255,255,255,.4),0 .06rem 0 #124f08;
+}
+#storeScreen .primary:disabled,
+#storeScreen .wideAction:disabled{
+  opacity:.72;
+  filter:saturate(.65);
+}
+#storeScreen .storeHero #buyPack{
+  grid-area:buy;
+  width:100%;
+  min-width:0;
+}
+
+#storeScreen .mythicStoreCard,
+#storeScreen .impossibleStoreCard{
+  min-height:13.8rem;
+  display:grid;
+  grid-template-columns:7.35rem minmax(0,1fr);
+  grid-template-rows:1fr 3.7rem;
+  grid-template-areas:
+    "visual details"
+    "purchase purchase";
+  align-items:center;
+  gap:.5rem .7rem;
+  padding:.75rem .8rem .7rem;
+  color:#6e281e;
+  text-align:left;
+}
+#storeScreen .mythicStoreCard{
+  border-color:#8068ff;
+  box-shadow:
+    inset 0 0 0 .16rem #44339d,
+    inset 0 .18rem 0 rgba(255,255,255,.9),
+    0 .28rem 0 #291e68,
+    0 .5rem .75rem rgba(5,14,28,.42);
+}
+#storeScreen .cataclysmStoreCard{border-color:#ef6541}
+#storeScreen .gaiaStoreCard{border-color:#7fc248}
+#storeScreen .mythicVisual,
+#storeScreen .impossibleVisual{
+  grid-area:visual;
+  width:7rem;
+  height:7rem;
+  justify-self:center;
+}
+#storeScreen .mythicCore,
+#storeScreen .elementOrb,
+#storeScreen .gaiaCore{
+  width:4.65rem;
+  height:4.65rem;
+}
+#storeScreen .mythicText,
+#storeScreen .impossibleText{
+  grid-area:details;
+  align-items:flex-start;
+  gap:.35rem;
+}
+#storeScreen .mythicRarity,
+#storeScreen .impossibleRarity{
+  align-self:flex-start;
+  padding:.28rem .52rem;
+  color:#fff8df;
+  background:linear-gradient(180deg,#a73b58,#7e1d38);
+  border:.08rem solid #5f172c;
+  font-size:.64rem;
+  text-shadow:0 .08rem 0 rgba(54,13,24,.7);
+}
+#storeScreen .mythicRarity{
+  color:#32226f;
+  background:linear-gradient(90deg,#8cecff,#e5b2ff,#ffe372);
+  border-color:#6654cb;
+  text-shadow:0 .05rem 0 rgba(255,255,255,.75);
+}
+#storeScreen .mythicText h2,
+#storeScreen .impossibleText h2{
+  color:#70251c;
+  font-size:1.45rem;
+  line-height:1;
+  white-space:normal;
+  text-shadow:0 .08rem 0 #fff;
+}
+#storeScreen .mythicText p,
+#storeScreen .impossibleText p{
+  color:#7b4a39;
+  font-size:.78rem;
+  line-height:1.28;
+  font-weight:850;
+  opacity:1;
+}
+#storeScreen .mythicPurchase,
+#storeScreen .impossiblePurchase{
+  position:relative;
+  grid-area:purchase;
+  width:calc(100% + .5rem);
+  height:3.45rem;
+  min-width:0;
+  margin:0 -.25rem;
+  padding:.28rem .22rem .22rem .65rem;
+  flex-direction:row;
+  justify-content:space-between;
+  gap:.65rem;
+  border:.1rem solid #7a1e36;
+  border-radius:.72rem;
+  background:linear-gradient(180deg,#bd3155,#8b1d3d);
+  box-shadow:inset 0 .12rem 0 rgba(255,255,255,.17);
+}
+#storeScreen .mythicPrice,
+#storeScreen .impossiblePrice{
+  flex:none;
+  color:#fff8d8;
+  font-size:1.08rem;
+  text-shadow:0 .11rem 0 #591627;
+}
+#storeScreen .mythicBuyButton,
+#storeScreen .impossibleBuyButton{
+  flex:0 1 11.5rem;
+  width:auto;
+  height:2.75rem;
+  min-height:2.75rem;
+  font-size:.78rem;
+}
+#storeScreen .impossibleStoreGrid{
+  flex:none;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:.85rem;
+}
+#storeScreen .storeNote{
+  position:sticky;
+  bottom:.2rem;
+  z-index:10;
+  min-height:0;
+  padding:.7rem;
+  color:#fff6d8;
+  border:.1rem solid #f3a02b;
+  border-radius:.72rem;
+  background:rgba(131,25,54,.96);
+  box-shadow:0 .3rem .65rem rgba(4,12,24,.35);
+  font-size:.85rem;
+}
+#storeScreen .storeNote:empty{display:none}
+
+body:has(#storeScreen.active) .quickNav{
+  left:50%;
+  right:auto;
+  bottom:0;
+  z-index:50;
+  width:min(100%,30rem);
+  height:5.35rem;
+  padding:.25rem .45rem max(.25rem,env(safe-area-inset-bottom));
+  gap:.32rem;
+  transform:translateX(-50%);
+  border:0;
+  border-top:.3rem solid #ffc236;
+  border-radius:0;
+  background:linear-gradient(180deg,#a71f43,#75152f);
+  box-shadow:0 -.18rem 0 #74311e,0 -.42rem .8rem rgba(4,11,23,.35);
+}
+body:has(#storeScreen.active) .quickNavButton{
+  min-width:0;
+  min-height:4.55rem;
+  gap:.18rem;
+  padding:.32rem .45rem .25rem;
+  color:#ffd86b;
+  background:linear-gradient(180deg,rgba(195,49,79,.72),rgba(123,20,47,.82));
+  border:.1rem solid #681129;
+  border-radius:.5rem;
+  box-shadow:inset 0 .12rem 0 rgba(255,255,255,.12);
+  font-size:.72rem;
+  text-shadow:0 .1rem 0 #53101f;
+}
+body:has(#storeScreen.active) .quickNavButton.active{
+  color:#fff4c4;
+  background:linear-gradient(180deg,#cf3a62,#9c2043);
+  border:.16rem solid #ffcf43;
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.2),0 0 .5rem rgba(255,193,44,.32);
+  transform:translateY(-.18rem);
+}
+body:has(#storeScreen.active) .quickNavIcon{
+  font-size:2rem;
+  line-height:1;
+  filter:drop-shadow(0 .11rem 0 #5e1522);
+}
+
+@media(max-width:23.75rem){
+  #storeScreen .menuHeader{min-height:5rem;padding-left:.55rem;padding-right:.55rem}
+  #storeScreen .menuHeader h1{font-size:2rem}
+  #storeScreen .bigWallet{min-width:5.8rem;min-height:2.5rem;font-size:.95rem}
+  #storeScreen .storeHero,
+  #storeScreen .mythicStoreCard,
+  #storeScreen .impossibleStoreCard{grid-template-columns:6.2rem minmax(0,1fr)}
+  #storeScreen .storeHero{padding-left:.65rem;padding-right:.65rem}
+  #storeScreen .mythicStoreCard,
+  #storeScreen .impossibleStoreCard{padding-left:.62rem;padding-right:.62rem}
+  #storeScreen .mythicVisual,
+  #storeScreen .impossibleVisual{width:5.9rem;height:5.9rem}
+  #storeScreen .mythicCore,
+  #storeScreen .elementOrb,
+  #storeScreen .gaiaCore{width:4.15rem;height:4.15rem}
+  #storeScreen .mythicText h2,
+  #storeScreen .impossibleText h2{font-size:1.24rem}
+  #storeScreen .mythicText p,
+  #storeScreen .impossibleText p{font-size:.7rem}
+  #storeScreen .mythicBuyButton,
+  #storeScreen .impossibleBuyButton{font-size:.69rem}
+}
+
+/* ============================================================
+   UNIFIED GAME THEME — SHOP / COLLECTION / NAVIGATION
+   ============================================================ */
+:root{
+  --game-ice:#f6fcff;
+  --game-ice-blue:#dff5fc;
+  --game-sky:#72d2ea;
+  --game-blue:#51abc9;
+  --game-blue-deep:#2e7f9e;
+  --game-navy:#294e63;
+  --game-line:#91cfe2;
+}
+
+#storeScreen,
+#collectionScreen{
+  background:
+    radial-gradient(circle at 50% -10%,rgba(111,211,235,.42),transparent 27rem),
+    linear-gradient(180deg,#eaf8fd 0,#dceff6 55%,#d4e7ef 100%);
+}
+#storeScreen::before,
+#collectionScreen::before{
+  background-image:
+    linear-gradient(rgba(52,126,156,.055) .0625rem,transparent .0625rem),
+    linear-gradient(90deg,rgba(52,126,156,.055) .0625rem,transparent .0625rem);
+}
+
+#storeScreen .menuHeader{
+  color:white;
+  background:
+    radial-gradient(circle at 50% 120%,rgba(223,251,255,.34),transparent 52%),
+    linear-gradient(180deg,#78d8ec 0,#4ea9c8 100%);
+  border-bottom-color:#d8f8ff;
+  box-shadow:
+    0 .18rem 0 #2f7f9e,
+    0 .4rem 0 #8ad9eb,
+    0 .65rem 1.25rem rgba(39,83,104,.28);
+}
+#storeScreen .menuHeader h1,
+#collectionScreen .menuHeader h1{
+  color:#fff;
+  -webkit-text-stroke:.075rem #276f8d;
+  text-shadow:
+    0 .14rem 0 #3c92b1,
+    0 .25rem 0 #246783,
+    0 .36rem .24rem rgba(24,74,94,.32);
+}
+#storeScreen .bigWallet,
+#collectionScreen .bigWallet{
+  color:var(--game-navy);
+  background:linear-gradient(180deg,#fff,#eaf8fd);
+  border-color:#398cab;
+  box-shadow:inset 0 .12rem 0 #fff,0 .18rem 0 #276f8a,0 .3rem .7rem rgba(38,91,112,.18);
+}
+
+#storeScreen .storeSectionTitle,
+#storeScreen .storeRarityDivider{
+  color:white;
+  border-color:#b8eaf5;
+  background:linear-gradient(180deg,#6dccdf 0,#459fbe 100%);
+  box-shadow:
+    inset 0 0 0 .12rem #347f9e,
+    inset 0 .14rem 0 rgba(255,255,255,.34),
+    0 .18rem 0 #2b6f8b,
+    0 .34rem .55rem rgba(35,79,100,.22);
+}
+#storeScreen .storeSectionTitle strong,
+#storeScreen .storeRarityDivider strong{
+  text-shadow:0 .13rem 0 #2b708d;
+}
+#storeScreen .mythicStoreDivider{
+  border-color:#b8ecf8;
+  background:linear-gradient(90deg,#62c9e0 0,#7d95df 50%,#69c7dc 100%);
+  box-shadow:
+    inset 0 0 0 .12rem #4c76ae,
+    inset 0 .14rem 0 rgba(255,255,255,.34),
+    0 .18rem 0 #36577f,
+    0 .34rem .55rem rgba(35,79,100,.22);
+}
+#storeScreen .impossibleStoreDivider{
+  border-color:#b8eaf5;
+  background:linear-gradient(180deg,#72d4e8 0,#4ba5c3 100%);
+  box-shadow:
+    inset 0 0 0 .12rem #347f9e,
+    inset 0 .14rem 0 rgba(255,255,255,.34),
+    0 .18rem 0 #2b6f8b,
+    0 .34rem .55rem rgba(35,79,100,.22);
+}
+#storeScreen .impossibleStoreDivider strong{
+  color:white;
+  text-shadow:0 .13rem 0 #2b708d;
+}
+
+#storeScreen .storeHero,
+#storeScreen .mythicStoreCard,
+#storeScreen .impossibleStoreCard{
+  border-color:#7ec7dd;
+  background:
+    radial-gradient(circle at 14% 5%,rgba(255,255,255,.98),transparent 8rem),
+    linear-gradient(145deg,#fff 0,#edf9fd 70%,#d8eff7 100%);
+  box-shadow:
+    inset 0 0 0 .16rem #4e9dbb,
+    inset 0 .18rem 0 rgba(255,255,255,.95),
+    0 .28rem 0 #337d9b,
+    0 .5rem .75rem rgba(39,83,104,.25);
+}
+#storeScreen .storeHero::after,
+#storeScreen .mythicStoreCard::after,
+#storeScreen .impossibleStoreCard::after{
+  border-color:rgba(62,143,174,.25);
+}
+#storeScreen .storeHero::before{
+  background:repeating-conic-gradient(from -12deg,rgba(103,205,230,.31) 0 9deg,transparent 9deg 20deg);
+}
+#storeScreen .mythicStoreCard{
+  border-color:#839ce0;
+  box-shadow:
+    inset 0 0 0 .16rem #6079bc,
+    inset 0 .18rem 0 rgba(255,255,255,.95),
+    0 .28rem 0 #465d9c,
+    0 .5rem .75rem rgba(39,83,104,.27);
+}
+#storeScreen .cataclysmStoreCard{border-color:#69bdd5}
+#storeScreen .gaiaStoreCard{border-color:#73bfd0}
+#storeScreen .storeHero h2,
+#storeScreen .mythicText h2,
+#storeScreen .impossibleText h2{
+  color:var(--game-navy);
+  text-shadow:0 .08rem 0 #fff;
+}
+#storeScreen .storeHero p,
+#storeScreen .mythicText p,
+#storeScreen .impossibleText p{
+  color:#577486;
+}
+#storeScreen .storeHero .priceLine{color:var(--game-navy)}
+#storeScreen .impossibleRarity{
+  color:white;
+  background:linear-gradient(180deg,#65bfd7,#3f94b3);
+  border-color:#327e9b;
+  text-shadow:0 .08rem 0 #276b85;
+}
+
+#storeScreen .primary,
+#storeScreen .wideAction{
+  color:white;
+  background:linear-gradient(180deg,#8be0f0 0,#58b4d1 58%,#3b91af 100%);
+  border-color:#317d9b;
+  box-shadow:
+    inset 0 .16rem 0 rgba(255,255,255,.58),
+    inset 0 0 0 .1rem #70cce2,
+    0 .22rem 0 #286d88,
+    0 .32rem .45rem rgba(39,102,127,.25);
+  text-shadow:0 .12rem 0 #2a7390;
+}
+#storeScreen .primary:active,
+#storeScreen .wideAction:active{
+  box-shadow:inset 0 .1rem 0 rgba(255,255,255,.42),0 .06rem 0 #286d88;
+}
+#storeScreen .mythicPurchase,
+#storeScreen .impossiblePurchase{
+  border-color:#468da8;
+  background:linear-gradient(180deg,#69bfd8,#438faa);
+  box-shadow:inset 0 .12rem 0 rgba(255,255,255,.24);
+}
+#storeScreen .mythicPrice,
+#storeScreen .impossiblePrice{
+  color:white;
+  text-shadow:0 .11rem 0 #2d6e87;
+}
+#storeScreen .storeNote{
+  color:white;
+  border-color:#a8e2f0;
+  background:rgba(58,142,174,.96);
+  box-shadow:0 .3rem .65rem rgba(35,79,100,.24);
+}
+
+#collectionScreen{
+  position:relative;
+}
+#collectionScreen .menuApp{
+  width:min(100%,30rem);
+  margin-inline:auto;
+}
+#collectionScreen .menuHeader{
+  color:white;
+  padding:.5rem .65rem;
+  border:.125rem solid #a9e2ef;
+  border-radius:1rem;
+  background:
+    radial-gradient(circle at 50% 120%,rgba(223,251,255,.3),transparent 52%),
+    linear-gradient(180deg,#78d8ec 0,#4ea9c8 100%);
+  box-shadow:inset 0 .12rem 0 rgba(255,255,255,.35),0 .22rem 0 #2f7f9e,0 .45rem .9rem rgba(39,83,104,.2);
+  backdrop-filter:none;
+}
+#collectionScreen .screenEyebrow{color:#dff8ff}
+#collectionScreen .collectionBrowseHint{
+  color:#39748f;
+  background:linear-gradient(180deg,#fff,#eaf8fd);
+  border-color:#98d3e3;
+  box-shadow:0 .15rem 0 #74b7cd;
+}
+
+body:has(#storeScreen.active) .quickNav,
+body:has(#collectionScreen.active) .quickNav{
+  left:50%;
+  right:auto;
+  bottom:0;
+  z-index:50;
+  width:min(100%,30rem);
+  height:5.35rem;
+  padding:.34rem .46rem max(.3rem,env(safe-area-inset-bottom));
+  gap:.38rem;
+  transform:translateX(-50%);
+  border:0;
+  border-top:.22rem solid #99dceb;
+  border-radius:0;
+  background:linear-gradient(180deg,rgba(248,253,255,.98),rgba(215,239,247,.98));
+  box-shadow:0 -.16rem 0 #438fab,0 -.42rem .8rem rgba(39,83,104,.22);
+}
+body:has(#storeScreen.active) .quickNavButton,
+body:has(#collectionScreen.active) .quickNavButton{
+  min-width:0;
+  min-height:4.45rem;
+  gap:.18rem;
+  padding:.3rem .45rem .24rem;
+  color:#527487;
+  background:linear-gradient(180deg,#f8fdff,#e6f4f9);
+  border:.1rem solid #a9d3df;
+  border-radius:.75rem;
+  box-shadow:inset 0 .12rem 0 #fff,0 .14rem 0 #81b9ca;
+  font-size:.72rem;
+  text-shadow:none;
+}
+body:has(#storeScreen.active) .quickNavButton.active,
+body:has(#collectionScreen.active) .quickNavButton.active{
+  color:white;
+  background:linear-gradient(180deg,#84dcee,#4fa8c7);
+  border:.14rem solid #2f7f9e;
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.48),0 .18rem 0 #2d7895,0 0 .65rem rgba(72,172,205,.35);
+  text-shadow:0 .09rem 0 #2d748f;
+  transform:translateY(-.12rem);
+}
+.quickNavIcon{
+  width:2rem;
+  height:2rem;
+  display:grid;
+  place-items:center;
+  font-size:0;
+  line-height:1;
+  filter:none;
+}
+.quickNavIcon svg{
+  width:100%;
+  height:100%;
+  overflow:visible;
+  color:currentColor;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.15;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  filter:drop-shadow(0 .09rem 0 rgba(31,84,105,.18));
+}
+.quickNavLabel{line-height:1;font-weight:1000;letter-spacing:.045em}
+.quickNavButton:focus-visible{
+  outline:.18rem solid #fff;
+  outline-offset:-.32rem;
+}
+.gameUtilityMenuButton{
+  color:white;
+  background:linear-gradient(180deg,#84dcee,#4fa8c7);
+  border-color:#2f7f9e;
+  box-shadow:inset 0 .13rem 0 rgba(255,255,255,.45),0 .2rem 0 #2d7895;
+}
+.gameUtilityMenuButton .utilityIcon{
+  width:1.65rem;
+  height:1.65rem;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.1;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+/* Commerce palette: neutral structure, cyan brand, gold reward, green action. */
+:root{
+  --ui-charcoal:#263943;
+  --ui-charcoal-deep:#1b2930;
+  --ui-surface:#ffffff;
+  --ui-canvas:#eef3f5;
+  --ui-cyan:#4eb3cd;
+  --ui-cyan-light:#82d5e6;
+  --ui-emerald:#36b853;
+  --ui-emerald-deep:#21833a;
+  --ui-gold:#f3b72d;
+  --ui-ink:#29404c;
+  --ui-muted:#68808b;
+}
+#storeScreen,
+#collectionScreen{
+  background:
+    radial-gradient(circle at 50% -12%,rgba(78,179,205,.16),transparent 28rem),
+    linear-gradient(180deg,#f4f7f8 0,var(--ui-canvas) 58%,#e7edef 100%);
+}
+#storeScreen::before,
+#collectionScreen::before{
+  opacity:.5;
+  background-image:
+    linear-gradient(rgba(52,76,87,.035) .0625rem,transparent .0625rem),
+    linear-gradient(90deg,rgba(52,76,87,.035) .0625rem,transparent .0625rem);
+}
+#storeScreen .menuHeader,
+#collectionScreen .menuHeader{
+  color:white;
+  background:
+    radial-gradient(circle at 50% 120%,rgba(130,213,230,.12),transparent 52%),
+    linear-gradient(180deg,#314954 0,var(--ui-charcoal) 100%);
+  border-color:#536a74;
+  border-bottom-color:var(--ui-cyan);
+  box-shadow:
+    inset 0 .1rem 0 rgba(255,255,255,.08),
+    0 .18rem 0 var(--ui-charcoal-deep),
+    0 .4rem 0 rgba(78,179,205,.75),
+    0 .65rem 1.2rem rgba(27,41,48,.22);
+}
+#storeScreen .menuHeader h1,
+#collectionScreen .menuHeader h1{
+  color:white;
+  -webkit-text-stroke:0;
+  text-shadow:0 .14rem 0 #142128,0 .28rem .35rem rgba(0,0,0,.24);
+}
+#storeScreen .bigWallet,
+#collectionScreen .bigWallet{
+  color:var(--ui-ink);
+  background:linear-gradient(180deg,#fff,#f7f7f3);
+  border-color:#d6a12c;
+  box-shadow:inset 0 .12rem 0 #fff,0 .18rem 0 #a97817,0 .3rem .65rem rgba(27,41,48,.18);
+}
+#collectionScreen .screenEyebrow{color:#a9dce8}
+
+#storeScreen .storeSectionTitle{
+  color:var(--ui-ink);
+  border-color:#e0b24a;
+  background:linear-gradient(180deg,#fff,#faf7ec);
+  box-shadow:
+    inset 0 .12rem 0 #fff,
+    0 .18rem 0 #b58a2b,
+    0 .34rem .55rem rgba(27,41,48,.16);
+}
+#storeScreen .storeSectionTitle strong{
+  color:var(--ui-ink);
+  text-shadow:none;
+}
+#storeScreen .mythicStoreDivider{
+  color:#5b4ba3;
+  border-color:#8b7bd5;
+  background:linear-gradient(180deg,#fff,#f2effc);
+  box-shadow:inset 0 .12rem 0 #fff,0 .18rem 0 #6655b1,0 .34rem .55rem rgba(27,41,48,.15);
+}
+#storeScreen .mythicStoreDivider strong{
+  color:#5b4ba3;
+  text-shadow:none;
+}
+#storeScreen .impossibleStoreDivider{
+  color:#73541c;
+  border-color:#dfb14b;
+  background:linear-gradient(180deg,#fff,#fbf5e7);
+  box-shadow:inset 0 .12rem 0 #fff,0 .18rem 0 #b08325,0 .34rem .55rem rgba(27,41,48,.15);
+}
+#storeScreen .impossibleStoreDivider strong{
+  color:#73541c;
+  text-shadow:none;
+}
+
+#storeScreen .storeHero,
+#storeScreen .mythicStoreCard,
+#storeScreen .impossibleStoreCard{
+  border-color:#9aacb4;
+  background:
+    radial-gradient(circle at 14% 5%,#fff,transparent 8rem),
+    linear-gradient(145deg,#fff 0,#fbfcfc 72%,#edf2f4 100%);
+  box-shadow:
+    inset 0 0 0 .13rem #d6e0e4,
+    inset 0 .18rem 0 #fff,
+    0 .26rem 0 #7e929b,
+    0 .5rem .75rem rgba(27,41,48,.18);
+}
+#storeScreen .storeHero::after,
+#storeScreen .mythicStoreCard::after,
+#storeScreen .impossibleStoreCard::after{border-color:rgba(66,89,99,.18)}
+#storeScreen .storeHero::before{
+  background:repeating-conic-gradient(from -12deg,rgba(243,183,45,.22) 0 9deg,transparent 9deg 20deg);
+}
+#storeScreen .mythicStoreCard{
+  border-color:#8a79d0;
+  box-shadow:inset 0 0 0 .13rem #ddd7f5,inset 0 .18rem 0 #fff,0 .26rem 0 #6656a9,0 .5rem .75rem rgba(27,41,48,.18);
+}
+#storeScreen .cataclysmStoreCard{border-color:#d98268}
+#storeScreen .gaiaStoreCard{border-color:#75ae86}
+#storeScreen .storeHero h2,
+#storeScreen .mythicText h2,
+#storeScreen .impossibleText h2{color:var(--ui-ink)}
+#storeScreen .storeHero p,
+#storeScreen .mythicText p,
+#storeScreen .impossibleText p{color:var(--ui-muted)}
+#storeScreen .storeHero .priceLine{color:var(--ui-ink)}
+
+#storeScreen .primary,
+#storeScreen .wideAction{
+  color:white;
+  background:linear-gradient(180deg,#55ca70 0,var(--ui-emerald) 56%,var(--ui-emerald-deep) 100%);
+  border-color:#1d7733;
+  box-shadow:
+    inset 0 .16rem 0 rgba(255,255,255,.42),
+    inset 0 0 0 .09rem #64d47c,
+    0 .22rem 0 #17642a,
+    0 .32rem .45rem rgba(25,101,44,.2);
+  text-shadow:0 .11rem 0 #17652b;
+}
+#storeScreen .primary:active,
+#storeScreen .wideAction:active{
+  box-shadow:inset 0 .1rem 0 rgba(255,255,255,.3),0 .06rem 0 #17642a;
+}
+#storeScreen .mythicPurchase,
+#storeScreen .impossiblePurchase{
+  border-color:#17252b;
+  background:linear-gradient(180deg,#344d58,var(--ui-charcoal));
+  box-shadow:inset 0 .12rem 0 rgba(255,255,255,.09);
+}
+#storeScreen .mythicPrice,
+#storeScreen .impossiblePrice{
+  color:white;
+  text-shadow:0 .11rem 0 #111d22;
+}
+#storeScreen .storeNote{
+  color:white;
+  border-color:#455d68;
+  background:rgba(38,57,67,.97);
+  box-shadow:0 .3rem .65rem rgba(27,41,48,.22);
+}
+
+#collectionScreen .collectionBrowseHint{
+  color:var(--ui-ink);
+  background:linear-gradient(180deg,#fff,#f7f9fa);
+  border-color:#becbd0;
+  box-shadow:0 .15rem 0 #98aab2;
+}
+#collectionScreen .collectionBrowseHint span{color:var(--ui-cyan)}
+
+body:has(#storeScreen.active) .quickNav,
+body:has(#collectionScreen.active) .quickNav{
+  border-top-color:var(--ui-cyan);
+  background:linear-gradient(180deg,#314954,var(--ui-charcoal-deep));
+  box-shadow:0 -.16rem 0 #172329,0 -.42rem .8rem rgba(27,41,48,.25);
+}
+body:has(#storeScreen.active) .quickNavButton,
+body:has(#collectionScreen.active) .quickNavButton{
+  color:#c0d0d6;
+  background:rgba(255,255,255,.035);
+  border-color:#405761;
+  box-shadow:inset 0 .1rem 0 rgba(255,255,255,.06);
+}
+body:has(#storeScreen.active) .quickNavButton.active,
+body:has(#collectionScreen.active) .quickNavButton.active{
+  color:#277f9d;
+  background:linear-gradient(180deg,#fff,#eef6f8);
+  border-color:var(--ui-cyan);
+  box-shadow:inset 0 .14rem 0 #fff,0 .18rem 0 #2d7d98,0 0 .65rem rgba(78,179,205,.28);
+  text-shadow:none;
+}
+.gameUtilityMenuButton{
+  color:var(--ui-cyan-light);
+  background:linear-gradient(180deg,#344d58,var(--ui-charcoal));
+  border-color:#17252b;
+  box-shadow:inset 0 .13rem 0 rgba(255,255,255,.09),0 .2rem 0 #17252b;
+}
+
+/* Calm menu chrome with emotional colors reserved for clear decisions. */
+#storeScreen .menuHeader,
+#collectionScreen .menuHeader{
+  color:var(--ui-ink);
+  background:
+    radial-gradient(circle at 50% 120%,rgba(95,181,132,.09),transparent 55%),
+    linear-gradient(180deg,#fff 0,#edf3ef 100%);
+  border-color:#c7d5ce;
+  border-bottom-color:#7eb99a;
+  box-shadow:
+    inset 0 .12rem 0 #fff,
+    0 .18rem 0 #a8beb3,
+    0 .4rem 0 rgba(95,181,132,.42),
+    0 .62rem 1.1rem rgba(48,70,60,.14);
+}
+#storeScreen .menuHeader h1,
+#collectionScreen .menuHeader h1{
+  color:#314840;
+  text-shadow:0 .1rem 0 #fff,0 .22rem .28rem rgba(44,67,57,.14);
+}
+#collectionScreen .screenEyebrow{color:#688278}
+
+body:has(#storeScreen.active) .quickNav,
+body:has(#collectionScreen.active) .quickNav{
+  border-top-color:#bdcdc5;
+  background:linear-gradient(180deg,rgba(252,252,249,.99),rgba(232,239,235,.99));
+  box-shadow:0 -.14rem 0 #9eb3a9,0 -.4rem .75rem rgba(45,66,57,.16);
+}
+body:has(#storeScreen.active) .quickNavButton,
+body:has(#collectionScreen.active) .quickNavButton{
+  color:#667a71;
+  background:rgba(255,255,255,.72);
+  border-color:#ccd8d2;
+  box-shadow:inset 0 .1rem 0 #fff,0 .12rem 0 #afc0b8;
+}
+body:has(#storeScreen.active) #quickStore.active,
+body:has(#collectionScreen.active) #quickStore.active{
+  color:#b64f49;
+  background:linear-gradient(180deg,#fff,#fff0ed);
+  border-color:#df8179;
+  box-shadow:inset 0 .14rem 0 #fff,0 .18rem 0 #b95750,0 0 .6rem rgba(207,91,82,.22);
+}
+body:has(#storeScreen.active) #quickPlay.active,
+body:has(#collectionScreen.active) #quickPlay.active{
+  color:#278b55;
+  background:linear-gradient(180deg,#fff,#e9f7ee);
+  border-color:#65bd87;
+  box-shadow:inset 0 .14rem 0 #fff,0 .18rem 0 #3b9060,0 0 .6rem rgba(54,168,96,.2);
+}
+body:has(#storeScreen.active) #quickCollection.active,
+body:has(#collectionScreen.active) #quickCollection.active{
+  color:#2e809b;
+  background:linear-gradient(180deg,#fff,#ecf7fa);
+  border-color:#72bdd2;
+  box-shadow:inset 0 .14rem 0 #fff,0 .18rem 0 #478ba1,0 0 .6rem rgba(78,179,205,.2);
+}
+.gameUtilityMenuButton{
+  color:#3f7561;
+  background:linear-gradient(180deg,#fff,#e8f0eb);
+  border-color:#9fb9ac;
+  box-shadow:inset 0 .13rem 0 #fff,0 .2rem 0 #849e91;
+}
+
+/* Collection actions: green = choose, gold = success, red = unavailable. */
+#collectionScreen .equipButton:not(.equippedButton):not(:disabled){
+  color:white;
+  background:linear-gradient(180deg,#5bd078 0,#35b75a 58%,#238d43 100%);
+  border-color:#247c3e;
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.45),0 .24rem 0 #1d6d35,0 0 .75rem rgba(47,178,86,.24);
+  text-shadow:0 .1rem 0 #1e7037;
+}
+#collectionScreen .equipButton.equippedButton{
+  color:#6a4b0d;
+  background:linear-gradient(180deg,#fff8cf 0,#f7d76b 58%,#e6ad2f 100%);
+  border-color:#c78c1c;
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.72),0 .22rem 0 #a97515,0 0 .8rem rgba(231,177,46,.3);
+  text-shadow:0 .08rem 0 rgba(255,255,255,.62);
+  opacity:1;
+}
+#collectionScreen .equipButton:disabled:not(.equippedButton){
+  color:#fff4f2;
+  background:linear-gradient(180deg,#df766d,#bf514a);
+  border-color:#9e403b;
+  box-shadow:inset 0 .12rem 0 rgba(255,255,255,.2),0 .18rem 0 #83342f;
+  text-shadow:0 .08rem 0 #873a35;
+  opacity:.62;
+}
+
+.ballCard.equipCelebrating{
+  z-index:12;
+  animation:equipCardCelebrate .9s cubic-bezier(.18,.88,.28,1.18)!important;
+}
+.ballCard.equipCelebrating .collectionBall{
+  animation:equipBallCelebrate .92s cubic-bezier(.17,.9,.24,1.2)!important;
+}
+.ballCard.equipCelebrating .equippedButton{
+  animation:equipButtonLand .82s cubic-bezier(.18,.9,.24,1.2)!important;
+}
+.equipCelebrationBadge{
+  position:absolute;
+  left:50%;
+  bottom:4.85rem;
+  z-index:20;
+  min-width:9.5rem;
+  padding:.58rem .9rem;
+  border:.12rem solid #c98d1c;
+  border-radius:999rem;
+  color:#5f430d;
+  background:linear-gradient(180deg,#fffce5,#f5d05d);
+  box-shadow:inset 0 .12rem 0 #fff,0 .28rem 0 #a97416,0 .45rem 1.1rem rgba(95,67,13,.24);
+  font-size:.86rem;
+  font-weight:1000;
+  line-height:1;
+  text-align:center;
+  text-shadow:0 .07rem 0 rgba(255,255,255,.7);
+  pointer-events:none;
+  transform:translateX(-50%);
+  animation:equipBadgePop .9s cubic-bezier(.2,.9,.25,1.22) both;
+}
+.equipSparkBurst{
+  position:absolute;
+  z-index:18;
+  width:0;
+  height:0;
+  pointer-events:none;
+}
+.equipSpark{
+  --spark-distance:4.5rem;
+  position:absolute;
+  left:0;
+  top:0;
+  width:.58rem;
+  height:.58rem;
+  border-radius:35% 65% 42% 58%;
+  background:var(--rarity-color,#f3b72d);
+  box-shadow:0 0 .7rem currentColor;
+  animation:equipSparkFly .72s cubic-bezier(.15,.75,.25,1) both;
+  animation-delay:var(--spark-delay,0ms);
+}
+.equipSpark:nth-child(3n+1){background:#f4bd37;color:#f4bd37}
+.equipSpark:nth-child(3n+2){background:#4fcf79;color:#4fcf79}
+.equipSpark:nth-child(3n){background:var(--rarity-color,#69c7df);color:var(--rarity-color,#69c7df)}
+@keyframes equipCardCelebrate{
+  0%{transform:scale(1);filter:brightness(1)}
+  28%{transform:translateY(-.5rem) scale(1.025);filter:brightness(1.12)}
+  55%{transform:translateY(-.16rem) scale(1.012);filter:brightness(1.05)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
+@keyframes equipBallCelebrate{
+  0%{transform:scale(var(--ball-scale));filter:brightness(1)}
+  30%{transform:translateY(-.55rem) scale(calc(var(--ball-scale) * 1.18));filter:brightness(1.3) saturate(1.25)}
+  58%{transform:translateY(.08rem) scale(calc(var(--ball-scale) * .96));filter:brightness(1.08)}
+  100%{transform:scale(var(--ball-scale));filter:brightness(1)}
+}
+@keyframes equipButtonLand{
+  0%{transform:scale(.9);filter:brightness(1.25)}
+  48%{transform:scale(1.045)}
+  100%{transform:scale(1)}
+}
+@keyframes equipBadgePop{
+  0%{opacity:0;transform:translate(-50%,1rem) scale(.5) rotate(-4deg)}
+  28%,70%{opacity:1;transform:translate(-50%,0) scale(1.06) rotate(0)}
+  100%{opacity:0;transform:translate(-50%,-.65rem) scale(.96)}
+}
+@keyframes equipSparkFly{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--spark-angle)) translateX(.25rem) scale(.2)}
+  18%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--spark-angle)) translateX(var(--spark-distance)) scale(0) rotate(150deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  .ballCard.equipCelebrating,
+  .ballCard.equipCelebrating .collectionBall,
+  .ballCard.equipCelebrating .equippedButton,
+  .equipCelebrationBadge,
+  .equipSpark{animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
+
+/* ============================================================
+   STORE + PACK JUICE — LARGE, LAYERED REWARD PAYOFFS
+   ============================================================ */
+#storeScreen.purchaseScreenShake{
+  animation:purchaseScreenKick .72s cubic-bezier(.16,.82,.22,1) both;
+}
+#storeScreen .purchaseBoom{
+  z-index:8;
+  animation:purchaseCardBoom .92s cubic-bezier(.16,.9,.22,1.25) both!important;
+}
+.storeFxLayer.purchaseFlash{
+  background:
+    radial-gradient(circle at var(--purchase-x,50%) var(--purchase-y,50%),rgba(255,244,176,.95) 0,rgba(80,211,120,.38) 12%,rgba(80,211,120,.1) 31%,transparent 58%);
+  animation:purchaseMegaFlash 1.25s ease-out both;
+}
+.purchaseSuccessBanner{
+  position:fixed;
+  left:50%;
+  top:43%;
+  z-index:30;
+  width:max-content;
+  max-width:88vw;
+  padding:.78rem 1.3rem;
+  border:.15rem solid #c88d1c;
+  border-radius:999rem;
+  color:#5e430c;
+  background:linear-gradient(180deg,#fffde9,#f4cf58);
+  box-shadow:inset 0 .14rem 0 #fff,0 .3rem 0 #a87516,0 .7rem 2rem rgba(69,52,16,.3),0 0 2rem rgba(245,194,55,.36);
+  font-size:clamp(.9rem,4.2vw,1.25rem);
+  font-weight:1000;
+  letter-spacing:.025em;
+  line-height:1;
+  text-align:center;
+  text-shadow:0 .08rem 0 rgba(255,255,255,.75);
+  pointer-events:none;
+  animation:purchaseBannerSlam 1.35s cubic-bezier(.16,.9,.24,1.22) both;
+}
+.purchaseBurstParticle,
+.packMegaSpark{
+  position:fixed;
+  left:var(--burst-x,50%);
+  top:var(--burst-y,50%);
+  z-index:24;
+  width:.72rem;
+  height:.72rem;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:var(--particle-color,#f4bd37);
+  background:currentColor;
+  box-shadow:0 0 .8rem currentColor;
+  font-size:.72rem;
+  font-weight:1000;
+  line-height:1;
+  pointer-events:none;
+  animation:purchaseParticleBurst var(--particle-duration,1.05s) cubic-bezier(.12,.72,.22,1) var(--particle-delay,0ms) both;
+}
+.purchaseBurstParticle.coinParticle{
+  width:1rem;
+  height:1rem;
+  color:#9b6708;
+  background:radial-gradient(circle at 34% 28%,#fff6a7,#ffc93b 42%,#e39712 78%);
+  border:.08rem solid #bd7810;
+  box-shadow:inset 0 0 0 .08rem rgba(255,250,171,.72),0 0 .85rem rgba(244,183,45,.6);
+}
+.purchaseBurstParticle.coinParticle::after{
+  content:'★';
+  color:#fff2a1;
+  font-size:.46rem;
+  text-shadow:0 .05rem 0 #b36d0b;
+}
+@keyframes purchaseScreenKick{
+  0%,100%{transform:translate3d(0,0,0)}
+  18%{transform:translate3d(-.2rem,.08rem,0)}
+  34%{transform:translate3d(.16rem,-.06rem,0)}
+  52%{transform:translate3d(-.1rem,.03rem,0)}
+  70%{transform:translate3d(.06rem,0,0)}
+}
+@keyframes purchaseCardBoom{
+  0%{transform:scale(1);filter:brightness(1)}
+  20%{transform:scale(.96);filter:brightness(1.08)}
+  42%{transform:translateY(-.72rem) scale(1.045);filter:brightness(1.18) saturate(1.15)}
+  66%{transform:translateY(.08rem) scale(.99);filter:brightness(1.05)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
+@keyframes purchaseMegaFlash{
+  0%{opacity:0}
+  12%{opacity:1}
+  42%{opacity:.8}
+  100%{opacity:0}
+}
+@keyframes purchaseBannerSlam{
+  0%{opacity:0;transform:translate(-50%,2rem) scale(.42) rotate(-5deg)}
+  28%{opacity:1;transform:translate(-50%,-.35rem) scale(1.12) rotate(1deg)}
+  45%,72%{opacity:1;transform:translate(-50%,0) scale(1) rotate(0)}
+  100%{opacity:0;transform:translate(-50%,-1.4rem) scale(.94)}
+}
+@keyframes purchaseParticleBurst{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--particle-angle)) translateX(.2rem) scale(.15)}
+  14%{opacity:1}
+  72%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--particle-angle)) translateX(var(--particle-distance,7rem)) scale(.15) rotate(220deg)}
+}
+
+.packModal.packAnticipation{
+  animation:packChargeFrame .88s cubic-bezier(.2,.72,.22,1) both;
+}
+.bigPack.opening{
+  animation:packSuperShake .86s cubic-bezier(.2,.72,.22,1)!important;
+  filter:drop-shadow(0 0 1.5rem rgba(244,190,46,.7));
+}
+.packFxLayer.openingBurst{
+  --reveal-color:#f4bd37;
+  background:
+    radial-gradient(circle at var(--burst-x,50%) var(--burst-y,50%),#fff 0,rgba(255,247,181,.96) 6%,color-mix(in srgb,var(--reveal-color) 60%,transparent) 20%,color-mix(in srgb,var(--reveal-color) 18%,transparent) 42%,transparent 67%);
+  animation:packMegaFlash 1.65s ease-out both;
+}
+.packFxLayer.openingBurst .packRays,
+.packFxLayer.openingBurst .packLightBurst,
+.packFxLayer.openingBurst .packLightRing,
+.packFxLayer.openingBurst .packBurstStar{display:block}
+.packRays{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:150vmax;
+  height:150vmax;
+  margin:-75vmax 0 0 -75vmax;
+  opacity:.38;
+  background:repeating-conic-gradient(from 0deg,transparent 0 7deg,color-mix(in srgb,var(--reveal-color) 54%,transparent) 7deg 12deg,transparent 12deg 21deg);
+  animation:packRaysExplode 2.1s cubic-bezier(.12,.7,.22,1) both;
+}
+.packLightBurst{
+  position:absolute;
+  left:var(--burst-x,50%);
+  top:var(--burst-y,50%);
+  width:8rem;
+  height:8rem;
+  margin:-4rem 0 0 -4rem;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 2rem #fff,0 0 5rem var(--reveal-color),0 0 9rem var(--reveal-color);
+  animation:packCoreBlast 1.25s ease-out both;
+}
+.packLightRing{
+  position:absolute;
+  left:var(--burst-x,50%);
+  top:var(--burst-y,50%);
+  width:7rem;
+  height:7rem;
+  margin:-3.5rem 0 0 -3.5rem;
+  border:.3rem solid color-mix(in srgb,var(--reveal-color) 74%,white);
+  border-radius:50%;
+  box-shadow:0 0 1.4rem var(--reveal-color),inset 0 0 1rem var(--reveal-color);
+  animation:packRingBlast 1.25s cubic-bezier(.12,.72,.22,1) both;
+}
+.packLightRing.ringB{animation-delay:.14s}
+.packBurstStar{
+  position:absolute;
+  color:#fff7b2;
+  font-size:2rem;
+  text-shadow:0 0 1rem var(--reveal-color),0 0 2rem var(--reveal-color);
+  animation:packStarPop 1.4s ease-out both;
+}
+.packBurstStar.pbs1{left:14%;top:20%}
+.packBurstStar.pbs2{right:12%;top:24%;animation-delay:.08s}
+.packBurstStar.pbs3{left:20%;bottom:19%;animation-delay:.14s}
+.packBurstStar.pbs4{right:17%;bottom:16%;animation-delay:.2s}
+.packBurstStar.pbs5{left:50%;top:10%;animation-delay:.25s}
+.packModal.revealBoom{
+  animation:packModalRevealBoom 1.12s cubic-bezier(.15,.82,.24,1.15) both;
+}
+.rewardReveal.megaReveal{
+  position:relative;
+  z-index:210;
+  animation:rewardStageMega 1.2s cubic-bezier(.14,.88,.2,1.18) both!important;
+}
+.rewardReveal.megaReveal .rewardBall{
+  animation:rewardBallMega 1.35s cubic-bezier(.12,.9,.22,1.24) both!important;
+  filter:drop-shadow(0 0 1.1rem var(--reveal-color)) drop-shadow(0 .8rem 1rem rgba(31,55,64,.22));
+}
+.rewardReveal.megaReveal .rewardName{
+  animation:rewardNameSlam .82s cubic-bezier(.15,.88,.2,1.22) .18s both;
+}
+.packDropBanner{
+  position:fixed;
+  left:50%;
+  top:max(7.75rem,17dvh);
+  z-index:32;
+  width:max-content;
+  max-width:90vw;
+  padding:.68rem 1.15rem;
+  border:.15rem solid color-mix(in srgb,var(--reveal-color) 72%,#76500b);
+  border-radius:999rem;
+  color:#fff;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--reveal-color) 78%,white),color-mix(in srgb,var(--reveal-color) 78%,#2c3640));
+  box-shadow:inset 0 .13rem 0 rgba(255,255,255,.5),0 .3rem 0 color-mix(in srgb,var(--reveal-color) 55%,#343434),0 .65rem 2rem color-mix(in srgb,var(--reveal-color) 44%,transparent);
+  font-size:clamp(.88rem,4.4vw,1.3rem);
+  font-weight:1000;
+  letter-spacing:.035em;
+  line-height:1;
+  text-align:center;
+  text-shadow:0 .11rem 0 rgba(29,35,40,.45);
+  pointer-events:none;
+  transform:translateX(-50%);
+  animation:packBannerDrop 1.85s cubic-bezier(.16,.88,.22,1.2) both;
+}
+.packMegaSpark{
+  --particle-duration:1.45s;
+  width:.66rem;
+  height:.66rem;
+  color:var(--particle-color,var(--reveal-color));
+}
+@keyframes packChargeFrame{
+  0%{transform:scale(1);box-shadow:0 1.5rem 4.375rem rgba(48,63,78,.2)}
+  45%{transform:scale(.985);box-shadow:0 1.5rem 4.375rem rgba(48,63,78,.2),0 0 0 .2rem rgba(244,190,46,.14)}
+  75%{transform:scale(1.015);box-shadow:0 1.5rem 4.375rem rgba(48,63,78,.2),0 0 2.8rem rgba(244,190,46,.42)}
+  100%{transform:scale(.99);box-shadow:0 1.5rem 4.375rem rgba(48,63,78,.2),0 0 4rem rgba(244,190,46,.58)}
+}
+@keyframes packSuperShake{
+  0%{transform:translate(0) rotate(0) scale(1)}
+  12%{transform:translate(-.18rem,.04rem) rotate(-4deg) scale(1.03)}
+  24%{transform:translate(.22rem,-.04rem) rotate(5deg) scale(1.055)}
+  38%{transform:translate(-.28rem,.02rem) rotate(-6deg) scale(1.075)}
+  52%{transform:translate(.3rem,-.05rem) rotate(7deg) scale(1.1)}
+  66%{transform:translate(-.35rem,.03rem) rotate(-8deg) scale(1.13)}
+  79%{transform:translate(.32rem,-.06rem) rotate(8deg) scale(1.16)}
+  92%{transform:translate(-.2rem,0) rotate(-4deg) scale(1.2)}
+  100%{transform:translate(0) rotate(0) scale(.92)}
+}
+@keyframes packMegaFlash{
+  0%{opacity:0}
+  7%{opacity:1}
+  18%{opacity:.72}
+  36%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes packRaysExplode{
+  0%{opacity:0;transform:scale(.12) rotate(-22deg)}
+  16%{opacity:.55}
+  100%{opacity:0;transform:scale(1.08) rotate(22deg)}
+}
+@keyframes packCoreBlast{
+  0%{opacity:0;transform:scale(.08)}
+  14%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(4.5)}
+}
+@keyframes packRingBlast{
+  0%{opacity:0;transform:scale(.1)}
+  16%{opacity:1}
+  100%{opacity:0;transform:scale(5.7)}
+}
+@keyframes packStarPop{
+  0%{opacity:0;transform:scale(.1) rotate(-35deg)}
+  28%{opacity:1;transform:scale(1.45) rotate(10deg)}
+  100%{opacity:0;transform:translateY(-2.5rem) scale(.55) rotate(95deg)}
+}
+@keyframes packModalRevealBoom{
+  0%{transform:scale(.94);filter:brightness(1)}
+  16%{transform:scale(1.035);filter:brightness(1.35)}
+  34%{transform:scale(.985);filter:brightness(1.08)}
+  58%{transform:scale(1.012)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
+@keyframes rewardStageMega{
+  0%{opacity:0;transform:scale(.5) translateY(2rem)}
+  34%{opacity:1;transform:scale(1.08) translateY(-.35rem)}
+  58%{transform:scale(.98) translateY(.08rem)}
+  100%{transform:scale(1) translateY(0)}
+}
+@keyframes rewardBallMega{
+  0%{opacity:0;transform:scale(.15) rotate(-24deg);filter:brightness(2.2) saturate(1.4)}
+  28%{opacity:1;transform:scale(1.24) rotate(8deg);filter:brightness(1.55) saturate(1.35)}
+  48%{transform:scale(.92) rotate(-3deg)}
+  70%{transform:scale(1.07) rotate(1deg)}
+  100%{transform:scale(1) rotate(0);filter:brightness(1) saturate(1)}
+}
+@keyframes rewardNameSlam{
+  0%{opacity:0;transform:translateY(1rem) scale(.65)}
+  52%{opacity:1;transform:translateY(-.15rem) scale(1.1)}
+  100%{transform:scale(1)}
+}
+@keyframes packBannerDrop{
+  0%{opacity:0;transform:translate(-50%,-2rem) scale(.45) rotate(-4deg)}
+  22%{opacity:1;transform:translate(-50%,.25rem) scale(1.12) rotate(1deg)}
+  38%,72%{opacity:1;transform:translate(-50%,0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-1rem) scale(.94)}
+}
+@media(prefers-reduced-motion:reduce){
+  #storeScreen.purchaseScreenShake,
+  #storeScreen .purchaseBoom,
+  .storeFxLayer.purchaseFlash,
+  .purchaseSuccessBanner,
+  .purchaseBurstParticle,
+  .packModal.packAnticipation,
+  .bigPack.opening,
+  .packFxLayer.openingBurst,
+  .packRays,
+  .packLightBurst,
+  .packLightRing,
+  .packBurstStar,
+  .packModal.revealBoom,
+  .rewardReveal.megaReveal,
+  .rewardReveal.megaReveal .rewardBall,
+  .rewardReveal.megaReveal .rewardName,
+  .packDropBanner,
+  .packMegaSpark{animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
+
 </style>
 </head>
 
 <body>
 <nav class="quickNav" id="quickNav" aria-label="Main navigation">
   <button class="quickNavButton" id="quickStore" title="Store" aria-label="Store">
-    <span class="quickNavIcon">🛒</span><span>STORE</span>
+    <span class="quickNavIcon" aria-hidden="true">
+      <svg viewBox="0 0 32 32">
+        <path d="M7.5 13.5v12h17v-12" />
+        <path d="M5 12.5 7.3 6.8h17.4l2.3 5.7" />
+        <path d="M5 12.5c0 1.8 1.2 3 2.8 3s2.8-1.2 2.8-3c0 1.8 1.2 3 2.8 3s2.8-1.2 2.8-3c0 1.8 1.2 3 2.8 3s2.8-1.2 2.8-3c0 1.8 1.2 3 2.8 3s2.8-1.2 2.8-3" />
+        <path d="M11 25.5v-6.8h6v6.8M20.5 19h2" />
+      </svg>
+    </span>
+    <span class="quickNavLabel">STORE</span>
   </button>
   <button class="quickNavButton active" id="quickPlay" title="Play" aria-label="Play">
-    <span class="quickNavIcon">▶</span><span>PLAY</span>
+    <span class="quickNavIcon" aria-hidden="true">
+      <svg viewBox="0 0 32 32">
+        <circle cx="16" cy="16" r="11.5" />
+        <path d="m13.2 10.7 8.2 5.3-8.2 5.3z" />
+        <path d="M8.2 7.8 6.7 6.3M23.8 7.8l1.5-1.5" />
+      </svg>
+    </span>
+    <span class="quickNavLabel">PLAY</span>
   </button>
   <button class="quickNavButton" id="quickCollection" title="Collection" aria-label="Collection">
-    <span class="quickNavIcon">⚪</span><span>BALLS</span>
+    <span class="quickNavIcon" aria-hidden="true">
+      <svg viewBox="0 0 32 32">
+        <circle cx="11" cy="12" r="5.2" />
+        <circle cx="21.2" cy="12.7" r="4.3" />
+        <circle cx="16.5" cy="21.1" r="6.1" />
+        <path d="M8.5 9.5h.1M14.2 18.2h.1M19.5 10.8h.1" />
+      </svg>
+    </span>
+    <span class="quickNavLabel">BALLS</span>
   </button>
 </nav>
 <div class="screen active" id="gameScreen">
@@ -3882,7 +6282,7 @@ body.packOpen{overflow:hidden!important}
     </details>
 
     <div class="boosterInventoryLabel">
-      BOSS REWARDS <strong id="boosterInventoryCount">0/10</strong>
+      BOSS REWARDS <strong id="boosterInventoryCount">0/9</strong>
     </div>
 
     <div class="topProgress">
@@ -3908,7 +6308,6 @@ body.packOpen{overflow:hidden!important}
         </div>
         <div class="starMarker starMarker3"><span>★</span></div>
       </div>
-      <div class="bossMechanicStatus" id="bossMechanicStatus"></div>
     </div>
 
     <div class="boardWrap">
@@ -3964,7 +6363,7 @@ body.packOpen{overflow:hidden!important}
     </div>
 
     <div id="difficulty" hidden></div>
-    <div id="boosterStatus" class="boosterToast"></div>
+    <div id="boosterStatus" class="boosterToast" role="status" aria-live="polite"></div>
 
     <div class="boosterDock" id="boosterDock">
       <div class="boosterViewport" id="boosterViewport">
@@ -3975,14 +6374,20 @@ body.packOpen{overflow:hidden!important}
           <button id="moreTime" title="Add 10 seconds">⏱</button>
           <button id="destroyBall" title="Destroy random enemy">💥</button>
           <button id="coinFrenzy" title="Coin frenzy">🧲</button>
-          <button id="shieldPulse" title="Shield Pulse">🛡️</button>
           <button id="slowEnemies" title="Slow Enemies">🐌</button>
           <button id="coinBurst" title="Coin Burst">🪙</button>
           <button id="instantGrow" title="Growth Burst">⚡</button>
           <button id="panicClear" title="Panic Clear">🌟</button>
         </div>
       </div>
-      <button class="gameUtilityMenuButton" id="gameUtilityMenuButton" type="button" aria-label="Game settings">⚙</button>
+      <button class="gameUtilityMenuButton" id="gameUtilityMenuButton" type="button" aria-label="Game settings">
+        <svg class="utilityIcon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+          <circle cx="9" cy="6" r="2" />
+          <circle cx="15" cy="12" r="2" />
+          <circle cx="11" cy="18" r="2" />
+        </svg>
+      </button>
     </div>
   </div>
   <canvas id="hudFxCanvas" class="hudFxCanvas" aria-hidden="true"></canvas>
@@ -3994,7 +6399,7 @@ body.packOpen{overflow:hidden!important}
     <div class="menuHeader">
       <div>
         <div class="screenEyebrow">SHOP</div>
-        <h1>PACK STORE</h1>
+        <h1>Shop</h1>
       </div>
       <div class="pill bigWallet"><span class="coinIcon">◉</span><span id="storeWalletCoins">0</span></div>
     </div>
@@ -4016,19 +6421,19 @@ body.packOpen{overflow:hidden!important}
           <div class="foilPackSeal foilPackSealBottom"></div>
         </div>
       </div>
-      <h2>BALL PACK</h2>
+      <h2>SURPRISE BALL PACK</h2>
       <p>A sealed surprise pack containing a new ball for your collection.</p>
       <div class="priceLine"><span class="coinIcon">◉</span><strong id="storePackPrice">25</strong></div>
       <button class="primary wideAction" id="buyPack">BUY PACK</button>
     </div>
 
     <div class="storeSectionTitle">
-      <div><strong>DIRECT UNLOCKS</strong><span>Premium balls ordered by rarity tier</span></div>
+      <div><strong>SPECIAL OFFERS</strong><span>Premium balls ordered by rarity tier</span></div>
       <div class="premiumSpark">✦</div>
     </div>
 
     <div class="storeRarityDivider mythicStoreDivider">
-      <span class="storeRarityPip"></span><strong>MYTHIC</strong><span>Celestial power</span>
+      <span class="storeRarityPip"></span><strong>MYTHIC BUNDLE</strong><span>Celestial power</span>
     </div>
 
     <div class="mythicStoreCard">
@@ -4054,7 +6459,7 @@ body.packOpen{overflow:hidden!important}
     </div>
 
     <div class="storeRarityDivider impossibleStoreDivider">
-      <span class="storeRarityPip"></span><strong>IMPOSSIBLE</strong><span>Elemental power</span>
+      <span class="storeRarityPip"></span><strong>IMPOSSIBLE BALLS</strong><span>Elemental power</span>
     </div>
 
     <div class="impossibleStoreGrid">
@@ -4109,12 +6514,14 @@ body.packOpen{overflow:hidden!important}
     <div class="menuHeader">
       <div>
         <div class="screenEyebrow">LOADOUT</div>
-        <h1>COLLECTION</h1>
+        <h1>Collection</h1>
       </div>
       <div class="pill bigWallet"><span class="coinIcon">◉</span><span id="collectionWalletCoins">0</span></div>
     </div>
 
-    <div class="collectionGrid">
+    <div class="collectionBrowseHint">SCROLL TO BROWSE <span>↓</span> DETAILS + PERKS IN EVERY CARD</div>
+
+    <div class="collectionGrid" aria-label="Ball collection carousel">
       <div class="ballCard" id="normalCard">
         <div class="collectionBall normalCollectionBall"></div>
         <div class="rarityLabel commonRarity">COMMON</div>
@@ -4229,8 +6636,9 @@ body.packOpen{overflow:hidden!important}
 
     <div class="equippedPanel collectionDetailPanel" id="collectionDetailPanel">
       <div class="collectionDetailHead">
-        <span>BALL DETAILS • tap any ball</span>
+        <span>BALL DETAILS</span>
         <strong id="collectionEquippedName">Normal Ball</strong>
+        <span class="collectionDetailRarity commonRarity" id="collectionDetailRarity">COMMON</span>
       </div>
       <div class="collectionDetailDesc" id="collectionEquippedDesc">Reliable standard ball.</div>
     </div>
@@ -4328,7 +6736,6 @@ body.packOpen{overflow:hidden!important}
     progressFill2: document.getElementById('progressFill2'),
     progressFill3: document.getElementById('progressFill3'),
     progressStars: document.getElementById('progressStars'),
-    bossMechanicStatus: document.getElementById('bossMechanicStatus'),
     overlay: document.getElementById('overlay'),
     resultTitle: document.getElementById('resultTitle'),
     resultCard: document.getElementById('resultCard'),
@@ -4348,7 +6755,6 @@ body.packOpen{overflow:hidden!important}
     moreTime: document.getElementById('moreTime'),
     destroyBall: document.getElementById('destroyBall'),
     coinFrenzy: document.getElementById('coinFrenzy'),
-    shieldPulse: document.getElementById('shieldPulse'),
     slowEnemies: document.getElementById('slowEnemies'),
     coinBurst: document.getElementById('coinBurst'),
     instantGrow: document.getElementById('instantGrow'),
@@ -4388,6 +6794,7 @@ body.packOpen{overflow:hidden!important}
     gameEquippedName: document.getElementById('gameEquippedName'),
     collectionEquippedName: document.getElementById('collectionEquippedName'),
     collectionEquippedDesc: document.getElementById('collectionEquippedDesc'),
+    collectionDetailRarity: document.getElementById('collectionDetailRarity'),
     collectionDetailPanel: document.getElementById('collectionDetailPanel'),
     normalCard: document.getElementById('normalCard'),
     swiftCard: document.getElementById('swiftCard'),
@@ -4945,6 +7352,74 @@ body.packOpen{overflow:hidden!important}
       desc:'Grows 10% faster with a rare aura.'
     }
   };
+  const BALL_BENEFITS = {
+    normal:'BALANCED GROWTH',
+    swift:'+6% GROWTH SPEED',
+    shield:'BLOCKS 1 ENEMY HIT',
+    magnet:'PULLS NEARBY COINS',
+    coin:'+25% COIN VALUE',
+    giant:'+25% START SIZE',
+    ghost:'1.2s GHOST PHASE',
+    legendary:'+10% GROWTH SPEED',
+    apex:'2× COINS • 2 SHIELDS',
+    cataclysm:'+24% GROWTH • 1 SHIELD',
+    gaia:'+40% COINS • MAGNET'
+  };
+  const BALL_ASSET_PATHS = Object.freeze({
+    normal:'assets/balls/normal.svg',
+    swift:'assets/balls/swift.svg',
+    shield:'assets/balls/shield.svg',
+    magnet:'assets/balls/magnet.svg',
+    coin:'assets/balls/coin.svg',
+    giant:'assets/balls/giant.svg',
+    ghost:'assets/balls/ghost.svg',
+    legendary:'assets/balls/legendary.svg',
+    apex:'assets/balls/apex.svg',
+    cataclysm:'assets/balls/cataclysm.svg',
+    gaia:'assets/balls/gaia.svg'
+  });
+  const BALL_ASSET_IMAGES = Object.fromEntries(
+    Object.entries(BALL_ASSET_PATHS).map(([type,path])=>{
+      const image=new Image();
+      image.decoding='async';
+      image.src=path;
+      return [type,image];
+    })
+  );
+
+  function setBallAssetBackground(element,type){
+    const path=BALL_ASSET_PATHS[type] || BALL_ASSET_PATHS.normal;
+    if(!element) return;
+    element.style.backgroundImage=`url("${path}")`;
+    element.style.backgroundPosition='center';
+    element.style.backgroundRepeat='no-repeat';
+    element.style.backgroundSize='contain';
+    element.dataset.ballAsset=path;
+  }
+
+  function installSharedBallAssets(){
+    const collectionTargets={
+      normal:ui.normalCard,
+      swift:ui.swiftCard,
+      shield:ui.shieldCard,
+      magnet:ui.magnetCard,
+      coin:ui.coinCard,
+      giant:ui.giantCard,
+      ghost:ui.ghostCard,
+      legendary:ui.legendaryCard,
+      apex:ui.apexCard,
+      cataclysm:ui.cataclysmCard,
+      gaia:ui.gaiaCard
+    };
+    for(const [type,card] of Object.entries(collectionTargets)){
+      setBallAssetBackground(card?.querySelector('.collectionBall'),type);
+    }
+    setBallAssetBackground(document.querySelector('.mythicCore'),'apex');
+    setBallAssetBackground(document.querySelector('.elementOrb'),'cataclysm');
+    setBallAssetBackground(document.querySelector('.gaiaCore'),'gaia');
+    setBallAssetBackground(ui.rewardBall,'normal');
+  }
+  installSharedBallAssets();
   let selectedBallType='normal';
   let collectionPreviewType='normal';
 
@@ -5050,16 +7525,15 @@ body.packOpen{overflow:hidden!important}
 
 
   const BOOSTERS = {
-    moreBalls:{icon:'➕', name:'+3 Balls', cooldown:10, unlockLevel:20},
-    moreTime:{icon:'⏱', name:'+10 Seconds', cooldown:10, unlockLevel:40},
-    destroyBall:{icon:'💥', name:'Destroy Enemy', cooldown:6, unlockLevel:60},
-    freeze:{icon:'❄', name:'Freeze Enemies', cooldown:8, unlockLevel:80},
-    coinFrenzy:{icon:'🧲', name:'Coin Frenzy', cooldown:10, unlockLevel:100},
-    shieldPulse:{icon:'🛡️', name:'Shield Pulse', cooldown:10, unlockLevel:120},
-    slowEnemies:{icon:'🐌', name:'Slow Enemies', cooldown:9, unlockLevel:140},
-    coinBurst:{icon:'🪙', name:'Coin Burst', cooldown:10, unlockLevel:160},
-    instantGrow:{icon:'⚡', name:'Growth Burst', cooldown:8, unlockLevel:180},
-    panicClear:{icon:'🌟', name:'Panic Clear', cooldown:12, unlockLevel:200}
+    moreBalls:{icon:'➕', name:'+3 Balls', cooldown:10, unlockLevel:20, color:'#62ddff'},
+    moreTime:{icon:'⏱', name:'+10 Seconds', cooldown:10, unlockLevel:40, color:'#70f3d0'},
+    destroyBall:{icon:'💥', name:'Destroy Enemy', cooldown:6, unlockLevel:60, color:'#ff9b68'},
+    freeze:{icon:'❄', name:'Freeze Enemies', cooldown:8, unlockLevel:80, color:'#9fe8ff'},
+    coinFrenzy:{icon:'🧲', name:'Coin Frenzy', cooldown:10, unlockLevel:100, color:'#b49aff'},
+    slowEnemies:{icon:'🐌', name:'Slow Enemies', cooldown:9, unlockLevel:140, color:'#8ee9ed'},
+    coinBurst:{icon:'🪙', name:'Coin Burst', cooldown:10, unlockLevel:160, color:'#ffd85d'},
+    instantGrow:{icon:'⚡', name:'Growth Burst', cooldown:8, unlockLevel:180, color:'#fff08b'},
+    panicClear:{icon:'🌟', name:'Panic Clear', cooldown:12, unlockLevel:200, color:'#ffffff'}
   };
 
   const unlockedBoosters = new Set();
@@ -5069,7 +7543,6 @@ body.packOpen{overflow:hidden!important}
     destroyBall:0,
     freeze:0,
     coinFrenzy:0,
-    shieldPulse:0,
     slowEnemies:0,
     coinBurst:0,
     instantGrow:0,
@@ -5345,8 +7818,8 @@ body.packOpen{overflow:hidden!important}
       toxicLeft:0,
       gravityLeft:0,
       chaosLeft:0,
-      shieldPulseLeft:0,
       slowEnemiesLeft:0,
+      instantGrowReady:false,
       shakeT:0,
       shakePower:0,
       screenFlashT:0,
@@ -5355,6 +7828,9 @@ body.packOpen{overflow:hidden!important}
       rewardAnimToken:0,
       message:'',
       messageT:0,
+      boosterFeedbackT:0,
+      boosterFeedbackText:'',
+      boosterFeedbackColor:'#63d8ff',
       tutorialActive:false,
       lastWin:false,
       settled:false
@@ -5364,6 +7840,10 @@ body.packOpen{overflow:hidden!important}
     ui.overlay.style.display='none';
     for(const key of Object.keys(boosterCooldowns)) boosterCooldowns[key]=0;
     ui.boosterStatus.textContent='';
+    ui.boosterStatus.classList.remove('boosterActivated','boosterCountdown');
+    ui.boosterStatus.style.removeProperty('--booster-accent');
+    ui.boosterStatus.setAttribute('aria-live','polite');
+    for(const key of Object.keys(BOOSTERS)) boosterButton(key)?.classList.remove('boosterUsed');
     ui.adminLevel.value=currentLevel;
     updateAdminPreview(currentLevel);
     updateBoosterUI();
@@ -5403,7 +7883,6 @@ body.packOpen{overflow:hidden!important}
       destroyBall:ui.destroyBall,
       freeze:ui.freeze,
       coinFrenzy:ui.coinFrenzy,
-      shieldPulse:ui.shieldPulse,
       slowEnemies:ui.slowEnemies,
       coinBurst:ui.coinBurst,
       instantGrow:ui.instantGrow,
@@ -5433,7 +7912,7 @@ body.packOpen{overflow:hidden!important}
       }
     }
 
-    ui.boosterInventoryCount.textContent=`${unlockedBoosters.size}/10`;
+    ui.boosterInventoryCount.textContent=`${unlockedBoosters.size}/${Object.keys(BOOSTERS).length}`;
   }
 
   function unlockBoosterForBoss(level){
@@ -5454,9 +7933,49 @@ body.packOpen{overflow:hidden!important}
     return {key,...cfg};
   }
 
-  function startBoosterCooldown(key){
+  function showBoosterFeedback(key,detail='ACTIVATED'){
+    const cfg=BOOSTERS[key];
+    if(!cfg || !state) return;
+
+    state.boosterFeedbackT=1.35;
+    state.boosterFeedbackText=`${cfg.icon} ${cfg.name.toUpperCase()} • ${detail}`;
+    state.boosterFeedbackColor=cfg.color;
+
+    ui.boosterStatus.style.setProperty('--booster-accent',cfg.color);
+    ui.boosterStatus.classList.remove('boosterActivated','boosterCountdown');
+    void ui.boosterStatus.offsetWidth;
+    ui.boosterStatus.classList.add('boosterActivated');
+
+    const btn=boosterButton(key);
+    if(btn){
+      btn.style.setProperty('--booster-accent',cfg.color);
+      btn.classList.remove('boosterUsed');
+      void btn.offsetWidth;
+      btn.classList.add('boosterUsed');
+      setTimeout(()=>btn.classList.remove('boosterUsed'),700);
+    }
+
+    addImpactRing(W/2,H/2,cfg.color,Math.min(W,H)*.36);
+  }
+
+  function startBoosterCooldown(key,detail){
     boosterCooldowns[key]=BOOSTERS[key].cooldown;
+    showBoosterFeedback(key,detail);
     updateBoosterUI();
+  }
+
+  function applyGrowthBurst(ball){
+    if(!ball) return false;
+    const previousRadius=ball.r;
+    const limit=maxGrowthRadius(ball);
+    ball.r=Math.min(limit,ball.r+55);
+    if(ball.r<=previousRadius+.5) return false;
+
+    flashScreen(BOOSTERS.instantGrow.color,.1);
+    addImpactRing(ball.x,ball.y,BOOSTERS.instantGrow.color,ball.r+42);
+    state.message='GROWTH BURST!';
+    state.messageT=.75;
+    return true;
   }
 
   function updateCollectionUI(){
@@ -5515,12 +8034,33 @@ body.packOpen{overflow:hidden!important}
 
       card.classList.toggle('lockedCard',!owned);
       card.classList.toggle('equipped',equipped);
+      card.classList.toggle('previewed',collectionPreviewType===type);
 
-      button.disabled=!owned;
+      const description=card.querySelector('p');
+      const stat=card.querySelector('.statRow');
+      if(description) description.textContent=BALL_TYPES[type].desc;
+      if(stat){
+        stat.querySelector('span').textContent='WHAT IT GIVES';
+        stat.querySelector('strong').textContent=BALL_BENEFITS[type];
+      }
+
+      button.disabled=!owned || equipped;
       button.classList.toggle('equippedButton',equipped);
-      button.textContent=equipped?'EQUIPPED':(owned?'EQUIP':'LOCKED');
+      button.setAttribute('aria-pressed',equipped?'true':'false');
+      button.textContent=equipped?'✓ EQUIPPED':(owned?'EQUIP':'LOCKED');
 
       if(lockMap[type]) lockMap[type].style.display=owned?'none':'block';
+    }
+
+    // Keep every usable ball at the front while preserving the designed
+    // progression order inside the owned and locked groups.
+    const collectionGrid=ui.normalCard?.parentElement;
+    if(collectionGrid){
+      const sortedTypes=[
+        ...types.filter(type=>ownedBalls.has(type)),
+        ...types.filter(type=>!ownedBalls.has(type))
+      ];
+      for(const type of sortedTypes) collectionGrid.appendChild(cardMap[type]);
     }
 
     const data=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
@@ -5530,6 +8070,15 @@ body.packOpen{overflow:hidden!important}
     const previewData=BALL_TYPES[collectionPreviewType] || data;
     ui.collectionEquippedName.textContent=previewData.name;
     ui.collectionEquippedDesc.textContent=previewData.desc;
+    ui.collectionDetailRarity.textContent=previewData.rarity.toUpperCase();
+    ui.collectionDetailRarity.className='collectionDetailRarity '+({
+      Common:'commonRarity',
+      Rare:'rareRarity',
+      Epic:'epicRarity',
+      Legendary:'legendaryRarity',
+      Mythic:'mythicRarityTag',
+      Impossible:'impossibleRarityTag'
+    }[previewData.rarity] || 'commonRarity');
 
     ui.collectionDetailPanel.classList.toggle('previewLocked',!ownedBalls.has(collectionPreviewType));
 
@@ -5654,37 +8203,136 @@ body.packOpen{overflow:hidden!important}
     },2700);
   }
 
-  function celebratePackPurchase(){
+  function radialJuiceBurst(container,className,count,x,y,colors,minDistance,maxDistance){
+    for(let i=0;i<count;i++){
+      const particle=document.createElement('i');
+      particle.className=className;
+      particle.style.setProperty('--burst-x',`${x}px`);
+      particle.style.setProperty('--burst-y',`${y}px`);
+      particle.style.setProperty('--particle-angle',`${i*(360/count)+(Math.random()*8-4)}deg`);
+      particle.style.setProperty('--particle-distance',`${minDistance+Math.random()*(maxDistance-minDistance)}px`);
+      particle.style.setProperty('--particle-delay',`${(i%5)*22}ms`);
+      particle.style.setProperty('--particle-duration',`${.9+Math.random()*.45}s`);
+      particle.style.setProperty('--particle-color',colors[i%colors.length]);
+      container.appendChild(particle);
+    }
+  }
+
+  function celebratePackPurchase(targetCard=ui.storeHero,label='PURCHASE COMPLETE!'){
     sfx('purchase');
+    const target=targetCard || ui.storeHero;
+    const rect=target.getBoundingClientRect();
+    const centerX=rect.left+rect.width/2;
+    const centerY=rect.top+Math.min(rect.height*.7,rect.height-28);
+
+    ui.storeFxLayer.querySelectorAll('.purchaseSuccessBanner,.purchaseBurstParticle').forEach(el=>el.remove());
     ui.storeFxLayer.classList.remove('purchaseFlash');
-    ui.storeHero.classList.remove('purchaseBoom');
+    ui.storeScreen.classList.remove('purchaseScreenShake');
+    document.querySelectorAll('#storeScreen .purchaseBoom').forEach(el=>el.classList.remove('purchaseBoom'));
+    ui.storeFxLayer.style.setProperty('--purchase-x',`${centerX}px`);
+    ui.storeFxLayer.style.setProperty('--purchase-y',`${centerY}px`);
     void ui.storeFxLayer.offsetWidth;
 
     ui.storeFxLayer.classList.add('purchaseFlash');
-    ui.storeHero.classList.add('purchaseBoom');
-    shopConfetti(ui.storeFxLayer,52,false);
+    ui.storeScreen.classList.add('purchaseScreenShake');
+    target.classList.add('purchaseBoom');
+
+    const banner=document.createElement('div');
+    banner.className='purchaseSuccessBanner';
+    banner.setAttribute('role','status');
+    banner.textContent=`★ ${label} ★`;
+    ui.storeFxLayer.appendChild(banner);
+
+    radialJuiceBurst(
+      ui.storeFxLayer,
+      'purchaseBurstParticle',
+      34,
+      centerX,
+      centerY,
+      ['#f4bd37','#4fcf79','#ff7f70','#79cbe0','#ffffff'],
+      72,
+      190
+    );
+    [...ui.storeFxLayer.querySelectorAll('.purchaseBurstParticle')]
+      .filter((_,index)=>index%4===0)
+      .forEach(el=>el.classList.add('coinParticle'));
+
+    shopConfetti(ui.storeFxLayer,92,false);
+    setTimeout(()=>shopConfetti(ui.storeFxLayer,54,true),190);
+    if(navigator.vibrate) navigator.vibrate([24,28,42]);
 
     setTimeout(()=>{
       ui.storeFxLayer.classList.remove('purchaseFlash');
-      ui.storeHero.classList.remove('purchaseBoom');
-    },760);
+      ui.storeScreen.classList.remove('purchaseScreenShake');
+      target.classList.remove('purchaseBoom');
+    },1250);
+    setTimeout(()=>{
+      banner.remove();
+      ui.storeFxLayer.querySelectorAll('.purchaseBurstParticle').forEach(el=>el.remove());
+    },1550);
   }
 
-  function celebratePackReveal(){
+  function celebratePackReveal(type,isNew){
     sfx('packReveal');
+    const data=BALL_TYPES[type] || BALL_TYPES.normal;
+    const revealColor={
+      Common:'#85a9ba',
+      Rare:'#28a9df',
+      Epic:'#ad59de',
+      Legendary:'#ffad22',
+      Mythic:'#ed56d8',
+      Impossible:'#ff624d'
+    }[data.rarity] || '#f4bd37';
+    const ballRect=ui.rewardBall.getBoundingClientRect();
+    const centerX=ballRect.left+ballRect.width/2;
+    const centerY=ballRect.top+ballRect.height/2;
+
+    ui.packFxLayer.querySelectorAll('.packDropBanner,.packMegaSpark').forEach(el=>el.remove());
     ui.packFxLayer.classList.remove('openingBurst');
     ui.packModal.classList.remove('revealBoom','packAnticipation');
+    ui.rewardReveal.classList.remove('megaReveal');
+    ui.packFxLayer.style.setProperty('--reveal-color',revealColor);
+    ui.packFxLayer.style.setProperty('--burst-x',`${centerX}px`);
+    ui.packFxLayer.style.setProperty('--burst-y',`${centerY}px`);
+    ui.packModal.style.setProperty('--reveal-color',revealColor);
     void ui.packFxLayer.offsetWidth;
 
     ui.packFxLayer.classList.add('openingBurst');
     ui.packModal.classList.add('revealBoom');
-    shopConfetti(ui.packFxLayer,110,true);
-    setTimeout(()=>shopConfetti(ui.packFxLayer,56,true),180);
+    ui.rewardReveal.classList.add('megaReveal');
+
+    const banner=document.createElement('div');
+    banner.className='packDropBanner';
+    banner.setAttribute('role','status');
+    banner.textContent=isNew
+      ? `★ NEW ${data.rarity.toUpperCase()} BALL! ★`
+      : `★ ${data.rarity.toUpperCase()} REWARD! ★`;
+    ui.packFxLayer.appendChild(banner);
+
+    radialJuiceBurst(
+      ui.packFxLayer,
+      'packMegaSpark',
+      46,
+      centerX,
+      centerY,
+      [revealColor,'#fff6a7','#ffffff','#65d7ee','#f0a1ff'],
+      88,
+      250
+    );
+    shopConfetti(ui.packFxLayer,170,true);
+    setTimeout(()=>shopConfetti(ui.packFxLayer,100,true),210);
+    setTimeout(()=>shopConfetti(ui.packFxLayer,58,false),430);
+    if(navigator.vibrate) navigator.vibrate([35,35,55,45,90]);
 
     setTimeout(()=>{
       ui.packFxLayer.classList.remove('openingBurst');
       ui.packModal.classList.remove('revealBoom');
-    },1150);
+      ui.rewardReveal.classList.remove('megaReveal');
+    },1850);
+    setTimeout(()=>{
+      banner.remove();
+      ui.packFxLayer.querySelectorAll('.packMegaSpark').forEach(el=>el.remove());
+    },2200);
   }
 
   function showPackOverlay(mode){
@@ -5701,13 +8349,13 @@ body.packOpen{overflow:hidden!important}
     ui.packOverlay.setAttribute('aria-hidden','false');
     document.body.classList.add('packOpen');
     ui.bigPack.classList.remove('opening','opened');
-    ui.rewardReveal.classList.remove('show');
+    ui.rewardReveal.classList.remove('show','megaReveal');
     ui.packContinue.classList.remove('show');
     ui.buyAnotherPack.classList.remove('show');
     ui.buyAnotherPack.disabled=false;
     ui.packFxLayer.classList.remove('openingBurst');
     ui.packModal.classList.remove('revealBoom','packAnticipation');
-    ui.packFxLayer.querySelectorAll('.shopConfetti').forEach(el=>el.remove());
+    ui.packFxLayer.querySelectorAll('.shopConfetti,.packDropBanner,.packMegaSpark').forEach(el=>el.remove());
 
     if(mode==='starter'){
       ui.packTitle.textContent='FREE STARTER PACK';
@@ -5756,12 +8404,10 @@ body.packOpen{overflow:hidden!important}
 
     setTimeout(()=>{
       ui.bigPack.classList.add('opened');
-      ui.rewardReveal.classList.add('show');
       ui.packContinue.classList.add('show');
       ui.buyAnotherPack.classList.toggle('show',activePackMode==='paid');
       ui.packSub.textContent='YOU GOT';
       ui.packModal.classList.remove('packAnticipation');
-      celebratePackReveal();
 
       const rewardData=BALL_TYPES[activePackReward];
 
@@ -5777,6 +8423,7 @@ body.packOpen{overflow:hidden!important}
       }[activePackReward] || 'normalReward';
 
       ui.rewardBall.className='rewardBall '+rewardClass;
+      setBallAssetBackground(ui.rewardBall,activePackReward);
       ui.rewardName.textContent=rewardData.name.toUpperCase();
       ui.rewardRarity.textContent=`${rewardData.rarity.toUpperCase()} BALL`;
       ui.rewardDesc.textContent=rewardData.desc;
@@ -5792,6 +8439,10 @@ body.packOpen{overflow:hidden!important}
         starterPackOpened=true;
         selectedBallType='normal';
       }
+
+      // Start the reveal only after the shared asset, copy and rarity are ready.
+      ui.rewardReveal.classList.add('show');
+      celebratePackReveal(activePackReward,!wasOwned);
 
       updateCollectionUI();
       syncUI();
@@ -5813,7 +8464,8 @@ body.packOpen{overflow:hidden!important}
 
     ui.packSub.textContent='BUYING + OPENING…';
     ui.buyAnotherPack.disabled=true;
-    shopConfetti(ui.packFxLayer,40,true);
+    shopConfetti(ui.packFxLayer,90,true);
+    if(navigator.vibrate) navigator.vibrate([22,26,38]);
     ui.packModal.classList.remove('revealBoom');
     void ui.packModal.offsetWidth;
     ui.packModal.classList.add('revealBoom');
@@ -5839,10 +8491,10 @@ body.packOpen{overflow:hidden!important}
     ui.packFxLayer.classList.remove('openingBurst');
     ui.packModal.classList.remove('revealBoom','packAnticipation');
     ui.bigPack.classList.remove('opening','opened');
-    ui.rewardReveal.classList.remove('show');
+    ui.rewardReveal.classList.remove('show','megaReveal');
     ui.packContinue.classList.remove('show');
     ui.buyAnotherPack.classList.remove('show');
-    ui.packFxLayer.querySelectorAll('.shopConfetti').forEach(el=>el.remove());
+    ui.packFxLayer.querySelectorAll('.shopConfetti,.packDropBanner,.packMegaSpark').forEach(el=>el.remove());
 
     activePackMode=null;
     activePackReward=null;
@@ -5880,8 +8532,8 @@ body.packOpen{overflow:hidden!important}
     syncEconomyUI();
     syncUI();
 
-    ui.storeMessage.textContent='✨ PACK PURCHASED! ✨';
-    celebratePackPurchase();
+    ui.storeMessage.textContent='';
+    celebratePackPurchase(ui.storeHero,'PACK PURCHASED!');
 
     // Give the purchase its own payoff before transitioning into the
     // separate pack-opening moment.
@@ -6007,6 +8659,11 @@ body.packOpen{overflow:hidden!important}
         growthAge:0,
         spawnPunch:1
       };
+
+      if(state.instantGrowReady && applyGrowthBurst(state.active)){
+        state.instantGrowReady=false;
+        showBoosterFeedback('instantGrow','BALL GREW');
+      }
 
       canvas.classList.add('growthPressed');
       setTimeout(()=>canvas.classList.remove('growthPressed'),170);
@@ -6295,7 +8952,6 @@ body.packOpen{overflow:hidden!important}
     if(state.toxicLeft>0) state.toxicLeft=Math.max(0,state.toxicLeft-dt);
     if(state.gravityLeft>0) state.gravityLeft=Math.max(0,state.gravityLeft-dt);
     if(state.chaosLeft>0) state.chaosLeft=Math.max(0,state.chaosLeft-dt);
-    if(state.shieldPulseLeft>0) state.shieldPulseLeft=Math.max(0,state.shieldPulseLeft-dt);
     if(state.slowEnemiesLeft>0) state.slowEnemiesLeft=Math.max(0,state.slowEnemiesLeft-dt);
 
     const bossIndex=Math.floor(currentLevel/20);
@@ -6328,6 +8984,7 @@ body.packOpen{overflow:hidden!important}
       if(state.shakeT<=0) state.shakePower=0;
     }
     if(state.screenFlashT>0) state.screenFlashT=Math.max(0,state.screenFlashT-dt);
+    if(state.boosterFeedbackT>0) state.boosterFeedbackT=Math.max(0,state.boosterFeedbackT-dt);
 
     for(let i=state.impactRings.length-1;i>=0;i--){
       const ring=state.impactRings[i];
@@ -6512,13 +9169,20 @@ body.packOpen{overflow:hidden!important}
 
         e.trailTimer-=dt;
         if(e.trailTimer<=0){
-          e.trailTimer=.025;
-          e.trail.push({x:e.x,y:e.y});
+          e.trailTimer=e.boss ? .012 : (e.minion ? .018 : .022);
+          e.trail.push({x:e.x,y:e.y,life:1});
 
-          const currentSpeed=Math.hypot(e.vx,e.vy)*moveMult;
-          const trailCap=Math.round(Math.max(8,Math.min(e.boss?42:32,8+currentSpeed*.09)));
+          const trailCap=e.boss ? 38 : (e.minion ? 28 : 24);
           while(e.trail.length>trailCap) e.trail.shift();
         }
+      }
+
+      // Version 36 trails fade smoothly even while an enemy is frozen.
+      for(const t of e.trail){
+        t.life=Math.max(0,(t.life??1)-dt*(e.boss?1.05:(e.minion?1.35:1.48)));
+      }
+      while(e.trail.length && e.trail[0].life<=0){
+        e.trail.shift();
       }
 
       // Bounce off locked balls, making trapping possible.
@@ -6809,31 +9473,21 @@ body.packOpen{overflow:hidden!important}
     document.querySelector('.starMarker2')?.classList.toggle('earned',liveStars>=2);
     document.querySelector('.starMarker3')?.classList.toggle('earned',liveStars>=3);
 
-    if(state.frenzyLeft>0){
+    if(state.boosterFeedbackT>0){
+      ui.boosterStatus.textContent=state.boosterFeedbackText;
+      ui.boosterStatus.style.setProperty('--booster-accent',state.boosterFeedbackColor);
+      ui.boosterStatus.classList.add('boosterActivated');
+      ui.boosterStatus.classList.remove('boosterCountdown');
+      ui.boosterStatus.setAttribute('aria-live','polite');
+    }else if(state.frenzyLeft>0){
       ui.boosterStatus.textContent=`🧲 ${state.frenzyLeft.toFixed(1)}s`;
+      ui.boosterStatus.classList.remove('boosterActivated');
+      ui.boosterStatus.classList.add('boosterCountdown');
+      ui.boosterStatus.setAttribute('aria-live','off');
     }else{
       ui.boosterStatus.textContent='';
-    }
-
-    const bossProfile=bossProfileForLevel(currentLevel);
-    if(bossProfile){
-      ui.bossMechanicStatus.classList.add('show');
-      ui.bossMechanicStatus.style.background=bossProfile.fill+'18';
-      ui.bossMechanicStatus.style.borderColor=bossProfile.edge;
-      ui.bossMechanicStatus.style.color=bossProfile.fill;
-
-      let activeText;
-      if(state.bossEffectT>0){
-        activeText=state.bossEffectText;
-      }else{
-        activeText=`${bossProfile.name} • GROW → BOSS CHARGES • ${bossProfile.mechanic} IN ${Math.max(0,Math.ceil(state.bossAbilityTimer))}s`;
-      }
-
-      ui.bossMechanicStatus.textContent=activeText;
-      ui.bossMechanicStatus.classList.toggle('warning',state.bossEffectT>0);
-    }else{
-      ui.bossMechanicStatus.classList.remove('show','warning');
-      ui.bossMechanicStatus.textContent='';
+      ui.boosterStatus.classList.remove('boosterActivated','boosterCountdown');
+      ui.boosterStatus.setAttribute('aria-live','polite');
     }
 
     updateBoosterUI();
@@ -7440,29 +10094,38 @@ body.packOpen{overflow:hidden!important}
     ctx.shadowOffsetX=7;
     ctx.shadowOffsetY=9;
 
-    ctx.fillStyle=style.fill;
-    ctx.beginPath();
-    ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
-    ctx.fill();
+    const sharedAsset=BALL_ASSET_IMAGES[type] || BALL_ASSET_IMAGES.normal;
+    const sharedAssetReady=sharedAsset?.complete && sharedAsset.naturalWidth>0;
 
-    ctx.shadowColor='transparent';
-    ctx.strokeStyle=active
-      ? (type==='legendary' ? '#a74605' : '#227ea8')
-      : style.edge;
-    ctx.lineWidth=active?6:4;
-    ctx.stroke();
+    if(sharedAssetReady){
+      // The same canonical SVG is used by gameplay, Collection, Store, and pack reveals.
+      ctx.drawImage(sharedAsset,b.x-b.r,b.y-b.r,b.r*2,b.r*2);
+      ctx.shadowColor='transparent';
+    }else{
+      // First-frame fallback while the tiny SVG asset finishes decoding.
+      ctx.fillStyle=style.fill;
+      ctx.beginPath();
+      ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+      ctx.fill();
 
-    // Highlight
-    ctx.globalAlpha=.78;
-    ctx.fillStyle=style.highlight;
-    ctx.beginPath();
-    ctx.arc(
-      b.x-b.r*.28,
-      b.y-b.r*.32,
-      Math.max(5,b.r*.17),
-      0,Math.PI*2
-    );
-    ctx.fill();
+      ctx.shadowColor='transparent';
+      ctx.strokeStyle=active
+        ? (type==='legendary' ? '#a74605' : '#227ea8')
+        : style.edge;
+      ctx.lineWidth=active?6:4;
+      ctx.stroke();
+
+      ctx.globalAlpha=.78;
+      ctx.fillStyle=style.highlight;
+      ctx.beginPath();
+      ctx.arc(
+        b.x-b.r*.28,
+        b.y-b.r*.32,
+        Math.max(5,b.r*.17),
+        0,Math.PI*2
+      );
+      ctx.fill();
+    }
 
     // Legendary inner shimmer
     if(type==='legendary'){
@@ -7561,74 +10224,200 @@ body.packOpen{overflow:hidden!important}
     ctx.restore();
   }
 
-  function traceEnemyTriangle(context,radius){
-    context.beginPath();
-    context.moveTo(radius,0);
-    context.lineTo(-radius*.5,radius*.866);
-    context.lineTo(-radius*.5,-radius*.866);
-    context.closePath();
-  }
-
   function drawEnemyTrail(e){
     if(!e.trail || e.trail.length<2) return;
 
-    const profile=e.boss
-      ? (BOSS_PROFILES[e.bossIndex] || BOSS_PROFILES[1])
-      : (BOSS_PROFILES[e.worldIndex] || BOSS_PROFILES[1]);
-    const angle=Math.atan2(e.vy,e.vx);
-    const drawR=e.r*(state.enemyGrowLeft>0?1.30:1)*(e.boss?1.14:1);
-    const tailEnd={
-      x:e.x-Math.cos(angle)*drawR*.5,
-      y:e.y-Math.sin(angle)*drawR*.5
-    };
-    const trailColor=state.freezeLeft>0
-      ? '#8bcbed'
-      : (e.boss ? profile.fill : (e.minion ? profile.minionFill : profile.fill));
-    const start=e.trail[0];
-    const gradient=ctx.createLinearGradient(start.x,start.y,tailEnd.x,tailEnd.y);
-    gradient.addColorStop(0,'rgba(0,0,0,0)');
-    gradient.addColorStop(.35,trailColor+'55');
-    gradient.addColorStop(1,trailColor);
+    const profile=BOSS_PROFILES[e.worldIndex] || BOSS_PROFILES[1];
+    const n=e.trail.length;
 
     ctx.save();
     ctx.lineCap='round';
     ctx.lineJoin='round';
-    ctx.globalAlpha=e.boss?.72:.6;
-    ctx.strokeStyle=gradient;
-    ctx.lineWidth=e.boss?13:(e.minion?9:11);
-    ctx.beginPath();
-    ctx.moveTo(start.x,start.y);
-    for(let i=1;i<e.trail.length;i++) ctx.lineTo(e.trail[i].x,e.trail[i].y);
-    ctx.lineTo(tailEnd.x,tailEnd.y);
-    ctx.stroke();
+
+    // Soft glow ribbon.
+    for(let i=1;i<n;i++){
+      const a=e.trail[i-1];
+      const b=e.trail[i];
+      const progress=i/(n-1);
+      const life=Math.min(a.life??1,b.life??1);
+      if(life<=0) continue;
+      const widthBase=e.boss ? e.r*1.22 : (e.minion ? e.r*.88 : e.r*.72);
+
+      ctx.globalAlpha=life*progress*(e.boss?.19:(e.minion?.13:.10));
+      ctx.strokeStyle=profile.glow || profile.trail;
+      ctx.shadowColor=profile.glow || profile.trail;
+      ctx.shadowBlur=e.boss ? 26 : (e.minion ? 18 : 14);
+      ctx.lineWidth=Math.max(4,widthBase*progress*1.55);
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y);
+      ctx.lineTo(b.x,b.y);
+      ctx.stroke();
+    }
+
+    // Main colored ribbon.
+    for(let i=1;i<n;i++){
+      const a=e.trail[i-1];
+      const b=e.trail[i];
+      const progress=i/(n-1);
+      const life=Math.min(a.life??1,b.life??1);
+      if(life<=0) continue;
+      const widthBase=e.boss ? e.r*.96 : (e.minion ? e.r*.68 : e.r*.56);
+
+      ctx.globalAlpha=life*progress*(e.boss?.44:(e.minion?.31:.25));
+      ctx.shadowBlur=0;
+      ctx.strokeStyle=profile.trail;
+      ctx.lineWidth=Math.max(2.5,widthBase*progress*1.18);
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y);
+      ctx.lineTo(b.x,b.y);
+      ctx.stroke();
+    }
+
+    // Bright energy core.
+    for(let i=1;i<n;i++){
+      const a=e.trail[i-1];
+      const b=e.trail[i];
+      const progress=i/(n-1);
+      const life=Math.min(a.life??1,b.life??1);
+      if(life<=0) continue;
+      const widthBase=e.boss ? e.r*.42 : (e.minion ? e.r*.30 : e.r*.24);
+
+      ctx.globalAlpha=life*progress*(e.boss?.58:(e.minion?.42:.34));
+      ctx.strokeStyle='#fff7d2';
+      ctx.lineWidth=Math.max(1.2,widthBase*progress);
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y);
+      ctx.lineTo(b.x,b.y);
+      ctx.stroke();
+    }
+
+    // Round sparks preserve the version 36 enemy language.
+    for(let i=0;i<n;i+=2){
+      const t=e.trail[i];
+      const progress=(i+1)/n;
+      const alpha=(t.life??1)*progress*(e.boss?.62:(e.minion?.34:.26));
+      if(alpha<=0) continue;
+      const rr=Math.max(1.8,e.r*(e.boss?.23:(e.minion?.16:.13))*progress);
+
+      ctx.globalAlpha=alpha;
+      ctx.shadowColor=profile.glow || profile.edge;
+      ctx.shadowBlur=e.boss ? 18 : 10;
+      ctx.fillStyle=(i%4===0 && e.boss) ? '#fff0a8' : profile.edge;
+      ctx.beginPath();
+      ctx.arc(t.x,t.y,rr,0,Math.PI*2);
+      ctx.fill();
+    }
+
+    if(e.boss){
+      for(let i=1;i<n;i+=4){
+        const t=e.trail[i];
+        const progress=(i+1)/n;
+        const alpha=(t.life??1)*progress*.62;
+        if(alpha<=0) continue;
+        const s=2.2+3.8*progress;
+
+        ctx.globalAlpha=alpha;
+        ctx.shadowColor=profile.edge;
+        ctx.shadowBlur=12;
+        ctx.strokeStyle='#fff7cb';
+        ctx.lineWidth=1.5;
+        ctx.beginPath();
+        ctx.moveTo(t.x-s,t.y);
+        ctx.lineTo(t.x+s,t.y);
+        ctx.moveTo(t.x,t.y-s);
+        ctx.lineTo(t.x,t.y+s);
+        ctx.stroke();
+      }
+    }
 
     ctx.restore();
   }
 
   function drawEnemy(e){
-    const profile=e.boss
-      ? (BOSS_PROFILES[e.bossIndex] || BOSS_PROFILES[1])
-      : (BOSS_PROFILES[e.worldIndex] || BOSS_PROFILES[1]);
-    const angle=Math.atan2(e.vy,e.vx);
-    const drawR=e.r*(state.enemyGrowLeft>0?1.30:1);
-    const fill=state.freezeLeft>0
-      ? '#8bcbed'
-      : (e.boss ? profile.fill : (e.minion ? profile.minionFill : profile.fill));
-    const edge=state.freezeLeft>0
-      ? '#5daed8'
-      : (e.boss ? profile.edge : (e.minion ? profile.minionEdge : profile.edge));
-
     ctx.save();
     ctx.translate(e.x,e.y);
-    ctx.rotate(angle);
 
-    ctx.globalAlpha=1;
-    ctx.fillStyle=fill;
-    ctx.strokeStyle=edge;
-    ctx.lineWidth=e.boss?6:4;
-    traceEnemyTriangle(ctx,drawR*(e.boss?1.14:1));
+    const drawR=e.r*(state.enemyGrowLeft>0?1.30:1);
+    if(e.boss){
+      const profile=BOSS_PROFILES[e.bossIndex] || BOSS_PROFILES[1];
+      const pulse=1+.04*Math.sin(performance.now()/105);
+
+      // Animated halo and neon outline from version 36.
+      ctx.globalAlpha=.34;
+      ctx.strokeStyle=profile.edge;
+      ctx.lineWidth=7;
+      ctx.shadowColor=profile.glow;
+      ctx.shadowBlur=16;
+      ctx.beginPath();
+      ctx.arc(0,0,(drawR+10)*pulse,0,Math.PI*2);
+      ctx.stroke();
+
+      ctx.globalAlpha=1;
+      ctx.shadowColor=profile.glow;
+      ctx.shadowBlur=18;
+      ctx.fillStyle=state.freezeLeft>0?'#8bcbed':profile.fill;
+      ctx.strokeStyle=state.freezeLeft>0?'#5daed8':profile.edge;
+      ctx.lineWidth=5;
+      ctx.beginPath();
+      ctx.arc(0,0,drawR,0,Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur=0;
+
+      // Crown.
+      ctx.fillStyle='#ffbd4a';
+      ctx.strokeStyle='#9c5b08';
+      ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(-14,-drawR+1);
+      ctx.lineTo(-8,-drawR-14);
+      ctx.lineTo(0,-drawR-4);
+      ctx.lineTo(8,-drawR-14);
+      ctx.lineTo(14,-drawR+1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Eyes.
+      ctx.fillStyle='white';
+      ctx.beginPath();
+      ctx.arc(-9,-4,4.8,0,Math.PI*2);
+      ctx.arc(9,-4,4.8,0,Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle=COLORS.text;
+      ctx.beginPath();
+      ctx.arc(-9,-4,2.1,0,Math.PI*2);
+      ctx.arc(9,-4,2.1,0,Math.PI*2);
+      ctx.fill();
+
+      ctx.restore();
+      return;
+    }
+
+    const profile=BOSS_PROFILES[e.worldIndex] || BOSS_PROFILES[1];
+    ctx.fillStyle=state.freezeLeft>0
+      ? '#8bcbed'
+      : (e.minion ? profile.minionFill : profile.fill);
+    ctx.strokeStyle=state.freezeLeft>0
+      ? '#5daed8'
+      : (e.minion ? profile.minionEdge : profile.edge);
+    ctx.lineWidth=3;
+    ctx.beginPath();
+    ctx.arc(0,0,drawR,0,Math.PI*2);
     ctx.fill();
     ctx.stroke();
+
+    ctx.fillStyle='white';
+    ctx.beginPath();
+    ctx.arc(-5,-3,3.2,0,Math.PI*2);
+    ctx.arc(5,-3,3.2,0,Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle=COLORS.text;
+    ctx.beginPath();
+    ctx.arc(-5,-3,1.4,0,Math.PI*2);
+    ctx.arc(5,-3,1.4,0,Math.PI*2);
+    ctx.fill();
 
     ctx.restore();
   }
@@ -7671,9 +10460,9 @@ body.packOpen{overflow:hidden!important}
     walletCoins-=IMPOSSIBLE_BALL_PRICE;
     ownedBalls.add(type);
     selectedBallType=type;
-    sfx('purchase');
-    ui.storeMessage.textContent=`${data.name.toUpperCase()} UNLOCKED`;
-    celebratePackPurchase();
+    ui.storeMessage.textContent='';
+    const purchasedCard=document.querySelector(type==='gaia'?'.gaiaStoreCard':'.cataclysmStoreCard');
+    celebratePackPurchase(purchasedCard,`${data.name.toUpperCase()} UNLOCKED!`);
     updateCollectionUI();
     syncUI();
     setTimeout(()=>{ui.storeMessage.textContent='';},1300);
@@ -7695,7 +10484,8 @@ body.packOpen{overflow:hidden!important}
     walletCoins -= 5000;
     ownedBalls.add('apex');
     selectedBallType='apex';
-    ui.storeMessage.textContent='APEX UNLOCKED';
+    ui.storeMessage.textContent='';
+    celebratePackPurchase(document.querySelector('.mythicStoreCard'),'APEX BALL UNLOCKED!');
     updateCollectionUI();
     syncUI();
     setTimeout(()=>{ui.storeMessage.textContent='';},1200);
@@ -7704,6 +10494,7 @@ body.packOpen{overflow:hidden!important}
   function selectBallType(type){
     if(!ownedBalls.has(type)) return;
 
+    const changed=selectedBallType!==type;
     selectedBallType=type;
     collectionPreviewType=type;
     updateCollectionUI();
@@ -7711,6 +10502,11 @@ body.packOpen{overflow:hidden!important}
     const data=BALL_TYPES[type];
     ui.storeMessage.textContent=`${data.name} equipped`;
     setTimeout(()=>{ui.storeMessage.textContent='';},700);
+
+    if(changed){
+      sfx('purchase');
+      requestAnimationFrame(()=>celebrateEquippedBall(type));
+    }
   }
 
   const collectionCardsByType={
@@ -7726,6 +10522,48 @@ body.packOpen{overflow:hidden!important}
     cataclysm:ui.cataclysmCard,
     gaia:ui.gaiaCard
   };
+
+  function celebrateEquippedBall(type){
+    const card=collectionCardsByType[type];
+    const ball=card?.querySelector('.collectionBall');
+    if(!card || !ball) return;
+
+    document.querySelectorAll('.equipCelebrationBadge,.equipSparkBurst').forEach(el=>el.remove());
+    document.querySelectorAll('.ballCard.equipCelebrating').forEach(el=>el.classList.remove('equipCelebrating'));
+
+    const cardRect=card.getBoundingClientRect();
+    const ballRect=ball.getBoundingClientRect();
+    const burst=document.createElement('div');
+    burst.className='equipSparkBurst';
+    burst.style.left=`${ballRect.left-cardRect.left+ballRect.width/2}px`;
+    burst.style.top=`${ballRect.top-cardRect.top+ballRect.height/2}px`;
+
+    for(let i=0;i<14;i++){
+      const spark=document.createElement('i');
+      spark.className='equipSpark';
+      spark.style.setProperty('--spark-angle',`${i*(360/14)}deg`);
+      spark.style.setProperty('--spark-distance',`${3.7+(i%4)*.42}rem`);
+      spark.style.setProperty('--spark-delay',`${(i%3)*28}ms`);
+      burst.appendChild(spark);
+    }
+
+    const badge=document.createElement('div');
+    badge.className='equipCelebrationBadge';
+    badge.setAttribute('role','status');
+    badge.textContent=`✓ ${BALL_TYPES[type].name.toUpperCase()} EQUIPPED!`;
+
+    card.append(burst,badge);
+    void card.offsetWidth;
+    card.classList.add('equipCelebrating');
+
+    if(navigator.vibrate) navigator.vibrate([18,24,32]);
+
+    setTimeout(()=>{
+      card.classList.remove('equipCelebrating');
+      burst.remove();
+      badge.remove();
+    },1050);
+  }
 
   for(const [type,card] of Object.entries(collectionCardsByType)){
     card.addEventListener('click',(ev)=>{
@@ -7778,7 +10616,7 @@ body.packOpen{overflow:hidden!important}
     state.ballsLeft+=3;
     state.message='+3 BALLS!';
     state.messageT=.7;
-    startBoosterCooldown('moreBalls');
+    startBoosterCooldown('moreBalls','ADDED TO TOTAL');
     syncUI();
   });
 
@@ -7788,7 +10626,7 @@ body.packOpen{overflow:hidden!important}
     state.timeLeft+=10;
     state.message='+10 SECONDS!';
     state.messageT=.7;
-    startBoosterCooldown('moreTime');
+    startBoosterCooldown('moreTime','ADDED TO TIMER');
     syncUI();
   });
 
@@ -7830,7 +10668,7 @@ body.packOpen{overflow:hidden!important}
       removed.boss ? 135 : 95
     );
 
-    startBoosterCooldown('destroyBall');
+    startBoosterCooldown('destroyBall',removed.boss ? 'BOSS BLASTED' : 'ENEMY DESTROYED');
     syncUI();
   });
 
@@ -7845,7 +10683,7 @@ body.packOpen{overflow:hidden!important}
 
     for(let i=0;i<6;i++) spawnCoin(true);
 
-    startBoosterCooldown('coinFrenzy');
+    startBoosterCooldown('coinFrenzy','COINS PULLED IN');
     syncUI();
   });
 
@@ -7858,17 +10696,7 @@ body.packOpen{overflow:hidden!important}
     state.message='ENEMIES FROZEN!';
     state.messageT=.7;
 
-    startBoosterCooldown('freeze');
-    syncUI();
-  });
-
-  ui.shieldPulse.addEventListener('click',()=>{
-    if(!state.running || !unlockedBoosters.has('shieldPulse') || boosterCooldowns.shieldPulse>0) return;
-    sfx('booster');
-    if(state.active) state.active.shieldHits=(state.active.shieldHits||0)+1;
-    state.shieldPulseLeft=3;
-    flashScreen('#b7c3ff',.09);
-    startBoosterCooldown('shieldPulse');
+    startBoosterCooldown('freeze','4s FREEZE');
     syncUI();
   });
 
@@ -7877,7 +10705,7 @@ body.packOpen{overflow:hidden!important}
     sfx('booster');
     state.slowEnemiesLeft=4;
     flashScreen('#b6f0ff',.08);
-    startBoosterCooldown('slowEnemies');
+    startBoosterCooldown('slowEnemies','4s SLOW');
     syncUI();
   });
 
@@ -7886,17 +10714,16 @@ body.packOpen{overflow:hidden!important}
     sfx('booster');
     for(let i=0;i<5;i++) spawnCoin(true);
     flashScreen('#ffe47a',.08);
-    startBoosterCooldown('coinBurst');
+    startBoosterCooldown('coinBurst','+5 COINS');
     syncUI();
   });
 
   ui.instantGrow.addEventListener('click',()=>{
-    if(!state.running || !unlockedBoosters.has('instantGrow') || boosterCooldowns.instantGrow>0 || !state.active) return;
+    if(!state.running || !unlockedBoosters.has('instantGrow') || boosterCooldowns.instantGrow>0) return;
     sfx('booster');
-    const limit=maxGrowthRadius(state.active);
-    state.active.r=Math.min(limit,state.active.r+55);
-    flashScreen('#fff19c',.08);
-    startBoosterCooldown('instantGrow');
+    const appliedNow=applyGrowthBurst(state.active);
+    state.instantGrowReady=!appliedNow;
+    startBoosterCooldown('instantGrow',appliedNow ? 'BALL GREW' : 'NEXT BALL CHARGED');
     syncUI();
   });
 
@@ -7910,7 +10737,7 @@ body.packOpen{overflow:hidden!important}
       e.vy=dy/d*sp;
     }
     flashScreen('#ffffff',.16);
-    startBoosterCooldown('panicClear');
+    startBoosterCooldown('panicClear','ENEMIES PUSHED');
     syncUI();
   });
 
