@@ -24,7 +24,7 @@ test('starter pack leads into responsive touch gameplay and navigation', async (
   const box = await canvas.boundingBox();
   expect(box).not.toBeNull();
 
-  const startTime = Number(await page.locator('#time').textContent());
+  await expect(page.locator('#time')).toHaveText('—');
   await canvas.dispatchEvent('pointerdown', {
     pointerId: 1,
     pointerType: 'touch',
@@ -40,7 +40,8 @@ test('starter pack leads into responsive touch gameplay and navigation', async (
     clientX: box!.x + box!.width / 2,
     clientY: box!.y + box!.height / 2,
   });
-  await expect.poll(async () => Number(await page.locator('#time').textContent())).toBeLessThan(startTime);
+  await expect(page.locator('#tutorialCoach')).toHaveAttribute('aria-hidden', 'true');
+  await expect(page.locator('#time')).toHaveText('—');
 
   await page.locator('#gameToStore').click();
   await expect(page.locator('#storeScreen')).toHaveClass(/active/);
@@ -128,6 +129,131 @@ test('legacy renderer remains a playable rollback path', async ({ page }) => {
     clientY: box!.y + box!.height / 2,
   });
   await expect(page.locator('#balls')).toHaveText('9');
+});
+
+test('pack reward stays spacious on mobile with a bounded reveal effect', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 720 });
+  await page.goto('/');
+  await page.locator('#bigPack').click();
+  await expect(page.locator('#rewardReveal')).toHaveClass(/show/, { timeout: 3_000 });
+  // Measure the settled card, not the opening scale keyframe.
+  await page.waitForTimeout(1_250);
+
+  const layout = await page.evaluate(() => {
+    const modal = document.querySelector<HTMLElement>('#packModal')!;
+    const title = document.querySelector<HTMLElement>('#packTitle')!;
+    const subtitle = document.querySelector<HTMLElement>('#packSub')!;
+    const reward = document.querySelector<HTMLElement>('#rewardReveal')!;
+    const actions = document.querySelector<HTMLElement>('.packAfterActions')!;
+    const modalRect = modal.getBoundingClientRect();
+    const rewardRect = reward.getBoundingClientRect();
+    const actionsRect = actions.getBoundingClientRect();
+
+    return {
+      modalTop: modalRect.top,
+      modalBottom: modalRect.bottom,
+      modalHeight: modalRect.height,
+      titleTop: title.getBoundingClientRect().top,
+      subtitleBottom: subtitle.getBoundingClientRect().bottom,
+      rewardTop: rewardRect.top,
+      rewardHeight: rewardRect.height,
+      rewardBottom: rewardRect.bottom,
+      actionsTop: actionsRect.top,
+      actionsBottom: actionsRect.bottom,
+      scrollFits: modal.scrollHeight <= modal.clientHeight + 1,
+      particleCount: document.querySelectorAll('#packFxLayer .shopConfetti, #packFxLayer .packMegaSpark').length,
+    };
+  });
+
+  expect(layout.modalHeight).toBeGreaterThan(620);
+  expect(layout.modalTop).toBeGreaterThanOrEqual(0);
+  expect(layout.modalBottom).toBeLessThanOrEqual(720);
+  expect(layout.titleTop - layout.modalTop).toBeLessThan(32);
+  expect(layout.rewardTop).toBeLessThan(270);
+  expect(layout.rewardTop - layout.subtitleBottom).toBeGreaterThan(18);
+  expect(layout.rewardHeight).toBeGreaterThan(270);
+  expect(layout.actionsTop).toBeGreaterThan(layout.rewardBottom);
+  expect(layout.actionsBottom).toBeLessThanOrEqual(layout.modalBottom);
+  expect(layout.modalBottom - layout.actionsBottom).toBeLessThan(28);
+  expect(layout.scrollFits).toBe(true);
+  expect(layout.particleCount).toBeLessThanOrEqual(124);
+});
+
+test('collection selection uses native smooth scrolling without list jumps', async ({ page, context }) => {
+  await page.setViewportSize({ width: 360, height: 720 });
+  await page.goto('/');
+  await page.locator('#bigPack').click();
+  await expect(page.locator('#packContinue')).toHaveClass(/show/, { timeout: 3_000 });
+  await page.locator('#packContinue').click();
+  await page.locator('#adminBalls').evaluate((button: HTMLButtonElement) => button.click());
+  await page.locator('#hudCollectionButton').click();
+  await expect(page.locator('#collectionScreen')).toHaveClass(/active/);
+
+  const initial = await page.evaluate(() => {
+    const scroller = document.querySelector<HTMLElement>('#collectionScreen .menuApp')!;
+    return {
+      order: [...document.querySelectorAll<HTMLElement>('#collectionScreen .ballCard')].map(card => card.id),
+      behavior: getComputedStyle(scroller).scrollBehavior,
+    };
+  });
+  expect(initial.behavior).toBe('smooth');
+
+  await page.locator('#equipGaia').evaluate((button: HTMLButtonElement) => button.click());
+  await expect(page.locator('#equipGaia')).toHaveClass(/equippedButton/);
+  await expect.poll(async () => page.evaluate(() => {
+    const scroller = document.querySelector<HTMLElement>('#collectionScreen .menuApp')!;
+    const card = document.querySelector<HTMLElement>('#gaiaCard')!;
+    const style = getComputedStyle(scroller);
+    const start = Number.parseFloat(style.scrollPaddingBlockStart) || 0;
+    const end = Number.parseFloat(style.scrollPaddingBlockEnd) || 0;
+    const viewport = scroller.getBoundingClientRect();
+    const targetCenter = viewport.top + start + (viewport.height - start - end) / 2;
+    const cardRect = card.getBoundingClientRect();
+    return Math.abs(cardRect.top + cardRect.height / 2 - targetCenter);
+  }), { timeout: 2_000 }).toBeLessThan(24);
+
+  // A new selection must retarget the browser's native animation cleanly.
+  await page.locator('#equipSwift').evaluate((button: HTMLButtonElement) => button.click());
+  await page.waitForTimeout(50);
+  await page.locator('#equipNormal').evaluate((button: HTMLButtonElement) => button.click());
+  await expect(page.locator('#equipNormal')).toHaveClass(/equippedButton/);
+  await expect.poll(async () => page.evaluate(() => (
+    document.querySelector<HTMLElement>('#collectionScreen .menuApp')!.scrollTop
+  )), { timeout: 2_000 }).toBeLessThan(2);
+
+  const finalOrder = await page.evaluate(() => (
+    [...document.querySelectorAll<HTMLElement>('#collectionScreen .ballCard')].map(card => card.id)
+  ));
+  expect(finalOrder).toEqual(initial.order);
+
+  const scrollerBox = await page.locator('#collectionScreen .menuApp').boundingBox();
+  expect(scrollerBox).not.toBeNull();
+  const touchX = scrollerBox!.x + scrollerBox!.width / 2;
+  const touchStartY = scrollerBox!.y + scrollerBox!.height * .76;
+  const touchEndY = scrollerBox!.y + scrollerBox!.height * .32;
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent', {
+    type: 'touchStart',
+    touchPoints: [{ x: touchX, y: touchStartY }],
+  });
+  for (let step = 1; step <= 5; step++) {
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{
+        x: touchX,
+        y: touchStartY + (touchEndY - touchStartY) * step / 5,
+      }],
+    });
+    await page.waitForTimeout(16);
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+
+  await expect.poll(async () => page.evaluate(() => (
+    document.querySelector<HTMLElement>('#collectionScreen .menuApp')!.scrollTop
+  ))).toBeGreaterThan(80);
+  await expect.poll(async () => page.locator('#collectionScreen .menuApp').evaluate(scroller => (
+    !scroller.classList.contains('collectionScrolling')
+  ))).toBe(true);
 });
 
 test('starter progress, wallet, and inventory survive reload', async ({ page }) => {
