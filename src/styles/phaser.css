@@ -1,0 +1,43 @@
+#phaserArena {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border: 0.125rem solid var(--line);
+  border-radius: inherit;
+  background: #e8eef3;
+  pointer-events: none;
+}
+
+#phaserArena canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+}
+
+#game {
+  position: relative;
+  z-index: 1;
+}
+
+body.phaserRenderer #game {
+  opacity: 0;
+  background: transparent;
+  border-color: transparent;
+}
+
+body.phaserRenderer .boardWrap.speedRushLevel #phaserArena {
+  border-color: #ef9f25;
+  animation: speedRushArenaPulse 1.15s ease-in-out infinite;
+}
+
+body.phaserRenderer .boardWrap.miniBossLevel #phaserArena {
+  border-color: #d45264;
+  animation: miniBossArenaPulse 1.35s ease-in-out infinite;
+}
+
+body.phaserRenderer .boardWrap.defeatSlowdown #phaserArena {
+  filter: saturate(0.35) contrast(1.14) brightness(0.72);
+  transition: filter 0.28s ease-out;
+}
