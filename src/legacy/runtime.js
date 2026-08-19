@@ -1,7 +1,8 @@
 import { BALL_ASSET_PATHS, BALL_BENEFITS, BALL_TYPES } from '../data/balls';
 import { BOOSTERS } from '../data/boosters';
 import { PACK_POOL, PACK_PRICE, IMPOSSIBLE_BALL_PRICE, STAR_MULTIPLIERS, formatCoinAmount, roundCoinAmount } from '../data/economy';
-import { BOSS_LEVELS, BOSS_PROFILES, EARLY_LEVEL_CHALLENGES, MAX_LEVEL, bossProfileForLevel, encounterProfileForLevel, isMiniBossLevel, isRushEventLevel, worldProfileForLevel } from '../data/encounters';
+import { BOSS_LEVELS, BOSS_PROFILES, MAX_LEVEL, bossProfileForLevel, encounterProfileForLevel, worldProfileForLevel } from '../data/encounters';
+import { levelConfig } from '../data/levels';
 import { SAVE_VERSION } from '../state/SaveData';
 import { loadSaveData, saveSaveData } from '../state/SaveRepository';
 import { gameBridge } from '../game/GameBridge';
@@ -805,105 +806,7 @@ void loadSaveData().then(initialSaveData=>{
   }
 
   function enemyConfig(level){
-    level=Math.max(1,Math.min(MAX_LEVEL,Math.floor(level)));
-
-    const world=Math.floor((level-1)/20);       // 0..9
-    const stage=((level-1)%20)+1;              // 1..20
-    const boss=stage===20;
-    const miniBoss=isMiniBossLevel(level);
-    const rushEvent=isRushEventLevel(level);
-
-    // Give the opening ten levels an immediate pace boost, then taper that
-    // bonus away by level 20 so bosses and later worlds keep their balance.
-    const legacySpeedMult=1 + (level-1)*0.018;
-    const earlySpeedBonus=level<=10
-      ? 0.08
-      : (level<20 ? 0.08*((20-level)/10) : 0);
-    const baseSpeedMult=Math.min(2.40,legacySpeedMult+earlySpeedBonus);
-    const speedMult=baseSpeedMult*(rushEvent ? 1.24 : (miniBoss ? 1.08 : 1));
-
-    // Early enemies react during a normal two-second hold instead of drifting
-    // past it. This bonus also converges with the original curve at level 20.
-    const legacySeekStrength=0.14 + (level-1)*0.006;
-    const earlySeekBonus=level<=10
-      ? 0.06
-      : (level<20 ? 0.06*((20-level)/10) : 0);
-    const seekStrength=Math.min(
-      0.82,
-      legacySeekStrength+earlySeekBonus+(rushEvent ? .08 : (miniBoss ? .05 : 0))
-    );
-    const challenge=boss
-      ? 'BOSS BATTLE'
-      : (miniBoss
-          ? 'MINI BOSS'
-          : (rushEvent
-              ? '⚡ ENEMY RUSH'
-              : (EARLY_LEVEL_CHALLENGES[level-1] || `WORLD ${world+1} PUSH`)));
-
-    if(boss){
-      // Boss fights: one boss plus a few minions.
-      // Boss 20: 2 minions, Boss 40: 3, every later boss: 4.
-      // Total boss fight stays at 5 enemies max (boss + 4 minions).
-      const minions=Math.min(4,2+world);
-
-      return {
-        level,
-        world,
-        stage,
-        boss:true,
-        miniBoss:false,
-        rushEvent:false,
-        count:1+minions,
-        minions,
-        speedMult,
-        seekStrength,
-        challenge,
-        rewardMult:1
-      };
-    }
-
-    if(miniBoss){
-      // Mid-world trials use the boss silhouette and hunting behavior, but
-      // save the world's unique ability and booster reward for level 20.
-      const minions=Math.min(4,3+Math.floor(world/5));
-      return {
-        level,
-        world,
-        stage,
-        boss:false,
-        miniBoss:true,
-        rushEvent:false,
-        count:1+minions,
-        minions,
-        speedMult,
-        seekStrength,
-        challenge,
-        rewardMult:1.35
-      };
-    }
-
-    // Three moving threats make the first screen feel alive. Add one enemy
-    // every two levels so the opening ten levels have a clear rising rhythm:
-    // 3,3,4,4,5,5,6,6,7,7. Later worlds retain their established curve.
-    const baseCount=world===0
-      ? Math.min(7,3 + Math.floor((stage-1)/2))
-      : Math.min(7,2 + Math.floor((stage-1)/3));
-    const count=Math.min(8,baseCount+(rushEvent ? 1 : 0));
-
-    return {
-      level,
-      world,
-      stage,
-      boss:false,
-      miniBoss:false,
-      rushEvent,
-      count,
-      minions:0,
-      speedMult,
-      seekStrength,
-      challenge,
-      rewardMult:rushEvent ? 1.15 : 1
-    };
+    return levelConfig(level);
   }
 
   function setupEnemiesForLevel(){

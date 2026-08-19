@@ -70,6 +70,7 @@ export interface LegacyRunState {
   toxicLeft: number;
   chaosLeft: number;
   bossFlashT: number;
+  enemyGrowLeft: number;
   screenFlashT: number;
   screenFlashColor?: string;
   shakeT: number;

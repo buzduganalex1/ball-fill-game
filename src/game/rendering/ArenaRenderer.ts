@@ -28,7 +28,9 @@ export class ArenaRenderer {
 
     for (const enemy of frame.state.enemies) this.drawTrail(enemy);
     for (const coin of frame.state.coins) this.drawCoin(coin.x, coin.y, coin.r, frame.now, coin.pulse ?? 0);
-    for (const enemy of frame.state.enemies) this.drawEnemy(enemy);
+    for (const enemy of frame.state.enemies) {
+      this.drawEnemy(enemy, frame.state.freezeLeft > 0, frame.state.enemyGrowLeft > 0);
+    }
 
     this.balls.render([
       ...frame.state.placed.map(ball => ({ ball, active: false })),
@@ -59,23 +61,32 @@ export class ArenaRenderer {
       const progress = index / (trail.length - 1);
       const life = Math.min(from.life ?? 1, to.life ?? 1);
       const width = Math.max(2, enemy.r * (enemy.boss ? 0.72 : 0.4) * progress);
+      this.trails.lineStyle(width * 1.5, colorNumber(palette.glow), life * progress * (enemy.boss ? 0.2 : 0.1));
+      this.trails.lineBetween(from.x, from.y, to.x, to.y);
       this.trails.lineStyle(width, colorNumber(palette.trail), life * progress * (enemy.boss ? 0.48 : 0.28));
       this.trails.lineBetween(from.x, from.y, to.x, to.y);
     }
   }
 
-  private drawEnemy(enemy: LegacyEnemyState): void {
+  private drawEnemy(enemy: LegacyEnemyState, frozen: boolean, enlarged: boolean): void {
     const palette = WORLD_COLORS[Math.max(0, Math.min(9, (enemy.worldIndex ?? 1) - 1))];
-    const fill = enemy.boss || enemy.miniBoss ? palette.fill : enemy.minion ? palette.minion : '#d84b5c';
-    const edge = enemy.boss || enemy.miniBoss ? palette.edge : '#a83246';
-    this.world.fillStyle(colorNumber(fill), 1).fillCircle(enemy.x, enemy.y, enemy.r);
-    this.world.lineStyle(enemy.boss ? 5 : 3, colorNumber(edge), 1).strokeCircle(enemy.x, enemy.y, enemy.r);
+    const radius = enemy.r * (enlarged ? 1.3 : 1);
+    const fill = frozen ? '#8bcbed' : (enemy.minion ? palette.minion : palette.fill);
+    const edge = frozen ? '#5daed8' : (enemy.minion ? palette.minionEdge : palette.edge);
+
+    if (enemy.boss || enemy.miniBoss) {
+      this.world.lineStyle(7, colorNumber(palette.glow), 0.34)
+        .strokeCircle(enemy.x, enemy.y, radius + 10);
+    }
+
+    this.world.fillStyle(colorNumber(fill), 1).fillCircle(enemy.x, enemy.y, radius);
+    this.world.lineStyle(enemy.boss ? 5 : 3, colorNumber(edge), 1).strokeCircle(enemy.x, enemy.y, radius);
 
     const speed = Math.hypot(enemy.vx, enemy.vy) || 1;
     const lookX = enemy.vx / speed;
     const lookY = enemy.vy / speed;
-    const eyeOffset = Math.max(4, enemy.r * 0.27);
-    const eyeRadius = Math.max(2.4, enemy.r * 0.13);
+    const eyeOffset = Math.max(4, radius * 0.27);
+    const eyeRadius = Math.max(2.4, radius * 0.13);
     for (const side of [-1, 1]) {
       const sideX = -lookY * side * eyeOffset;
       const sideY = lookX * side * eyeOffset;
@@ -86,8 +97,8 @@ export class ArenaRenderer {
     }
 
     if (enemy.boss || enemy.miniBoss) {
-      const crownY = enemy.y - enemy.r - 9;
-      const crownWidth = enemy.r * 1.15;
+      const crownY = enemy.y - radius - 9;
+      const crownWidth = radius * 1.15;
       this.world.fillStyle(0xffca48, 1);
       this.world.fillTriangle(enemy.x - crownWidth / 2, crownY, enemy.x - crownWidth / 4, crownY - 14, enemy.x, crownY);
       this.world.fillTriangle(enemy.x, crownY, enemy.x + crownWidth / 4, crownY - 14, enemy.x + crownWidth / 2, crownY);
