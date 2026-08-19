@@ -82,31 +82,44 @@
       </div>
     </section>
 
-    <section class="homeStats" aria-label="Player stats">
-      <div class="homeStat">
-        <span>LEVEL</span>
-        <strong id="homeCurrentLevel">1</strong>
-      </div>
-      <div class="homeStat homeGoldStat">
-        <span>GOLD</span>
-        <strong id="homeGoldStat">0</strong>
-      </div>
-      <div class="homeStat homeBallStat">
-        <span>BALLS</span>
-        <strong id="homeBallCount">1</strong>
-      </div>
-    </section>
-
-    <section class="homeJourney">
-      <div class="homeJourneyHead">
-        <div>
-          <span>WORLD PROGRESS</span>
-          <strong id="homeWorldLabel">WORLD 1</strong>
+    <section class="homeWorldMap" id="homeWorldMap" aria-labelledby="homeWorldName">
+      <div class="homeWorldMapHead">
+        <button class="homeWorldArrow" id="homeWorldPrev" type="button" aria-label="Previous world">‹</button>
+        <div class="homeWorldIdentity">
+          <span id="homeWorldNumber">WORLD 1</span>
+          <h2 id="homeWorldName">CRIMSON FIELDS</h2>
+          <small id="homeWorldBoss">BOSS • CRIMSON HUNTER</small>
         </div>
-        <strong id="homeWorldProgress">1 / 20</strong>
+        <button class="homeWorldArrow" id="homeWorldNext" type="button" aria-label="Next world">›</button>
       </div>
-      <div class="homeJourneyTrack"><span id="homeJourneyFill"></span></div>
-      <p id="homeNextMilestone">NEXT EVENT • LEVEL 5 ENEMY RUSH</p>
+
+      <div class="homeWorldStars">
+        <div class="homeWorldStarsTop">
+          <strong><span aria-hidden="true">★</span> <span id="homeWorldStars">0 / 60</span></strong>
+          <span id="homeWorldUnlockRule">50 TO UNLOCK NEXT WORLD</span>
+        </div>
+        <div class="homeWorldStarTrack"><span id="homeWorldStarFill"></span><i id="homeWorldStarGate" aria-hidden="true"></i></div>
+        <p id="homeWorldGateCopy">0 / 60 STARS • 50 MORE TO UNLOCK WORLD 2</p>
+      </div>
+
+      <div class="homeLevelGrid" id="homeLevelGrid" role="list" aria-label="World levels"></div>
+
+      <div class="homeLevelDetail" id="homeLevelDetail">
+        <div class="homeLevelDetailHead">
+          <div>
+            <span id="homeLevelDetailStars">☆☆☆</span>
+            <h3 id="homeLevelDetailTitle">LEVEL 1</h3>
+            <p id="homeLevelDetailChallenge">FIRST FILL</p>
+          </div>
+          <small id="homeLevelAttempts">NOT COMPLETED</small>
+        </div>
+        <div class="homeLevelBestStats">
+          <span><small>BEST TIME</small><strong id="homeLevelBestTime">—</strong></span>
+          <span><small>FEWEST BALLS</small><strong id="homeLevelBestBalls">—</strong></span>
+          <span><small>BEST GOLD</small><strong id="homeLevelBestCoins">—</strong></span>
+        </div>
+        <button class="homeLevelPlay" id="homeLevelPlay" type="button">PLAY LEVEL 1</button>
+      </div>
     </section>
 
     <section class="homeActionStack" aria-label="Quick actions">
@@ -119,16 +132,6 @@
           <span class="homePackTrack"><span id="homePackProgress"></span></span>
         </span>
         <span class="homeActionCta" id="homePackCta">VIEW STORE</span>
-      </button>
-
-      <button class="homeLoadoutCard" id="homeCollectionCard" type="button">
-        <span class="homeLoadoutBall" id="homeLoadoutBall" aria-hidden="true"></span>
-        <span class="homeActionCopy">
-          <span class="homeActionKicker">CURRENT LOADOUT</span>
-          <strong id="homeEquippedName">Normal Ball</strong>
-          <span id="homeOwnedCopy">1 of 11 balls collected</span>
-        </span>
-        <span class="homeActionCta">COLLECTION ›</span>
       </button>
     </section>
   </main>
@@ -160,6 +163,15 @@
           <span class="packHudSpark sparkA">✦</span>
           <span class="packHudSpark sparkB">✦</span>
         </button>
+
+        <button class="gameUtilityMenuButton hudMenuButton" id="gameUtilityMenuButton" type="button" aria-label="Game settings">
+          <svg class="utilityIcon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+            <circle cx="9" cy="6" r="2" />
+            <circle cx="15" cy="12" r="2" />
+            <circle cx="11" cy="18" r="2" />
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -172,11 +184,12 @@
     <div class="gameUtilityOverlay" id="gameUtilityOverlay" aria-hidden="true">
       <button class="gameUtilityBackdrop" id="gameUtilityBackdrop" type="button" aria-label="Close menu"></button>
       <div class="gameUtilityActions">
+        <button class="utilityCloseButton" id="gameUtilityClose" type="button" aria-label="Close menu">✕</button>
         <button class="utilityAction utilityHome" id="gameToHome" type="button">⌂ HOME</button>
+        <button class="utilityAction utilityRestart" id="restart" type="button">↻ RESTART</button>
         <button class="utilityAction utilityCollection" id="gameToCollection" type="button">⚪ COLLECTION</button>
         <button class="utilityAction utilitySound" id="soundToggle" type="button">🔊 SOUND</button>
         <button class="utilityAction utilityAdmin" id="gameAdminButton" type="button">⚙ ADMIN</button>
-        <button class="utilityCloseButton" id="gameUtilityClose" type="button" aria-label="Close menu">✕</button>
       </div>
     </div>
 
@@ -297,7 +310,8 @@
           </div>
 
           <div class="sub" id="resultText"></div>
-          <div class="buttons resultButtons" style="justify-content:center">
+          <div class="buttons resultButtons">
+            <button class="resultReplay" id="replayLevel" type="button" hidden aria-label="Replay this level">↻ REPLAY</button>
             <button class="primary resultContinue" id="again">CONTINUE</button>
           </div>
         </div>
@@ -307,29 +321,16 @@
     <div id="difficulty" hidden></div>
     <div id="boosterStatus" class="boosterToast" role="status" aria-live="polite"></div>
 
-    <div class="boosterDock" id="boosterDock">
-      <div class="boosterViewport" id="boosterViewport">
-        <div class="bottomBar" id="boosterTrack">
-          <button id="restart" title="Restart">↻</button>
-          <button id="freeze" title="Freeze enemies">❄</button>
-          <button id="moreBalls" title="Add 3 balls">➕</button>
-          <button id="moreTime" title="Add 10 seconds">⏱</button>
-          <button id="destroyBall" title="Destroy random enemy">💥</button>
-          <button id="coinFrenzy" title="Coin frenzy">🧲</button>
-          <button id="slowEnemies" title="Slow Enemies">🐌</button>
-          <button id="coinBurst" title="Coin Burst">🪙</button>
-          <button id="instantGrow" title="Growth Burst">⚡</button>
-          <button id="panicClear" title="Panic Clear">🌟</button>
-        </div>
-      </div>
-      <button class="gameUtilityMenuButton" id="gameUtilityMenuButton" type="button" aria-label="Game settings">
-        <svg class="utilityIcon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 6h16M4 12h16M4 18h16" />
-          <circle cx="9" cy="6" r="2" />
-          <circle cx="15" cy="12" r="2" />
-          <circle cx="11" cy="18" r="2" />
-        </svg>
-      </button>
+    <div class="boosterRuntimeControls" hidden aria-hidden="true">
+      <button id="freeze" title="Freeze enemies">❄</button>
+      <button id="moreBalls" title="Add 3 balls">➕</button>
+      <button id="moreTime" title="Add 10 seconds">⏱</button>
+      <button id="destroyBall" title="Destroy random enemy">💥</button>
+      <button id="coinFrenzy" title="Coin frenzy">🧲</button>
+      <button id="slowEnemies" title="Slow Enemies">🐌</button>
+      <button id="coinBurst" title="Coin Burst">🪙</button>
+      <button id="instantGrow" title="Growth Burst">⚡</button>
+      <button id="panicClear" title="Panic Clear">🌟</button>
     </div>
   </div>
   <canvas id="hudFxCanvas" class="hudFxCanvas" aria-hidden="true"></canvas>

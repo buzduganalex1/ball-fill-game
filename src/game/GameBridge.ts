@@ -1,81 +1,20 @@
 import type { BallId } from '../data/balls';
+import type {
+  ActiveRunState,
+  BallState,
+  CoinState,
+  EnemyState,
+  ImpactRingState,
+  RunFxState,
+} from '../domains/gameplay/RunState';
 
-export interface LegacyBallState {
-  x: number;
-  y: number;
-  r: number;
-  type?: BallId;
-  shieldHits?: number;
-  maxShieldHits?: number;
-  shieldFlash?: number;
-  ghostLeft?: number;
-  spawnPunch?: number;
-}
+export type LegacyBallState = BallState;
+export type LegacyEnemyState = EnemyState;
+export type LegacyCoinState = CoinState;
+export type LegacyFxState = RunFxState;
+export type LegacyImpactRing = ImpactRingState;
 
-export interface LegacyTrailPoint {
-  x: number;
-  y: number;
-  life?: number;
-}
-
-export interface LegacyEnemyState {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  r: number;
-  boss?: boolean;
-  miniBoss?: boolean;
-  minion?: boolean;
-  worldIndex?: number;
-  trail?: LegacyTrailPoint[];
-}
-
-export interface LegacyCoinState {
-  x: number;
-  y: number;
-  r: number;
-  pulse?: number;
-}
-
-export interface LegacyFxState {
-  type?: string;
-  x: number;
-  y: number;
-  r: number;
-  life: number;
-  maxLife?: number;
-  rotation?: number;
-  color?: string;
-}
-
-export interface LegacyImpactRing {
-  x: number;
-  y: number;
-  color?: string;
-  life: number;
-  maxR?: number;
-}
-
-export interface LegacyRunState {
-  placed: LegacyBallState[];
-  active: LegacyBallState | null;
-  enemies: LegacyEnemyState[];
-  coins: LegacyCoinState[];
-  coinFx: LegacyFxState[];
-  impactRings: LegacyImpactRing[];
-  frenzyLeft: number;
-  freezeLeft: number;
-  frostDebuffLeft: number;
-  toxicLeft: number;
-  chaosLeft: number;
-  bossFlashT: number;
-  enemyGrowLeft: number;
-  screenFlashT: number;
-  screenFlashColor?: string;
-  shakeT: number;
-  shakePower: number;
-}
+export type LegacyRunState = ActiveRunState;
 
 export interface LegacyRenderFrame {
   sequence: number;
