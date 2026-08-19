@@ -6,7 +6,7 @@ import { levelConfig } from '../data/levels';
 import { SAVE_VERSION } from '../state/SaveData';
 import { loadSaveData, saveSaveData } from '../state/SaveRepository';
 import { gameBridge } from '../game/GameBridge';
-import { liveStarCount as calculateLiveStars, measureCoverage as sampleCoverage } from '../game/systems/CoverageSystem';
+import { measureCoverage as sampleCoverage } from '../game/systems/CoverageSystem';
 import { distance as dist, followPointerTarget as followPointerWithinArena, growBallIntoAvailableSpace as growBallWithFit, maxGrowthRadius as calculateMaxGrowthRadius } from '../game/systems/GrowthSystem';
 import { initializeNativeShell } from '../native/lifecycle';
 import { beginNativeGrowthFeedback, endNativeGrowthFeedback, nativeHapticsAvailable, pulseNativeGrowthFeedback, triggerNativeFeedback } from '../native/haptics';
@@ -30,6 +30,7 @@ void loadSaveData().then(initialSaveData=>{
     level: document.getElementById('level'),
     difficulty: document.getElementById('difficulty'),
     time: document.getElementById('time'),
+    hudTimerCard: document.getElementById('hudTimerCard'),
     balls: document.getElementById('balls'),
     hudCollectionButton: document.getElementById('hudCollectionButton'),
     hudBallVisual: document.getElementById('hudBallVisual'),
@@ -38,29 +39,49 @@ void loadSaveData().then(initialSaveData=>{
     gameWalletPill: document.getElementById('gameWalletPill'),
     gameCoinTarget: document.getElementById('gameCoinTarget'),
     hudFxCanvas: document.getElementById('hudFxCanvas'),
+    growthBankFxLayer: document.getElementById('growthBankFxLayer'),
     soundToggle: document.getElementById('soundToggle'),
     storeWalletCoins: document.getElementById('storeWalletCoins'),
     collectionWalletCoins: document.getElementById('collectionWalletCoins'),
     tutorialCoach: document.getElementById('tutorialCoach'),
+    tutorialLevelBadge: document.getElementById('tutorialLevelBadge'),
+    tutorialPromptText: document.getElementById('tutorialPromptText'),
+    hudTutorialOverlay: document.getElementById('hudTutorialOverlay'),
+    hudTutorialSpotlight: document.getElementById('hudTutorialSpotlight'),
+    hudTutorialCard: document.getElementById('hudTutorialCard'),
+    hudTutorialStep: document.getElementById('hudTutorialStep'),
+    hudTutorialText: document.getElementById('hudTutorialText'),
+    hudTutorialNext: document.getElementById('hudTutorialNext'),
+    hudTutorialFinger: document.getElementById('hudTutorialFinger'),
+    hudTutorialSkip: document.getElementById('hudTutorialSkip'),
     boardWrap: document.getElementById('boardWrap'),
     defeatPrelude: document.getElementById('defeatPrelude'),
     coverage: document.getElementById('coverage'),
     progressFill1: document.getElementById('progressFill1'),
     progressFill2: document.getElementById('progressFill2'),
     progressFill3: document.getElementById('progressFill3'),
+    progressTrack: document.getElementById('segmentedProgressTrack'),
+    progressStar1: document.querySelector('.starMarker1'),
+    progressStar2: document.querySelector('.starMarker2'),
+    progressStar3: document.querySelector('.starMarker3'),
     progressStars: document.getElementById('progressStars'),
     levelChallenge: document.getElementById('levelChallenge'),
     levelGoal: document.getElementById('levelGoal'),
+    levelProgressValue: document.getElementById('levelProgressValue'),
+    progressMilestoneToast: document.getElementById('progressMilestoneToast'),
+    progressMilestoneValue: document.getElementById('progressMilestoneValue'),
     overlay: document.getElementById('overlay'),
     resultTitle: document.getElementById('resultTitle'),
     resultCard: document.getElementById('resultCard'),
     completionBadge: document.getElementById('completionBadge'),
     confettiField: document.getElementById('confettiField'),
+    starRequirements: document.getElementById('starRequirements'),
+    starRequirementsScore: document.getElementById('starRequirementsScore'),
     coinTransfer: document.getElementById('coinTransfer'),
     resultRunCoins: document.getElementById('resultRunCoins'),
+    resultMultiplierBadge: document.getElementById('resultMultiplierBadge'),
     resultWalletCoins: document.getElementById('resultWalletCoins'),
     resultWalletBucket: document.getElementById('resultWalletBucket'),
-    rewardFormula: document.getElementById('rewardFormula'),
     resultText: document.getElementById('resultText'),
     stars: document.getElementById('stars'),
     restart: document.getElementById('restart'),
@@ -448,6 +469,13 @@ void loadSaveData().then(initialSaveData=>{
         tone(1580,.10,{type:'sine',vol:.055,delay:.045,toFreq:1900});
         break;
 
+      case 'progressStar':
+        tone(660,.12,{type:'triangle',vol:.075,toFreq:820});
+        tone(990,.16,{type:'sine',vol:.07,delay:.045,toFreq:1180});
+        tone(1320,.22,{type:'sine',vol:.055,delay:.10,toFreq:1580});
+        noiseBurst(.09,{vol:.025,delay:.08,filterFreq:3900,filterType:'highpass',q:.35});
+        break;
+
       case 'pop':
         tone(240,.12,{type:'sine',vol:.08,toFreq:120});
         noiseBurst(.09,{vol:.065,filterFreq:1200,filterType:'bandpass'});
@@ -748,24 +776,142 @@ void loadSaveData().then(initialSaveData=>{
     queueProgressSave();
   }
 
-  function maybeShowLevelOneTutorial(){
-    if(!state || !starterPackOpened || currentLevel!==1 || tutorialSeen) return false;
-    state.tutorialActive=true;
-    state.running=false;
-    stopGrowSound(true);
-    ui.tutorialCoach.classList.add('show');
-    ui.tutorialCoach.setAttribute('aria-hidden','false');
-    return true;
+  const tutorialSession={
+    active:false,
+    level:0,
+    token:0,
+    hudIndex:0
+  };
+
+  const ONBOARDING_COPY={
+    1:'Tap, hold, move, grow, and release to fill the screen. Collect as many coins as possible before the progress bar is full.',
+    2:'If enemies hit you while growing, they will pop your ball and your progress will be lost. You have a limited number of balls—grow them as big as possible.'
+  };
+  const onboardingGuideShownLevels=new Set();
+  let onboardingDismissTimer=0;
+
+  function onboardingLevelActive(level=currentLevel){
+    return starterPackOpened && !tutorialSeen && (level===1 || level===2);
   }
 
-  function dismissLevelOneTutorial(){
-    if(!state?.tutorialActive) return;
-    state.tutorialActive=false;
+  function applyTutorialClasses(){
+    ui.gameScreen.classList.toggle('onboardingLevel1',onboardingLevelActive(1) && currentLevel===1);
+    ui.gameScreen.classList.toggle('tutorialHudTour',tutorialSession.level===4);
+    ui.gameScreen.dataset.onboardingLevel=onboardingLevelActive() ? String(currentLevel) : '0';
+  }
+
+  function showOnboardingLevelGuide(){
+    if(currentScreen!=='game' || !onboardingLevelActive() || onboardingGuideShownLevels.has(currentLevel)) return;
+    onboardingGuideShownLevels.add(currentLevel);
+    clearTimeout(onboardingDismissTimer);
+    ui.tutorialLevelBadge.textContent=`LEVEL ${currentLevel} • QUICK TIP`;
+    ui.tutorialPromptText.textContent=ONBOARDING_COPY[currentLevel];
+    ui.tutorialCoach.dataset.level=String(currentLevel);
+    ui.tutorialCoach.classList.remove('dismissing');
+    ui.tutorialCoach.classList.add('show');
+    ui.tutorialCoach.setAttribute('aria-hidden','false');
+  }
+
+  function dismissOnboardingLevelGuide(){
+    if(!ui.tutorialCoach.classList.contains('show')) return;
+    ui.tutorialCoach.classList.add('dismissing');
+    clearTimeout(onboardingDismissTimer);
+    onboardingDismissTimer=setTimeout(()=>{
+      ui.tutorialCoach.classList.remove('show','dismissing');
+      ui.tutorialCoach.setAttribute('aria-hidden','true');
+    },180);
+  }
+
+  function clearTutorialVisuals(){
+    clearTimeout(onboardingDismissTimer);
+    ui.tutorialCoach.classList.remove('show','dismissing');
+    ui.tutorialCoach.setAttribute('aria-hidden','true');
+    ui.tutorialCoach.dataset.level='0';
+    ui.hudTutorialOverlay.classList.remove('show');
+    ui.hudTutorialOverlay.setAttribute('aria-hidden','true');
+    ui.hudTutorialFinger.classList.remove('show');
+    applyTutorialClasses();
+  }
+
+  const HUD_TUTORIAL_STEPS=[
+    {target:()=>ui.hudCollectionButton,text:'This shows how many balls you have.'},
+    {target:()=>ui.hudTimerCard,text:'Complete the level before time runs out.'},
+    {target:()=>ui.gameToStore,text:'Collect money to unlock new items.'},
+    {target:()=>ui.hudCollectionButton,text:'Tap here to view and change your ball.',tap:true},
+    {target:()=>ui.gameToStore,text:'Tap here to visit the store.',tap:true}
+  ];
+
+  function positionHudTutorial(){
+    if(tutorialSession.level!==4) return;
+    const item=HUD_TUTORIAL_STEPS[tutorialSession.hudIndex];
+    const target=item?.target();
+    if(!target) return;
+    const rect=target.getBoundingClientRect();
+    const pad=5;
+    ui.hudTutorialSpotlight.style.setProperty('--spot-left',`${rect.left-pad}px`);
+    ui.hudTutorialSpotlight.style.setProperty('--spot-top',`${rect.top-pad}px`);
+    ui.hudTutorialSpotlight.style.setProperty('--spot-width',`${rect.width+pad*2}px`);
+    ui.hudTutorialSpotlight.style.setProperty('--spot-height',`${rect.height+pad*2}px`);
+    const cardTop=Math.min(window.innerHeight-190,Math.max(rect.bottom+18,135));
+    ui.hudTutorialCard.style.setProperty('--card-top',`${cardTop}px`);
+    ui.hudTutorialFinger.style.setProperty('--finger-left',`${rect.left+rect.width*.55}px`);
+    ui.hudTutorialFinger.style.setProperty('--finger-top',`${rect.top+rect.height*.5}px`);
+    ui.hudTutorialFinger.classList.toggle('show',!!item.tap);
+  }
+
+  function showHudTutorialStep(index){
+    tutorialSession.hudIndex=Math.max(0,Math.min(HUD_TUTORIAL_STEPS.length-1,index));
+    const item=HUD_TUTORIAL_STEPS[tutorialSession.hudIndex];
+    ui.hudTutorialStep.textContent=`${tutorialSession.hudIndex+1} / ${HUD_TUTORIAL_STEPS.length}`;
+    ui.hudTutorialText.textContent=item.text;
+    ui.hudTutorialNext.textContent=tutorialSession.hudIndex===HUD_TUTORIAL_STEPS.length-1?'PLAY':'NEXT';
+    requestAnimationFrame(positionHudTutorial);
+  }
+
+  function startHudTutorial(){
+    tutorialSession.token++;
+    tutorialSession.active=true;
+    tutorialSession.level=4;
+    state.running=false;
+    state.tutorialActive=true;
+    state.active=null;
+    state.enemies=[];
+    state.coins=[];
     ui.tutorialCoach.classList.remove('show');
     ui.tutorialCoach.setAttribute('aria-hidden','true');
+    applyTutorialClasses();
+    ui.hudTutorialOverlay.classList.add('show');
+    ui.hudTutorialOverlay.setAttribute('aria-hidden','false');
+    syncUI();
+    showHudTutorialStep(0);
+  }
+
+  function finishTutorial(skipped=false){
+    if(!tutorialSession.active) return;
+    tutorialSession.token++;
+    tutorialSession.active=false;
+    tutorialSession.level=0;
+    stopGrowSound(true);
+    void endNativeGrowthFeedback(skipped?'cancelled':'complete');
+    clearTutorialVisuals();
+    if(state) state.tutorialActive=false;
+    if(!skipped){
+      sfx('win');
+      void triggerNativeFeedback('success');
+    }
     markTutorialSeen();
-    state.running=true;
-    state.last=performance.now();
+    reset();
+  }
+
+  function advanceHudTutorial(){
+    if(tutorialSession.level!==4) return;
+    if(tutorialSession.hudIndex>=HUD_TUTORIAL_STEPS.length-1){
+      finishTutorial(false);
+      return;
+    }
+    sfx('lock');
+    void triggerNativeFeedback('light');
+    showHudTutorialStep(tutorialSession.hudIndex+1);
   }
 
   function maybeShowEncounterWarning(){
@@ -886,6 +1032,9 @@ void loadSaveData().then(initialSaveData=>{
   }
 
   function reset() {
+    const guidedLevel=onboardingLevelActive();
+    tutorialSession.token++;
+    clearTutorialVisuals();
     ui.quickNav?.classList.toggle('gameHidden',currentScreen==='game');
     configureArenaForViewport();
     syncHudFxCanvas();
@@ -893,6 +1042,16 @@ void loadSaveData().then(initialSaveData=>{
     void endNativeGrowthFeedback('cancelled');
     gameFrameDirty=true;
     hudFxHasVisuals=false;
+    ui.growthBankFxLayer.replaceChildren();
+    ui.gameScreen.dataset.activeGrowthPoints='0';
+    ui.gameScreen.dataset.growthTokenDiameter='0';
+    ui.gameScreen.dataset.activeBallDiameter='0';
+    ui.gameScreen.dataset.lastBankTokenDiameter='0';
+    ui.gameScreen.dataset.progressBankState='idle';
+    ui.gameScreen.dataset.progressLossState='idle';
+    ui.gameScreen.dataset.lastLostProgress='0';
+    ui.progressTrack?.classList.remove('progressLost');
+    progressLossFxToken++;
     if(state) state.rewardAnimToken=(state.rewardAnimToken||0)+1;
     clearConfetti();
     ui.coinTransfer?.classList.remove('transferring');
@@ -907,6 +1066,7 @@ void loadSaveData().then(initialSaveData=>{
       running:starterPackOpened,
       timeLeft:START_TIME,
       ballsLeft:START_BALLS,
+      ballsUsed:0,
       scoreCoins:0,
       placed:[],
       active:null,
@@ -916,6 +1076,9 @@ void loadSaveData().then(initialSaveData=>{
       coverage:0,
       liveCoverage:0,
       liveCoverageTimer:0,
+      bankedProgressPct:0,
+      pendingProgressBanks:0,
+      progressStarLevel:0,
       uiSyncTimer:0,
       last:performance.now(),
       freezeLeft:0,
@@ -948,14 +1111,27 @@ void loadSaveData().then(initialSaveData=>{
       boosterFeedbackT:0,
       boosterFeedbackText:'',
       boosterFeedbackColor:'#63d8ff',
+      onboardingLevel:guidedLevel ? currentLevel : 0,
       tutorialActive:false,
       defeatSequence:null,
       lastWin:false,
       settled:false
     };
-    setupEnemiesForLevel();
+    if(guidedLevel && currentLevel===2){
+      spawnEnemy(W*.17,H*.20,30,22,{r:16,maxSpeed:40,seekStrength:.045,worldIndex:1});
+    }else if(!guidedLevel){
+      setupEnemiesForLevel();
+    }
     spawnCoin(); spawnCoin();
     ui.overlay.style.display='none';
+    setProgressNumber(0,true);
+    for(const marker of [ui.progressStar1,ui.progressStar2,ui.progressStar3]){
+      marker?.classList.remove('earned','starHit');
+      marker?.querySelectorAll('.progressStarBurst').forEach(burst=>burst.remove());
+      if(marker) marker.dataset.celebrations='0';
+    }
+    ui.progressTrack?.classList.remove('milestoneHit');
+    ui.progressMilestoneToast?.classList.remove('show');
     for(const key of Object.keys(boosterCooldowns)) boosterCooldowns[key]=0;
     ui.boosterStatus.textContent='';
     ui.boosterStatus.classList.remove('boosterActivated','boosterCountdown');
@@ -966,10 +1142,9 @@ void loadSaveData().then(initialSaveData=>{
     updateAdminPreview(currentLevel);
     updateBoosterUI();
     updateCollectionUI();
+    applyTutorialClasses();
     syncUI();
 
-    ui.tutorialCoach.classList.remove('show');
-    ui.tutorialCoach.setAttribute('aria-hidden','true');
     ui.bossWarningOverlay.style.display='none';
     ui.bossWarningOverlay.setAttribute('aria-hidden','true');
 
@@ -980,8 +1155,10 @@ void loadSaveData().then(initialSaveData=>{
       ui.packOverlay.style.pointerEvents='none';
       ui.packOverlay.setAttribute('aria-hidden','true');
       document.body.classList.remove('packOpen');
-      if(currentScreen==='game' && !maybeShowEncounterWarning()){
-        maybeShowLevelOneTutorial();
+      if(currentScreen==='game' && !guidedLevel){
+        maybeShowEncounterWarning();
+      }else if(currentScreen==='game'){
+        showOnboardingLevelGuide();
       }else if(currentScreen!=='game'){
         state.running=false;
       }
@@ -1260,7 +1437,12 @@ void loadSaveData().then(initialSaveData=>{
         ...types.filter(type=>ownedBalls.has(type)),
         ...types.filter(type=>!ownedBalls.has(type))
       ];
-      for(const type of sortedTypes) collectionGrid.appendChild(cardMap[type]);
+      const orderedCards=sortedTypes.map(type=>cardMap[type]);
+      // Equipping changes classes, not inventory order. Moving every card on
+      // every selection forced a full list reflow and made the scroll jump.
+      if(orderedCards.some((card,index)=>collectionGrid.children[index]!==card)){
+        collectionGrid.append(...orderedCards);
+      }
     }
 
     const data=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
@@ -1347,60 +1529,49 @@ void loadSaveData().then(initialSaveData=>{
     syncHomeUI();
   }
 
-  let collectionScrollAnimation=0;
-  function stopCollectionScrollAnimation(){
-    cancelAnimationFrame(collectionScrollAnimation);
-    collectionScrollAnimation=0;
+  const collectionScrollViewport=ui.collectionScreen.querySelector('.menuApp');
+  let collectionScrollIdleTimer=0;
+
+  function finishCollectionScroll(){
+    clearTimeout(collectionScrollIdleTimer);
+    collectionScrollIdleTimer=0;
+    collectionScrollViewport?.classList.remove('collectionScrolling');
+  }
+
+  function markCollectionScrolling(){
+    if(!collectionScrollViewport) return;
+    collectionScrollViewport.classList.add('collectionScrolling');
+    clearTimeout(collectionScrollIdleTimer);
+    collectionScrollIdleTimer=setTimeout(finishCollectionScroll,140);
+  }
+
+  function stopCollectionAutoScroll(){
+    if(!collectionScrollViewport) return;
+    const currentTop=collectionScrollViewport.scrollTop;
+    collectionScrollViewport.style.scrollBehavior='auto';
+    collectionScrollViewport.scrollTo({top:currentTop,behavior:'auto'});
+    requestAnimationFrame(()=>collectionScrollViewport.style.removeProperty('scroll-behavior'));
   }
 
   function centerCollectionCard(type=selectedBallType,smooth=true){
     const card=document.getElementById(`${type}Card`);
-    const scroller=ui.collectionScreen.querySelector('.menuApp');
+    const scroller=collectionScrollViewport;
     if(!card || !scroller) return;
 
-    stopCollectionScrollAnimation();
     if(!ui.collectionScreen.classList.contains('active')) return;
-
-    const scrollerRect=scroller.getBoundingClientRect();
-    const cardRect=card.getBoundingClientRect();
-    const browseHint=ui.collectionScreen.querySelector('.collectionBrowseHint');
-    const hintRect=browseHint?.getBoundingClientRect();
-    const hintTop=Number.parseFloat(browseHint ? getComputedStyle(browseHint).top : '');
-    const hintBottom=hintRect && Number.isFinite(hintTop)
-      ? scrollerRect.top+hintTop+hintRect.height
-      : hintRect?.bottom || scrollerRect.top;
-    const visibleTop=Math.max(scrollerRect.top,hintBottom);
-    const visibleCenter=visibleTop+(scrollerRect.bottom-visibleTop)/2;
     const isFirstCard=card.parentElement?.firstElementChild===card;
-    const centeredTop=scroller.scrollTop+(cardRect.top+cardRect.height/2-visibleCenter);
-    const targetTop=isFirstCard?0:centeredTop;
-    const maxTop=Math.max(0,scroller.scrollHeight-scroller.clientHeight);
     const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const destination=Math.max(0,Math.min(maxTop,targetTop));
-    const startTop=scroller.scrollTop;
-    const distance=destination-startTop;
+    const behavior=smooth && !reduceMotion ? 'smooth' : 'auto';
 
-    if(!smooth || reduceMotion || Math.abs(distance)<1){
-      scroller.scrollTop=destination;
-      return;
-    }
-
-    const startedAt=performance.now();
-    const duration=Math.min(560,Math.max(300,260+Math.abs(distance)*.085));
-    const animateScroll=now=>{
-      const progress=Math.min(1,(now-startedAt)/duration);
-      const eased=progress<.5
-        ? 2*progress*progress
-        : 1-Math.pow(-2*progress+2,2)/2;
-      scroller.scrollTop=startTop+distance*eased;
-
-      if(progress<1) collectionScrollAnimation=requestAnimationFrame(animateScroll);
-      else collectionScrollAnimation=0;
-    };
-    collectionScrollAnimation=requestAnimationFrame(animateScroll);
+    // Let Chromium/WebView run scrolling through its native scroll pipeline.
+    // scroll-padding in CSS keeps centered cards clear of the sticky header.
+    if(isFirstCard) scroller.scrollTo({top:0,behavior});
+    else card.scrollIntoView({behavior,block:'center',inline:'nearest'});
   }
 
-  ui.collectionScreen.querySelector('.menuApp')?.addEventListener('pointerdown',stopCollectionScrollAnimation,{passive:true});
+  collectionScrollViewport?.addEventListener('pointerdown',stopCollectionAutoScroll,{passive:true});
+  collectionScrollViewport?.addEventListener('scroll',markCollectionScrolling,{passive:true});
+  collectionScrollViewport?.addEventListener('scrollend',finishCollectionScroll,{passive:true});
 
   function showScreen(name){
     const leavingGame=currentScreen==='game' && name!=='game';
@@ -1458,12 +1629,14 @@ void loadSaveData().then(initialSaveData=>{
       starterPackOpened &&
       ui.overlay.style.display!=='grid'
     ){
-      const encounterOpened=maybeShowEncounterWarning();
-      const tutorialOpened=!encounterOpened && maybeShowLevelOneTutorial();
-      if(!encounterOpened && !tutorialOpened){
+      const hudTutorialOpened=tutorialSession.active;
+      const guidedLevel=onboardingLevelActive();
+      const encounterOpened=!hudTutorialOpened && !guidedLevel && maybeShowEncounterWarning();
+      if(!encounterOpened && !hudTutorialOpened){
         state.running=true;
         state.last=performance.now();
         if(state.active && soundEnabled) startGrowSound();
+        if(guidedLevel) showOnboardingLevelGuide();
       }
       resumeGameAfterMenus=false;
     }
@@ -1492,6 +1665,7 @@ void loadSaveData().then(initialSaveData=>{
       : ['#ffd445','#ff8a66','#73d5ff','#91df76','#b991ff','#ffffff'];
 
     const pieces=[];
+    const fragment=document.createDocumentFragment();
     for(let i=0;i<count;i++){
       const piece=document.createElement('i');
       piece.className='shopConfetti';
@@ -1507,9 +1681,12 @@ void loadSaveData().then(initialSaveData=>{
       piece.style.setProperty('--spin',((360+Math.random()*950)*(Math.random()<.5?-1:1))+'deg');
       piece.style.width=(5+Math.random()*7)+'px';
       piece.style.height=(8+Math.random()*11)+'px';
-      container.appendChild(piece);
+      fragment.appendChild(piece);
       pieces.push(piece);
     }
+    // Commit the full wave once so mobile WebViews only perform one DOM
+    // insertion and one style pass at the start of the celebration.
+    container.appendChild(fragment);
 
     setTimeout(()=>{
       pieces.forEach(el=>el.remove());
@@ -1582,6 +1759,7 @@ void loadSaveData().then(initialSaveData=>{
   }
 
   function radialJuiceBurst(container,className,count,x,y,colors,minDistance,maxDistance){
+    const fragment=document.createDocumentFragment();
     for(let i=0;i<count;i++){
       const particle=document.createElement('i');
       particle.className=className;
@@ -1592,8 +1770,9 @@ void loadSaveData().then(initialSaveData=>{
       particle.style.setProperty('--particle-delay',`${(i%5)*22}ms`);
       particle.style.setProperty('--particle-duration',`${.9+Math.random()*.45}s`);
       particle.style.setProperty('--particle-color',colors[i%colors.length]);
-      container.appendChild(particle);
+      fragment.appendChild(particle);
     }
+    container.appendChild(fragment);
   }
 
   function celebratePackPurchase(targetCard=ui.storeHero,label='PURCHASE COMPLETE!'){
@@ -1693,7 +1872,7 @@ void loadSaveData().then(initialSaveData=>{
     radialJuiceBurst(
       ui.packFxLayer,
       'packMegaSpark',
-      46,
+      nativeHapticsAvailable ? 20 : 28,
       centerX,
       centerY,
       [revealColor,'#fff6a7','#ffffff','#65d7ee','#f0a1ff'],
@@ -1702,7 +1881,9 @@ void loadSaveData().then(initialSaveData=>{
     );
     // One dense synchronized wave prevents the reveal from feeling as if it
     // restarts while still delivering the same amount of visual energy.
-    shopConfetti(ui.packFxLayer,230,true,true);
+    // A smaller, denser-looking wave stays smooth on Android WebViews. The
+    // former 230 confetti nodes plus 46 sparks caused visible dropped frames.
+    shopConfetti(ui.packFxLayer,nativeHapticsAvailable ? 68 : 96,true,true);
     if(!nativeHapticsAvailable && navigator.vibrate) navigator.vibrate([35,35,55,45,90]);
 
     setTimeout(()=>{
@@ -2091,14 +2272,12 @@ void loadSaveData().then(initialSaveData=>{
   }
 
   function startBall(ev){
-    if(state?.tutorialActive){
-      dismissLevelOneTutorial();
-    }
     if(!state.running) return;
     ev.preventDefault();
     const p=pointerPos(ev);
 
     if(state.active || state.ballsLeft<=0) return;
+    dismissOnboardingLevelGuide();
     {
       const typeData=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
       const startR=BALL_MIN*(typeData.startSizeMult || 1);
@@ -2148,7 +2327,7 @@ void loadSaveData().then(initialSaveData=>{
       startGrowSound();
       void beginNativeGrowthFeedback();
 
-      if(BOSS_LEVELS.includes(currentLevel)){
+      if(!state.tutorialActive && BOSS_LEVELS.includes(currentLevel)){
         const boss=state.enemies.find(e=>e.boss);
         if(boss){
           const dx=state.active.x-boss.x;
@@ -2165,6 +2344,7 @@ void loadSaveData().then(initialSaveData=>{
       }
     }
     state.ballsLeft--;
+    state.ballsUsed++;
     state.message='Growing… collect coins!';
     state.messageT=.7;
     if(ev.pointerId !== undefined) canvas.setPointerCapture?.(ev.pointerId);
@@ -2181,6 +2361,7 @@ void loadSaveData().then(initialSaveData=>{
     }
     b.pointerTargetX=p.x;
     b.pointerTargetY=p.y;
+
   }
 
   function followPointerTarget(ball,dt){
@@ -2202,12 +2383,15 @@ void loadSaveData().then(initialSaveData=>{
     ev?.preventDefault?.();
 
     // Releasing commits the ball. Only now is its area added to progress.
-    state.placed.push({...state.active});
+    const lockedBall={...state.active};
+    const coverageBeforeLock=state.coverage;
+    state.placed.push(lockedBall);
     stopGrowSound();
     void endNativeGrowthFeedback('locked');
     sfx('growthFinish');
     state.active=null;
     computeCoverage();
+    spawnProgressBankFlight(lockedBall,coverageBeforeLock,state.coverage);
 
     state.message='Locked!';
     state.messageT=.45;
@@ -2225,9 +2409,21 @@ void loadSaveData().then(initialSaveData=>{
   function popActive(){
     if(!state.active) return;
     const b=state.active;
+    const liveLostPoints=Math.max(
+      0,
+      Math.round(progressPercent(state.liveCoverage))-Math.round(progressPercent(state.coverage))
+    );
+    const lostPoints=Math.max(liveLostPoints,b.growthDisplayPoints||0);
     stopGrowSound(true);
     void endNativeGrowthFeedback('hit');
     state.active=null;
+    // Live coverage is only a preview. A popped ball contributes nothing, so
+    // return every progress surface to the last banked coverage immediately.
+    state.liveCoverage=state.coverage;
+    state.liveCoverageTimer=0;
+    state.uiSyncTimer=0;
+    ui.gameScreen.dataset.activeGrowthPoints='0';
+    lastGrowthIndicatorPoints=-1;
     for(let i=0;i<13;i++){
       state.coinFx.push({
         type:'pop',x:b.x,y:b.y,
@@ -2241,6 +2437,8 @@ void loadSaveData().then(initialSaveData=>{
     addScreenShake(7,.20);
     flashScreen('#ff8b8b',.08);
     addImpactRing(b.x,b.y,'#ff8b8b',70);
+    spawnProgressLossFx(b,lostPoints);
+    syncUI();
     if(state.ballsLeft<=0) finish(false);
   }
 
@@ -2577,11 +2775,13 @@ void loadSaveData().then(initialSaveData=>{
     }
     if(!state.running) return;
 
-    state.timeLeft-=dt;
-    if(state.timeLeft<=0){
-      state.timeLeft=0;
-      finish(false);
-      return;
+    if(state.onboardingLevel!==1){
+      state.timeLeft-=dt;
+      if(state.timeLeft<=0){
+        state.timeLeft=0;
+        finish(false);
+        return;
+      }
     }
 
     if(state.freezeLeft>0) state.freezeLeft=Math.max(0,state.freezeLeft-dt);
@@ -2600,7 +2800,7 @@ void loadSaveData().then(initialSaveData=>{
       if(ring.life<=0) state.impactRings.splice(i,1);
     }
 
-    updateBossMechanics(dt);
+    if(!state.tutorialActive) updateBossMechanics(dt);
 
     for(const key of Object.keys(boosterCooldowns)){
       if(boosterCooldowns[key]>0){
@@ -2693,7 +2893,8 @@ void loadSaveData().then(initialSaveData=>{
       const bossGrowthMult=(state.frostDebuffLeft>0 ? 0.40 : 1) * (state.toxicLeft>0 ? 0.70 : 1);
       const typeGrowthMult=BALL_TYPES[b.type || 'normal']?.growthMult || 1;
       const nextArea=Math.PI*b.r*b.r + W*H*BALL_COVERAGE_GROWTH*typeGrowthMult*bossGrowthMult*dt;
-      const growthResult=growBallIntoAvailableSpace(b,Math.sqrt(nextArea/Math.PI));
+      const desiredRadius=Math.sqrt(nextArea/Math.PI);
+      const growthResult=growBallIntoAvailableSpace(b,desiredRadius);
       const limit=maxGrowthRadius(b);
 
       if(growthResult.grew && b.r>=(b.hapticGrowthStepR||Infinity)){
@@ -2888,20 +3089,47 @@ void loadSaveData().then(initialSaveData=>{
     state.liveCoverage=state.coverage;
   }
 
-  function liveStarCount(coverage=state.coverage){
-    return calculateLiveStars({
-      coverage,
-      targetCoverage:TARGET,
-      timeLeft:state.timeLeft,
-      startTime:START_TIME,
-      ballsLeft:state.ballsLeft,
-      startBalls:START_BALLS
-    });
+  const STAR_TIME_LEFT_REQUIRED=15;
+  const STAR_MAX_BALLS_USED=5;
+
+  function starPerformanceReport(win){
+    const ballsUsed=Math.max(0,state.ballsUsed||0);
+    const timeLeft=Math.max(0,state.timeLeft);
+    const requirements=[
+      {
+        key:'complete',
+        passed:!!win,
+        actual:win ? 'Progress goal reached' : `${Math.round(progressPercent(state.coverage))} / 100 progress`
+      },
+      {
+        key:'time',
+        passed:!!win && timeLeft>=STAR_TIME_LEFT_REQUIRED,
+        actual:`${timeLeft.toFixed(1)}s left • need ${STAR_TIME_LEFT_REQUIRED}s`
+      },
+      {
+        key:'balls',
+        passed:!!win && ballsUsed<=STAR_MAX_BALLS_USED,
+        actual:`${ballsUsed} ${ballsUsed===1?'ball':'balls'} used • limit ${STAR_MAX_BALLS_USED}`
+      }
+    ];
+    return {
+      win:!!win,
+      stars:win ? requirements.filter(item=>item.passed).length : 0,
+      ballsUsed,
+      timeLeft,
+      requirements
+    };
   }
 
-  function starsForWin(){
-    // On completion, guarantee at least 1★.
-    return Math.max(1,liveStarCount());
+  function renderStarRequirements(report){
+    ui.starRequirementsScore.textContent=`${report.stars} / 3 EARNED`;
+    ui.starRequirements.dataset.stars=String(report.stars);
+    for(const requirement of report.requirements){
+      const row=ui.starRequirements.querySelector(`[data-requirement="${requirement.key}"]`);
+      if(!row) continue;
+      row.dataset.status=requirement.passed?'earned':'missed';
+      row.querySelector('.starRequirementStatus').textContent=requirement.passed?'EARNED':'MISSED';
+    }
   }
 
   function clearConfetti(){
@@ -2927,14 +3155,17 @@ void loadSaveData().then(initialSaveData=>{
     setTimeout(clearConfetti,3300);
   }
 
-  function animateRewardTransfer(runCoins,walletBefore,walletAfter,win){
+  function animateRewardTransfer(runCoins,payout,walletBefore,walletAfter,win,multiplier){
     const token=++state.rewardAnimToken;
     const walletDelta=roundCoinAmount(walletAfter-walletBefore);
     const duration=Math.min(1600,700+Math.abs(walletDelta)*28);
     const start=performance.now();
 
     ui.coinTransfer.classList.add('transferring');
-    ui.resultRunCoins.textContent=(win?'+':'-')+formatCoinAmount(runCoins);
+    ui.resultRunCoins.textContent=(win?'+':'-')+formatCoinAmount(win?payout:runCoins);
+    const multiplierText=Number(multiplier.toFixed(2)).toString();
+    ui.resultMultiplierBadge.textContent=`×${multiplierText}`;
+    ui.resultMultiplierBadge.classList.toggle('show',win);
     ui.resultWalletCoins.textContent=formatCoinAmount(walletBefore);
 
     // Start from the total the player saw during play, then bank or roll it back.
@@ -2973,7 +3204,7 @@ void loadSaveData().then(initialSaveData=>{
     requestAnimationFrame(frame);
   }
 
-  function showLevelCelebration(win,runCoins,payout,walletBefore,walletAfter,stars){
+  function showLevelCelebration(win,runCoins,payout,walletBefore,walletAfter,multiplier){
     ui.resultCard.classList.remove('celebrate');
     ui.completionBadge.classList.remove('show');
     void ui.resultCard.offsetWidth;
@@ -2990,11 +3221,7 @@ void loadSaveData().then(initialSaveData=>{
       clearConfetti();
     }
 
-    ui.rewardFormula.textContent=win
-      ? `+${formatCoinAmount(payout)} GOLD BANKED`
-      : `-${formatCoinAmount(runCoins)} GOLD`;
-
-    animateRewardTransfer(runCoins,walletBefore,walletAfter,win);
+    animateRewardTransfer(runCoins,payout,walletBefore,walletAfter,win,multiplier);
   }
 
   function finish(win){
@@ -3023,13 +3250,19 @@ void loadSaveData().then(initialSaveData=>{
     if(win){
       flashScreen('#fff0a8',.08);
     }
-    if(state.active){
-      if(win) state.placed.push({...state.active});
+    const finishingBall=state.active ? {...state.active} : null;
+    const coverageBeforeFinish=state.coverage;
+    if(finishingBall){
+      if(win) state.placed.push(finishingBall);
       state.active=null;
     }
     computeCoverage();
+    if(win && finishingBall){
+      spawnProgressBankFlight(finishingBall,coverageBeforeFinish,state.coverage);
+    }
     const cfg=enemyConfig(currentLevel);
-    const stars=win?starsForWin():0;
+    const starReport=starPerformanceReport(win);
+    const stars=starReport.stars;
     const mult=win ? STAR_MULTIPLIERS[stars]*cfg.rewardMult : 1.00;
     const payout=win ? roundCoinAmount(runCoins*mult) : 0;
     if(win){
@@ -3040,7 +3273,6 @@ void loadSaveData().then(initialSaveData=>{
     const walletAfter=roundCoinAmount(walletCoins);
     state.scoreCoins=0;
 
-    const nextCfg=enemyConfig(Math.min(MAX_LEVEL,currentLevel+1));
     const bossReward=(win && cfg.boss) ? unlockBoosterForBoss(currentLevel) : null;
     const campaignComplete=win && currentLevel===MAX_LEVEL;
 
@@ -3049,6 +3281,7 @@ void loadSaveData().then(initialSaveData=>{
       : (win?`LEVEL ${currentLevel} COMPLETE`:`LEVEL ${currentLevel} — DEFEAT`);
 
     ui.stars.textContent=win?('★'.repeat(stars)+'☆'.repeat(3-stars)):'☆☆☆';
+    renderStarRequirements(starReport);
 
     const rewardLine=bossReward
       ? `<strong>${bossReward.icon} BOOSTER UNLOCKED</strong><br>${bossReward.name}`
@@ -3060,48 +3293,152 @@ void loadSaveData().then(initialSaveData=>{
           ? '<strong>⚡ RUSH SURVIVED!</strong><br>15% GOLD BONUS CLAIMED'
           : '');
 
-    const earlyPackProgress=win && currentLevel<=10
-      ? (walletAfter>=PACK_PRICE
-          ? '<strong>PACK READY!</strong><br>Open the store to reveal a new ball.'
-          : `<strong>${formatCoinAmount(PACK_PRICE-walletAfter)} GOLD TO NEXT PACK</strong><br>Keep filling to grow your collection.`)
-      : '';
-
-    // Keep the normal result card intentionally minimal for small phones.
-    // Only surface special rewards / campaign milestones here.
+    // The result card is about performance. Pack prompts remain in the store
+    // milestone flow instead of competing with the star explanation here.
     ui.resultText.innerHTML=win
       ? (campaignComplete
           ? '<strong>ALL BOSSES DEFEATED!</strong>'
-          : (rewardLine || encounterRewardLine || earlyPackProgress))
-      : '<strong>TRY AGAIN!</strong>';
+          : (rewardLine || encounterRewardLine))
+      : '';
 
     ui.again.textContent=campaignComplete?'Replay final boss':(win?'NEXT LEVEL':'RETRY');
     ui.overlay.classList.toggle('defeatResult',!win);
     ui.resultCard.classList.toggle('defeat',!win);
     ui.overlay.style.display='grid';
     syncUI();
-    showLevelCelebration(win,runCoins,payout,walletBefore,walletAfter,stars);
+    showLevelCelebration(win,runCoins,payout,walletBefore,walletAfter,mult);
     if(win) scheduleFirstPackMilestone(bankedWalletBefore,walletAfter);
+  }
+
+  let progressDisplayValue=0;
+  let progressDisplayTarget=0;
+  let progressDisplayFrame=0;
+  let progressDisplayLast=0;
+  let progressMilestoneToastToken=0;
+
+  function writeProgressNumber(value){
+    const rounded=Math.max(0,Math.min(100,Math.round(value)));
+    if(ui.levelProgressValue.textContent!==String(rounded)){
+      ui.levelProgressValue.textContent=String(rounded);
+    }
+    ui.levelGoal.setAttribute('aria-label',`Progress ${rounded} out of 100`);
+  }
+
+  function animateProgressNumber(now){
+    progressDisplayFrame=0;
+    const elapsed=progressDisplayLast ? Math.min(80,now-progressDisplayLast) : 16;
+    progressDisplayLast=now;
+    const distance=progressDisplayTarget-progressDisplayValue;
+    const blend=1-Math.exp(-elapsed/72);
+    progressDisplayValue+=distance*blend;
+
+    if(Math.abs(progressDisplayTarget-progressDisplayValue)<.035){
+      progressDisplayValue=progressDisplayTarget;
+    }
+    writeProgressNumber(progressDisplayValue);
+
+    if(progressDisplayValue!==progressDisplayTarget){
+      progressDisplayFrame=requestAnimationFrame(animateProgressNumber);
+    }else{
+      progressDisplayLast=0;
+    }
+  }
+
+  function setProgressNumber(target,snap=false){
+    progressDisplayTarget=Math.max(0,Math.min(100,target));
+    if(snap){
+      if(progressDisplayFrame) cancelAnimationFrame(progressDisplayFrame);
+      progressDisplayFrame=0;
+      progressDisplayLast=0;
+      progressDisplayValue=progressDisplayTarget;
+      writeProgressNumber(progressDisplayValue);
+      return;
+    }
+    if(!progressDisplayFrame){
+      progressDisplayFrame=requestAnimationFrame(animateProgressNumber);
+    }
+  }
+
+  function celebrateProgressStar(index){
+    const marker=[ui.progressStar1,ui.progressStar2,ui.progressStar3][index-1];
+    if(!marker) return;
+    const checkpoint=[33,67,100][index-1];
+    const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const colors=['#ffd447','#fff7b0','#ffae2c','#ffffff','#71dbff'];
+
+    marker.classList.remove('starHit');
+    marker.querySelectorAll('.progressStarBurst').forEach(burst=>burst.remove());
+    void marker.offsetWidth;
+    marker.classList.add('starHit');
+    marker.dataset.celebrations=String(Number(marker.dataset.celebrations||0)+1);
+
+    const burst=document.createElement('span');
+    burst.className='progressStarBurst';
+    const particleCount=reduceMotion ? 6 : 14;
+    for(let particleIndex=0;particleIndex<particleCount;particleIndex++){
+      const spark=document.createElement('i');
+      spark.style.setProperty('--spark-angle',`${particleIndex*(360/particleCount)}deg`);
+      spark.style.setProperty('--spark-distance',`${2.2+(particleIndex%4)*.25}rem`);
+      spark.style.setProperty('--spark-color',colors[particleIndex%colors.length]);
+      burst.appendChild(spark);
+    }
+    marker.appendChild(burst);
+
+    ui.progressTrack.classList.remove('milestoneHit');
+    void ui.progressTrack.offsetWidth;
+    ui.progressTrack.classList.add('milestoneHit');
+
+    const toastToken=++progressMilestoneToastToken;
+    ui.progressMilestoneValue.textContent=`${checkpoint} / 100`;
+    ui.progressMilestoneToast.classList.remove('show');
+    void ui.progressMilestoneToast.offsetWidth;
+    ui.progressMilestoneToast.classList.add('show');
+
+    sfx('progressStar');
+    void triggerNativeFeedback(index===3 ? 'success' : 'medium');
+    if(!nativeHapticsAvailable && navigator.vibrate){
+      navigator.vibrate(index===3 ? [24,28,48] : [18,20,28]);
+    }
+
+    setTimeout(()=>{
+      marker.classList.remove('starHit');
+      burst.remove();
+    },820);
+    setTimeout(()=>ui.progressTrack.classList.remove('milestoneHit'),760);
+    setTimeout(()=>{
+      if(toastToken===progressMilestoneToastToken){
+        ui.progressMilestoneToast.classList.remove('show');
+      }
+    },1080);
   }
 
   function syncUI(){
     const cfg=enemyConfig(currentLevel);
+    const guidedLevel=state.onboardingLevel||0;
+    const progressTarget=TARGET;
     ui.level.textContent=currentLevel;
-    ui.levelChallenge.textContent=`LEVEL ${currentLevel} • ${cfg.challenge}`;
-    ui.levelGoal.textContent=`GOAL ${TARGET}%`;
-    ui.boardWrap.classList.toggle('speedRushLevel',cfg.rushEvent);
-    ui.boardWrap.classList.toggle('miniBossLevel',cfg.miniBoss);
-    ui.levelChallenge.classList.toggle('speedRushLevel',cfg.rushEvent);
-    ui.levelChallenge.classList.toggle('miniBossLevel',cfg.miniBoss);
+    ui.levelChallenge.textContent=guidedLevel===1
+      ? 'LEVEL 1 • LEARN TO FILL'
+      : (guidedLevel===2 ? 'LEVEL 2 • PROTECT YOUR BALL' : `LEVEL ${currentLevel} • ${cfg.challenge}`);
+    ui.boardWrap.classList.toggle('speedRushLevel',!guidedLevel && cfg.rushEvent);
+    ui.boardWrap.classList.toggle('miniBossLevel',!guidedLevel && cfg.miniBoss);
+    ui.levelChallenge.classList.toggle('speedRushLevel',!guidedLevel && cfg.rushEvent);
+    ui.levelChallenge.classList.toggle('miniBossLevel',!guidedLevel && cfg.miniBoss);
     const worldProfile=worldProfileForLevel(currentLevel);
-    ui.difficulty.textContent=cfg.boss
-      ? `${worldProfile.name} • ${cfg.minions} minions • Speed ×${cfg.speedMult.toFixed(2)}`
-      : (cfg.miniBoss
-          ? `${encounterProfileForLevel(currentLevel).name} • ${cfg.minions} guards • Gold ×${cfg.rewardMult.toFixed(2)}`
-          : (cfg.rushEvent
-              ? `Enemy Rush • ${cfg.count} enemies • Speed ×${cfg.speedMult.toFixed(2)} • Gold ×${cfg.rewardMult.toFixed(2)}`
-              : `World ${cfg.world+1} • ${cfg.count} enemies • Speed ×${cfg.speedMult.toFixed(2)} • Reaction ${cfg.seekStrength.toFixed(2)}`));
+    ui.difficulty.textContent=guidedLevel===1
+      ? 'Safe practice • No enemies'
+      : (guidedLevel===2
+          ? '1 slow enemy • Learn to protect your ball'
+          : (cfg.boss
+              ? `${worldProfile.name} • ${cfg.minions} minions • Speed ×${cfg.speedMult.toFixed(2)}`
+              : (cfg.miniBoss
+                  ? `${encounterProfileForLevel(currentLevel).name} • ${cfg.minions} guards • Gold ×${cfg.rewardMult.toFixed(2)}`
+                  : (cfg.rushEvent
+                      ? `Enemy Rush • ${cfg.count} enemies • Speed ×${cfg.speedMult.toFixed(2)} • Gold ×${cfg.rewardMult.toFixed(2)}`
+                      : `World ${cfg.world+1} • ${cfg.count} enemies • Speed ×${cfg.speedMult.toFixed(2)} • Reaction ${cfg.seekStrength.toFixed(2)}`))));
     ui.difficulty.style.color=worldProfile.fill;
-    ui.time.textContent=state.timeLeft.toFixed(1);
+    ui.gameScreen.dataset.enemyCount=String(state.enemies.length);
+    ui.time.textContent=guidedLevel===1 ? '—' : state.timeLeft.toFixed(1);
     ui.balls.textContent=state.ballsLeft;
     const equippedBall=BALL_TYPES[selectedBallType] || BALL_TYPES.normal;
     setBallAssetBackground(ui.hudBallVisual,selectedBallType);
@@ -3117,7 +3454,10 @@ void loadSaveData().then(initialSaveData=>{
     }
     const displayedCoverage=state.active ? state.liveCoverage : state.coverage;
     ui.coverage.textContent=displayedCoverage.toFixed(1);
-    const progressPct=Math.max(0,Math.min(100,displayedCoverage/TARGET*100));
+    const progressPct=Math.max(0,Math.min(100,displayedCoverage/progressTarget*100));
+    // The bar previews live growth; the number is the satisfying banked total.
+    // It updates only when the released ball's score flight lands in the HUD.
+    setProgressNumber(state.bankedProgressPct||0);
     const seg1=Math.max(0,Math.min(100,(progressPct/33.333)*100));
     const seg2=Math.max(0,Math.min(100,((progressPct-33.333)/33.333)*100));
     const seg3=Math.max(0,Math.min(100,((progressPct-66.666)/33.334)*100));
@@ -3125,15 +3465,25 @@ void loadSaveData().then(initialSaveData=>{
     ui.progressFill2.style.width=seg2+'%';
     ui.progressFill3.style.width=seg3+'%';
 
-    // Resource efficiency contributes to the live rating, but a star cannot
-    // light up before its matching fill milestone has actually been reached.
-    const coverageStarGate=Math.min(3,Math.floor((displayedCoverage/(TARGET/3))+1e-6));
-    const liveStars=Math.min(liveStarCount(displayedCoverage),coverageStarGate);
+    // These stars are clear progression checkpoints. Performance stars remain
+    // separate and are calculated on the result screen.
+    const previousProgressStars=state.progressStarLevel||0;
+    const rawProgressStars=progressPct>=99.95 ? 3 : (progressPct>=66.666 ? 2 : (progressPct>=33.333 ? 1 : 0));
+    const previousThreshold=[0,33.333,66.666,99.95][previousProgressStars]||0;
+    const liveStars=rawProgressStars<previousProgressStars && progressPct>=previousThreshold-1.25
+      ? previousProgressStars
+      : rawProgressStars;
     ui.progressStars.textContent='★'.repeat(liveStars)+'☆'.repeat(3-liveStars);
 
-    document.querySelector('.starMarker1')?.classList.toggle('earned',liveStars>=1);
-    document.querySelector('.starMarker2')?.classList.toggle('earned',liveStars>=2);
-    document.querySelector('.starMarker3')?.classList.toggle('earned',liveStars>=3);
+    [ui.progressStar1,ui.progressStar2,ui.progressStar3].forEach((marker,index)=>{
+      const earned=liveStars>=index+1;
+      marker?.classList.toggle('earned',earned);
+      marker?.setAttribute('aria-label',`${[33,67,100][index]} point checkpoint${earned?', reached':''}`);
+    });
+    if(liveStars>previousProgressStars && currentScreen==='game' && (state.running || state.lastWin)){
+      for(let star=previousProgressStars+1;star<=liveStars;star++) celebrateProgressStar(star);
+    }
+    state.progressStarLevel=liveStars;
 
     if(state.boosterFeedbackT>0){
       ui.boosterStatus.textContent=state.boosterFeedbackText;
@@ -3175,6 +3525,222 @@ void loadSaveData().then(initialSaveData=>{
       x:(canvasRect.left - fxRect.left) + (x/W)*canvasRect.width,
       y:(canvasRect.top - fxRect.top) + (y/H)*canvasRect.height
     };
+  }
+
+  function progressPercent(coverage){
+    return Math.max(0,Math.min(100,coverage/TARGET*100));
+  }
+
+  let lastGrowthIndicatorPoints=-1;
+  let growthIndicatorPunchAt=0;
+  let progressLossFxToken=0;
+
+  function activeGrowthPoints(){
+    if(!state?.active) return 0;
+    const committed=Math.round(progressPercent(state.coverage));
+    const projected=Math.round(progressPercent(Math.max(state.coverage,state.liveCoverage)));
+    const measured=Math.max(0,projected-committed);
+    state.active.growthDisplayPoints=Math.max(state.active.growthDisplayPoints||0,measured);
+    return state.active.growthDisplayPoints;
+  }
+
+  function drawGrowthProgressIndicator(){
+    const ball=state?.active;
+    if(!ball || !state.running) return;
+    const points=activeGrowthPoints();
+    const center=boardPointToHudFx(ball.x,ball.y);
+    const canvasRect=canvas.getBoundingClientRect();
+    const radiusPx=ball.r/W*canvasRect.width;
+    const now=performance.now();
+    if(points!==lastGrowthIndicatorPoints){
+      if(points>lastGrowthIndicatorPoints) growthIndicatorPunchAt=now;
+      lastGrowthIndicatorPoints=points;
+    }
+    ui.gameScreen.dataset.activeGrowthPoints=String(points);
+
+    const punch=Math.max(0,1-(now-growthIndicatorPunchAt)/150);
+    const scale=1+punch*.055;
+    // This token is the ball's live score skin: it begins tiny and expands
+    // one-for-one with the growing ball before detaching on release.
+    const tokenRadius=Math.max(1,radiusPx);
+    const fontSize=Math.max(4,Math.min(64,tokenRadius*.58));
+    const labelFontSize=Math.max(4,Math.min(14,tokenRadius*.145));
+    const showLabel=tokenRadius>=18;
+    const style=BALL_TYPES[ball.type || 'normal'] || BALL_TYPES.normal;
+    ui.gameScreen.dataset.growthTokenShape='round';
+    ui.gameScreen.dataset.growthTokenDiameter=(tokenRadius*2).toFixed(1);
+    ui.gameScreen.dataset.activeBallDiameter=(radiusPx*2).toFixed(1);
+
+    hudFxCtx.save();
+    hudFxCtx.translate(center.x,center.y);
+    hudFxCtx.scale(scale,scale);
+    hudFxCtx.shadowColor=style.highlight || '#73ddff';
+    hudFxCtx.shadowBlur=18+punch*13;
+    const tokenFill=hudFxCtx.createRadialGradient(
+      -tokenRadius*.34,-tokenRadius*.38,tokenRadius*.08,
+      0,0,tokenRadius
+    );
+    tokenFill.addColorStop(0,'#ffffff');
+    tokenFill.addColorStop(.18,style.highlight || '#9ce9ff');
+    tokenFill.addColorStop(1,style.edge || '#2588aa');
+    hudFxCtx.fillStyle=tokenFill;
+    hudFxCtx.beginPath();
+    hudFxCtx.arc(0,0,tokenRadius,0,Math.PI*2);
+    hudFxCtx.fill();
+    hudFxCtx.shadowBlur=0;
+    hudFxCtx.strokeStyle='rgba(255,255,255,.96)';
+    hudFxCtx.lineWidth=Math.max(1.1,Math.min(4,tokenRadius*.09));
+    hudFxCtx.stroke();
+    if(tokenRadius>8){
+      hudFxCtx.strokeStyle=style.edge || '#2588aa';
+      hudFxCtx.lineWidth=Math.max(.8,Math.min(2,tokenRadius*.045));
+      hudFxCtx.beginPath();
+      hudFxCtx.arc(0,0,tokenRadius-Math.max(2.4,tokenRadius*.1),0,Math.PI*2);
+      hudFxCtx.stroke();
+    }
+    hudFxCtx.fillStyle='rgba(255,255,255,.68)';
+    hudFxCtx.beginPath();
+    hudFxCtx.ellipse(-tokenRadius*.3,-tokenRadius*.38,Math.max(1,tokenRadius*.24),Math.max(.7,tokenRadius*.12),-.35,0,Math.PI*2);
+    hudFxCtx.fill();
+    hudFxCtx.textAlign='center';
+    hudFxCtx.textBaseline='middle';
+    hudFxCtx.lineJoin='round';
+    hudFxCtx.font=`1000 ${fontSize}px system-ui, sans-serif`;
+    hudFxCtx.strokeStyle='rgba(10,39,52,.76)';
+    hudFxCtx.lineWidth=Math.max(1.6,fontSize*.16);
+    hudFxCtx.shadowColor='rgba(255,255,255,.72)';
+    hudFxCtx.shadowBlur=6;
+    const numberY=showLabel ? -tokenRadius*.08 : 0;
+    hudFxCtx.strokeText(`+${points}`,0,numberY);
+    hudFxCtx.fillStyle='#ffffff';
+    hudFxCtx.fillText(`+${points}`,0,numberY);
+    if(showLabel){
+      hudFxCtx.shadowBlur=3;
+      hudFxCtx.font=`1000 ${labelFontSize}px system-ui, sans-serif`;
+      hudFxCtx.letterSpacing=`${Math.max(.4,labelFontSize*.11)}px`;
+      hudFxCtx.strokeStyle='rgba(10,39,52,.82)';
+      hudFxCtx.lineWidth=Math.max(1.2,labelFontSize*.34);
+      hudFxCtx.strokeText('PROGRESS',0,tokenRadius*.48);
+      hudFxCtx.fillStyle='#dff9ff';
+      hudFxCtx.fillText('PROGRESS',0,tokenRadius*.48);
+    }
+    hudFxCtx.restore();
+  }
+
+  function pulseProgressTotal(points){
+    ui.levelGoal.dataset.lastBankedPoints=String(points);
+    ui.levelGoal.classList.remove('bankCatch');
+    ui.progressTrack.classList.remove('bankDeposit');
+    void ui.levelGoal.offsetWidth;
+    ui.levelGoal.classList.add('bankCatch');
+    ui.progressTrack.classList.add('bankDeposit');
+    sfx('coinLand');
+    void triggerNativeFeedback('medium');
+    setTimeout(()=>{
+      ui.levelGoal.classList.remove('bankCatch');
+      ui.progressTrack.classList.remove('bankDeposit');
+    },620);
+  }
+
+  function spawnProgressLossFx(ball,points){
+    const lost=Math.max(0,Math.round(points||0));
+    const token=++progressLossFxToken;
+    const start=boardPointToHudFx(ball.x,ball.y);
+    const element=document.createElement('div');
+    const strong=document.createElement('strong');
+    const small=document.createElement('small');
+    element.className='growthLossBurst';
+    strong.textContent=lost>0 ? `−${lost}` : 'POPPED';
+    small.textContent=lost>0 ? 'PROGRESS LOST' : 'BALL LOST';
+    element.append(strong,small);
+    element.style.left=`${start.x}px`;
+    element.style.top=`${start.y}px`;
+    ui.growthBankFxLayer.appendChild(element);
+
+    ui.gameScreen.dataset.lastLostProgress=String(lost);
+    ui.gameScreen.dataset.progressLossState='showing';
+    ui.progressTrack.classList.remove('progressLost');
+    void ui.progressTrack.offsetWidth;
+    ui.progressTrack.classList.add('progressLost');
+
+    const duration=window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 260 : 900;
+    const animation=element.animate([
+      {offset:0,opacity:0,transform:'translate(-50%,-50%) scale(.35) rotate(-4deg)'},
+      {offset:.18,opacity:1,transform:'translate(-50%,-50%) scale(1.28) rotate(2deg)'},
+      {offset:.55,opacity:1,transform:'translate(-50%,-65%) scale(1) rotate(0deg)'},
+      {offset:1,opacity:0,transform:'translate(-50%,-135%) scale(.82) rotate(-2deg)'}
+    ],{duration,easing:'cubic-bezier(.16,.88,.25,1)',fill:'forwards'});
+
+    animation.finished.catch(()=>{}).then(()=>{
+      element.remove();
+      if(token!==progressLossFxToken) return;
+      ui.progressTrack.classList.remove('progressLost');
+      ui.gameScreen.dataset.progressLossState='idle';
+    });
+  }
+
+  function spawnProgressBankFlight(ball,fromCoverage,toCoverage){
+    const fromPct=progressPercent(fromCoverage);
+    const toPct=progressPercent(toCoverage);
+    const points=Math.max(0,Math.round(toPct)-Math.round(fromPct));
+    if(points<=0){
+      state.bankedProgressPct=toPct;
+      setProgressNumber(toPct);
+      return;
+    }
+
+    const runState=state;
+    const start=boardPointToHudFx(ball.x,ball.y);
+    const layerRect=ui.growthBankFxLayer.getBoundingClientRect();
+    const targetRect=ui.levelGoal.getBoundingClientRect();
+    const target={
+      x:targetRect.left-layerRect.left+targetRect.width*.5,
+      y:targetRect.top-layerRect.top+targetRect.height*.5
+    };
+    const element=document.createElement('div');
+    const strong=document.createElement('strong');
+    const small=document.createElement('small');
+    element.className='growthBankFlight';
+    strong.textContent=`+${points}`;
+    small.textContent='PROGRESS';
+    element.append(strong,small);
+    element.style.left=`${start.x}px`;
+    element.style.top=`${start.y}px`;
+    const ballStyle=BALL_TYPES[ball.type || 'normal'] || BALL_TYPES.normal;
+    element.style.setProperty('--bank-color',ballStyle.highlight || '#73ddff');
+    const canvasRect=canvas.getBoundingClientRect();
+    const ballDiameterPx=Math.max(12,(ball.r/W)*canvasRect.width*2);
+    element.style.setProperty('--bank-token-diameter',`${ballDiameterPx}px`);
+    ui.gameScreen.dataset.lastBankTokenDiameter=ballDiameterPx.toFixed(1);
+    ui.growthBankFxLayer.appendChild(element);
+
+    runState.pendingProgressBanks++;
+    ui.gameScreen.dataset.lastBankedPoints=String(points);
+    ui.gameScreen.dataset.progressBankState='flying';
+    const dx=target.x-start.x;
+    const dy=target.y-start.y;
+    const duration=window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 220 : 680;
+    const animation=element.animate([
+      {offset:0,opacity:1,transform:'translate(-50%,-50%) scale(1)'},
+      {offset:.28,opacity:1,transform:`translate(-50%,-50%) translate(${dx*.18}px,${dy*.12-55}px) scale(1.08) rotate(-4deg)`},
+      {offset:.68,opacity:1,transform:`translate(-50%,-50%) translate(${dx*.68}px,${dy*.57-42}px) scale(.82) rotate(2deg)`},
+      {offset:1,opacity:.2,transform:`translate(-50%,-50%) translate(${dx}px,${dy}px) scale(.42) rotate(0deg)`}
+    ],{duration,easing:'cubic-bezier(.18,.78,.22,1)',fill:'forwards'});
+
+    animation.finished.catch(()=>{}).then(()=>{
+      element.remove();
+      if(state!==runState) return;
+      runState.pendingProgressBanks=Math.max(0,runState.pendingProgressBanks-1);
+      runState.bankedProgressPct=Math.max(runState.bankedProgressPct,toPct);
+      setProgressNumber(runState.bankedProgressPct);
+      ui.gameScreen.dataset.progressBankState='landed';
+      pulseProgressTotal(points);
+      setTimeout(()=>{
+        if(state===runState && runState.pendingProgressBanks===0){
+          ui.gameScreen.dataset.progressBankState='idle';
+        }
+      },520);
+    });
   }
 
   function coinHudFxTarget(){
@@ -3250,7 +3816,12 @@ void loadSaveData().then(initialSaveData=>{
 
   function renderHudCoinFx(){
     const hasCoinFlights=!!state?.coinFx?.some(effect=>effect.type==='coin');
-    if(!hasCoinFlights){
+    const hasGrowthIndicator=!!(state?.active && state.running);
+    if(!hasCoinFlights && !hasGrowthIndicator){
+      lastGrowthIndicatorPoints=-1;
+      ui.gameScreen.dataset.activeGrowthPoints='0';
+      ui.gameScreen.dataset.growthTokenDiameter='0';
+      ui.gameScreen.dataset.activeBallDiameter='0';
       if(!hudFxHasVisuals) return;
       hudFxCtx.save();
       hudFxCtx.setTransform(1,0,0,1,0,0);
@@ -3298,6 +3869,8 @@ void loadSaveData().then(initialSaveData=>{
 
       drawHudFxCoin(pos.x,pos.y,14*(1-.34*e));
     }
+
+    if(hasGrowthIndicator) drawGrowthProgressIndicator();
   }
 
   function pulseCoinHud(){
@@ -4380,6 +4953,12 @@ void loadSaveData().then(initialSaveData=>{
   ui.homePackCard.addEventListener('click',()=>showScreen('store'));
   ui.homeCollectionCard.addEventListener('click',()=>showScreen('collection'));
 
+  ui.hudTutorialSkip.addEventListener('click',()=>finishTutorial(true));
+  ui.hudTutorialNext.addEventListener('click',advanceHudTutorial);
+  window.addEventListener('resize',()=>{
+    if(tutorialSession.level===4) requestAnimationFrame(positionHudTutorial);
+  });
+
   ui.buyPack.addEventListener('click',buyPack);
   ui.buyApexBall.addEventListener('click',buyApexBall);
   ui.buyCataclysmBall.addEventListener('click',()=>buyImpossibleBall('cataclysm'));
@@ -4401,9 +4980,11 @@ void loadSaveData().then(initialSaveData=>{
 
   ui.restart.addEventListener('click',reset);
   ui.again.addEventListener('click',()=>{
+    const completedOnboardingLevels=!tutorialSeen && state.lastWin && currentLevel===2;
     if(state.lastWin && currentLevel<MAX_LEVEL) currentLevel++;
     queueProgressSave();
     reset();
+    if(completedOnboardingLevels) startHudTutorial();
   });
 
   ui.moreBalls.addEventListener('click',()=>{

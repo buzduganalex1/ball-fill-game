@@ -144,7 +144,7 @@
           <strong id="balls">10</strong>
         </button>
 
-        <div class="hudStatCard hudTimerCard" title="Time left">
+        <div class="hudStatCard hudTimerCard" id="hudTimerCard" title="Time left">
           <span class="hudTimerVisual" aria-hidden="true">⏱️</span>
           <strong id="time">45.0</strong>
         </div>
@@ -204,24 +204,31 @@
       <div class="topProgressHead">
         <span class="progressCaption" id="levelChallenge">LEVEL 1 • FIRST FILL</span>
         <span class="liveStars" id="progressStars">☆☆☆</span>
-        <strong class="coverageReadout" id="levelGoal">GOAL 30%</strong>
+        <strong class="coverageReadout" id="levelGoal" aria-label="Progress 0 out of 100">
+          <span id="levelProgressValue">0</span><small>/ 100</small>
+        </strong>
           <span id="coverage" hidden>0</span>
       </div>
       <div class="segmentedProgressTrack" id="segmentedProgressTrack">
         <div class="progressSegment">
           <div class="progressSegmentFill" id="progressFill1"></div>
         </div>
-        <div class="starMarker starMarker1"><span>★</span></div>
+        <div class="starMarker starMarker1" aria-label="33 point checkpoint"><span>★</span></div>
 
         <div class="progressSegment">
           <div class="progressSegmentFill" id="progressFill2"></div>
         </div>
-        <div class="starMarker starMarker2"><span>★</span></div>
+        <div class="starMarker starMarker2" aria-label="67 point checkpoint"><span>★</span></div>
 
         <div class="progressSegment">
           <div class="progressSegmentFill" id="progressFill3"></div>
         </div>
-        <div class="starMarker starMarker3"><span>★</span></div>
+        <div class="starMarker starMarker3" aria-label="100 point checkpoint"><span>★</span></div>
+      </div>
+      <div class="progressMilestoneToast" id="progressMilestoneToast" role="status" aria-live="polite">
+        <span>★</span>
+        <strong id="progressMilestoneValue">33 / 100</strong>
+        <small>CHECKPOINT!</small>
       </div>
     </div>
 
@@ -236,19 +243,10 @@
         </div>
       </div>
 
-      <div class="tutorialCoach" id="tutorialCoach" aria-hidden="true">
-        <div class="tutorialIntroBadge">HOW TO PLAY</div>
-        <div class="tutorialTarget">
-          <div class="tutorialMotionTrail"></div>
-          <div class="tutorialPulse pulseOne"></div>
-          <div class="tutorialPulse pulseTwo"></div>
-          <div class="tutorialDemoBall"></div>
-          <div class="tutorialHand">☝️</div>
-        </div>
-        <div class="tutorialCopy">
-          <strong>TAP &amp; HOLD TO GROW</strong>
-          <span class="tutorialMoveCopy">Keep holding and move your finger to guide the ball.</span>
-          <span class="tutorialStartCue">TAP ANYWHERE TO START</span>
+      <div class="tutorialCoach" id="tutorialCoach" aria-hidden="true" data-level="0">
+        <div class="tutorialLessonCard" role="status" aria-live="polite">
+          <span class="tutorialLevelBadge" id="tutorialLevelBadge">LEVEL 1 • QUICK TIP</span>
+          <p id="tutorialPromptText">Tap, hold, move, grow, and release to fill the screen. Collect as many coins as possible before the progress bar is full.</p>
         </div>
       </div>
 
@@ -259,24 +257,45 @@
           <div class="result" id="resultTitle">LEVEL COMPLETE</div>
           <div class="stars celebrationStars" id="stars">★★★</div>
 
-          <div class="coinTransfer" id="coinTransfer">
-            <div class="rewardBucket runBucket">
-              <span>LEVEL COINS</span>
-              <strong><span class="coinIcon">◉</span><span id="resultRunCoins">0</span></strong>
+          <div class="starRequirements" id="starRequirements">
+            <div class="starRequirementsHead">
+              <span>3-STAR REQUIREMENTS</span>
+              <strong id="starRequirementsScore">0 / 3 EARNED</strong>
             </div>
-            <div class="transferLane">
-              <div class="transferArrow">→</div>
-              <div class="transferCoin coinFly1">◉</div>
-              <div class="transferCoin coinFly2">◉</div>
-              <div class="transferCoin coinFly3">◉</div>
+            <div class="starRequirement" data-requirement="complete">
+              <span class="starRequirementIcon">★</span>
+              <div><strong>Complete the level</strong></div>
+              <span class="starRequirementStatus">MISSED</span>
             </div>
-            <div class="rewardBucket walletBucket" id="resultWalletBucket">
-              <span>WALLET</span>
-              <strong><span class="coinIcon">◉</span><span id="resultWalletCoins">0</span></strong>
+            <div class="starRequirement" data-requirement="time">
+              <span class="starRequirementIcon">★</span>
+              <div><strong>Finish with 15s left</strong></div>
+              <span class="starRequirementStatus">MISSED</span>
+            </div>
+            <div class="starRequirement" data-requirement="balls">
+              <span class="starRequirementIcon">★</span>
+              <div><strong>Use 5 balls or fewer</strong></div>
+              <span class="starRequirementStatus">MISSED</span>
             </div>
           </div>
 
-          <div class="rewardFormula" id="rewardFormula"></div>
+          <div class="coinTransfer" id="coinTransfer">
+            <div class="rewardBucket runBucket">
+              <span class="rewardBucketTitle">LEVEL COINS <em class="rewardMultiplierBadge" id="resultMultiplierBadge">×1</em></span>
+              <strong><span class="coinIcon">★</span><span id="resultRunCoins">0</span></strong>
+            </div>
+            <div class="transferLane">
+              <div class="transferArrow" aria-hidden="true">➜</div>
+              <div class="transferCoin coinFly1">★</div>
+              <div class="transferCoin coinFly2">★</div>
+              <div class="transferCoin coinFly3">★</div>
+            </div>
+            <div class="rewardBucket walletBucket" id="resultWalletBucket">
+              <span>WALLET</span>
+              <strong><span class="coinIcon">★</span><span id="resultWalletCoins">0</span></strong>
+            </div>
+          </div>
+
           <div class="sub" id="resultText"></div>
           <div class="buttons resultButtons" style="justify-content:center">
             <button class="primary resultContinue" id="again">CONTINUE</button>
@@ -314,6 +333,17 @@
     </div>
   </div>
   <canvas id="hudFxCanvas" class="hudFxCanvas" aria-hidden="true"></canvas>
+  <div id="growthBankFxLayer" class="growthBankFxLayer" aria-hidden="true"></div>
+  <div class="hudTutorialOverlay" id="hudTutorialOverlay" aria-hidden="true">
+    <div class="hudTutorialSpotlight" id="hudTutorialSpotlight"></div>
+    <div class="hudTutorialCard" id="hudTutorialCard" role="status" aria-live="polite">
+      <span id="hudTutorialStep">1 / 5</span>
+      <strong id="hudTutorialText">This shows how many balls you have.</strong>
+      <button id="hudTutorialNext" type="button">NEXT</button>
+    </div>
+    <span class="hudTutorialFinger" id="hudTutorialFinger" aria-hidden="true">👆</span>
+    <button class="hudTutorialSkip" id="hudTutorialSkip" type="button">SKIP</button>
+  </div>
 </div>
 
 <div class="screen" id="storeScreen">
