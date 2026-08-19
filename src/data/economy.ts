@@ -20,12 +20,9 @@ export const PACK_POOL = [
 ] as const;
 
 export function roundCoinAmount(value: unknown): number {
-  return Math.round((Number(value) || 0) * 100) / 100;
+  return Math.round(Number(value) || 0);
 }
 
 export function formatCoinAmount(value: unknown): string {
-  const rounded = roundCoinAmount(value);
-  return Number.isInteger(rounded)
-    ? String(rounded)
-    : rounded.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+  return String(roundCoinAmount(value));
 }

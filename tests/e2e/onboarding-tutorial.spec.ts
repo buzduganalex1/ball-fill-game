@@ -59,7 +59,7 @@ test('Level 2 teaches the enemy once, then Level 3 starts after the retained HUD
 
   await page.locator('#adminBoosters').evaluate((button: HTMLButtonElement) => button.click());
   await page.locator('#adminApex').evaluate((button: HTMLButtonElement) => button.click());
-  await page.locator('#freeze').click();
+  await page.locator('#freeze').evaluate((button: HTMLButtonElement) => button.click());
 
   const canvas = page.locator('#game');
   const box = (await canvas.boundingBox())!;
@@ -69,6 +69,11 @@ test('Level 2 teaches the enemy once, then Level 3 starts after the retained HUD
   await expect(page.locator('#overlay')).toHaveCSS('display', 'grid', { timeout: 15_000 });
   await page.mouse.up();
   await expect(page.locator('#resultTitle')).toContainText('LEVEL 2 COMPLETE');
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-enemy-count', '0');
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-placed-ball-count', '0');
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-coin-count', '0');
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-scene-fx-count', '0');
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-active-ball-diameter', '0');
 
   await page.locator('#again').click();
   await expect(page.locator('#level')).toHaveText('3');

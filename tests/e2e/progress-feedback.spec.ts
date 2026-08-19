@@ -23,7 +23,7 @@ test('growth score climbs on the ball, then banks into the total with checkpoint
   await page.locator('#adminApex').evaluate((button: HTMLButtonElement) => button.click());
   await page.locator('#panicClear').evaluate((button: HTMLButtonElement) => button.click());
   await page.waitForTimeout(900);
-  await page.locator('#freeze').click();
+  await page.locator('#freeze').evaluate((button: HTMLButtonElement) => button.click());
 
   const canvas = page.locator('#game');
   const box = (await canvas.boundingBox())!;
@@ -47,6 +47,38 @@ test('growth score climbs on the ball, then banks into the total with checkpoint
   }
 
   expect(Math.max(...samples)).toBeGreaterThanOrEqual(30);
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-growth-renderer', 'number-only');
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-growth-token-shape', 'number-only');
+  const growthFrameHealth = await page.evaluate(() => new Promise<{
+    sampleCount: number;
+    p95FrameMs: number;
+    effectsDpr: number;
+  }>(resolve => {
+    const intervals: number[] = [];
+    const started = performance.now();
+    let previous = started;
+    const sample = (now: number) => {
+      intervals.push(now - previous);
+      previous = now;
+      if (now - started < 700) {
+        requestAnimationFrame(sample);
+        return;
+      }
+      const sorted = intervals.slice(1).sort((a, b) => a - b);
+      const p95 = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * .95))] || 0;
+      const effects = document.querySelector<HTMLCanvasElement>('#hudFxCanvas')!;
+      const rect = effects.getBoundingClientRect();
+      resolve({
+        sampleCount: sorted.length,
+        p95FrameMs: p95,
+        effectsDpr: effects.width / Math.max(1, rect.width),
+      });
+    };
+    requestAnimationFrame(sample);
+  }));
+  expect(growthFrameHealth.sampleCount).toBeGreaterThan(20);
+  expect(growthFrameHealth.p95FrameMs).toBeLessThan(50);
+  expect(growthFrameHealth.effectsDpr).toBeLessThanOrEqual(1.51);
   await expect(page.locator('#levelProgressValue')).toHaveText('0');
   await expect(page.locator('.starMarker1')).toHaveClass(/earned/);
   await expect(page.locator('.starMarker1')).toHaveAttribute('data-celebrations', '1');
@@ -54,6 +86,7 @@ test('growth score climbs on the ball, then banks into the total with checkpoint
   await page.mouse.up();
   await expect(page.locator('#gameScreen')).toHaveAttribute('data-progress-bank-state', 'flying');
   await expect(page.locator('.growthBankFlight')).toBeVisible();
+  await expect(page.locator('.growthBankFlight small')).toHaveCount(0);
   const flyingTokenShape = await page.locator('.growthBankFlight').evaluate(element => {
     const rect = element.getBoundingClientRect();
     const style = getComputedStyle(element);
@@ -115,12 +148,47 @@ test('a popped growing ball drops its preview progress and clearly shows the los
   await expect(page.locator('.growthLossBurst')).toBeVisible();
   await expect(page.locator('.growthLossBurst')).toContainText('PROGRESS LOST');
   await expect(page.locator('#gameScreen')).toHaveAttribute('data-last-lost-progress', /[1-9]\d*/);
-  await expect(page.locator('#gameScreen')).toHaveAttribute('data-active-growth-points', '0');
+  await expect(page.locator('#balls')).toHaveText('8');
+  await expect.poll(async () => (
+    Number(await page.locator('#gameScreen').getAttribute('data-active-ball-diameter'))
+  )).toBeGreaterThan(0);
   await expect(page.locator('#levelProgressValue')).toHaveText('0');
-  await expect.poll(async () => page.locator('#progressFill1').evaluate(element => (
-    element.getBoundingClientRect().width
-  ))).toBeLessThan(1);
   await expect(page.locator('#segmentedProgressTrack')).toHaveClass(/progressLost/);
+  await expect.poll(async () => (
+    Number(await page.locator('#gameScreen').getAttribute('data-active-growth-points'))
+  )).toBeGreaterThan(0);
+  await page.mouse.up();
+});
+
+test('a press on a placed ball does not spend or grow another ball', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await page.locator('#bigPack').click();
+  await expect(page.locator('#packContinue')).toHaveClass(/show/, { timeout: 3_000 });
+  await page.locator('#packContinue').click();
+
+  const canvas = page.locator('#game');
+  const box = (await canvas.boundingBox())!;
+  const center = {
+    x: box.x + box.width * .5,
+    y: box.y + box.height * .58,
+  };
+
+  await page.mouse.move(center.x, center.y);
+  await page.mouse.down();
+  await page.waitForTimeout(360);
+  await page.mouse.up();
+  await expect(page.locator('#balls')).toHaveText('9');
+  await expect.poll(async () => (
+    Number(await page.locator('#gameScreen').getAttribute('data-active-ball-diameter'))
+  )).toBe(0);
+
+  await page.mouse.down();
+  await page.waitForTimeout(240);
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-spawn-blocked', 'true');
+  await expect(page.locator('#balls')).toHaveText('9');
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-active-ball-diameter', '0');
   await page.mouse.up();
 });
 
@@ -135,15 +203,25 @@ test('mobile defeat summary is readable and uses a card-matched transfer arrow',
   const canvas = page.locator('#game');
   const box = (await canvas.boundingBox())!;
   for (let ball = 0; ball < 10; ball += 1) {
+    const column = ball % 5;
+    const row = Math.floor(ball / 5);
     await page.mouse.click(
-      box.x + box.width * (.08 + (ball % 2) * .05),
-      box.y + box.height * (.08 + Math.floor(ball / 2) * .035),
+      box.x + box.width * (.1 + column * .19),
+      box.y + box.height * (.1 + row * .14),
       { delay: 18 },
     );
   }
 
   await expect(page.locator('#overlay')).toHaveCSS('display', 'grid', { timeout: 6_000 });
+  await expect(page.locator('#overlay')).toHaveClass(/defeatResult/);
+  await expect(page.locator('#overlay')).not.toHaveClass(/victoryResult/);
   await expect(page.locator('#resultCard')).toHaveClass(/defeat/);
+  await expect(page.locator('#replayLevel')).toBeHidden();
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-placed-ball-count', '0');
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-coin-count', '0');
+  await expect(page.locator('#gameScreen')).toHaveAttribute('data-scene-fx-count', '0');
+  await expect(page.locator('#resultRunCoins')).toHaveText('0');
+  await expect(page.locator('#resultRunCoins')).not.toContainText('-');
 
   const resultMetrics = await page.evaluate(() => {
     const px = (selector: string) => parseFloat(getComputedStyle(document.querySelector(selector)!).fontSize);
@@ -196,7 +274,10 @@ test('completion explains a two-star run and shows consistent reward visuals', a
   const box = (await canvas.boundingBox())!;
   // Spend six tiny balls in one corner so efficiency is missed without
   // surrounding or blocking the final scoring ball.
-  const taps = Array.from({ length: 6 }, () => [.08, .08]);
+  const taps = Array.from({ length: 6 }, (_, index) => [
+    .1 + (index % 3) * .18,
+    .1 + Math.floor(index / 3) * .11,
+  ]);
   for (const [x, y] of taps) {
     await page.mouse.click(box.x + box.width * x, box.y + box.height * y, { delay: 25 });
   }
@@ -204,14 +285,21 @@ test('completion explains a two-star run and shows consistent reward visuals', a
 
   await page.mouse.move(box.x + box.width * .62, box.y + box.height * .62);
   await page.mouse.down();
-  await expect(page.locator('#overlay')).toHaveCSS('display', 'grid', { timeout: 15_000 });
+  await expect(page.locator('#boardWrap')).toHaveClass(/victorySlowdown/, { timeout: 15_000 });
+  await expect(page.locator('#overlay')).toHaveCSS('display', 'grid', { timeout: 3_000 });
   await page.mouse.up();
 
+  await expect(page.locator('#overlay')).toHaveClass(/victoryResult/);
+  await expect(page.locator('#overlay')).not.toHaveClass(/defeatResult/);
+  await expect(page.locator('#replayLevel')).toBeVisible();
+  await expect(page.locator('#replayLevel')).toHaveText('↻ REPLAY');
   await expect(page.locator('#stars')).toHaveText('★★☆');
   await expect(page.locator('#starRequirementsScore')).toHaveText('2 / 3 EARNED');
   await expect(page.locator('[data-requirement="complete"]')).toHaveAttribute('data-status', 'earned');
   await expect(page.locator('[data-requirement="time"]')).toHaveAttribute('data-status', 'earned');
   await expect(page.locator('[data-requirement="balls"]')).toHaveAttribute('data-status', 'missed');
+  await expect(page.locator('[data-requirement="complete"] .starRequirementStatus')).toHaveText('✓');
+  await expect(page.locator('[data-requirement="balls"] .starRequirementStatus')).toHaveText('✕');
   await expect(page.locator('.starRequirement small')).toHaveCount(0);
   await expect(page.locator('#starRequirementsTip')).toHaveCount(0);
   await expect(page.locator('#resultText')).not.toContainText(/PACK READY|GOLD TO NEXT PACK/);
@@ -226,6 +314,56 @@ test('completion explains a two-star run and shows consistent reward visuals', a
   await expect(page.locator('.transferArrow')).toHaveText('➜');
   await expect(page.locator('.resultCard .coinIcon')).toHaveText(['★', '★']);
 
+  const resultSpacing = await page.evaluate(() => {
+    const requirements = document.querySelector('#starRequirements')!.getBoundingClientRect();
+    const rewards = document.querySelector('#coinTransfer')!.getBoundingClientRect();
+    const action = document.querySelector('.resultButtons')!.getBoundingClientRect();
+    const missed = document.querySelector('[data-requirement="balls"] .starRequirementStatus')!;
+    const earned = document.querySelector('[data-requirement="complete"] .starRequirementStatus')!;
+    const missedRect = missed.getBoundingClientRect();
+    return {
+      requirementsToRewards: rewards.top - requirements.bottom,
+      rewardsToAction: action.top - rewards.bottom,
+      markerRatio: missedRect.width / missedRect.height,
+      missedColor: getComputedStyle(missed).backgroundImage,
+      earnedColor: getComputedStyle(earned).backgroundImage,
+    };
+  });
+  expect(resultSpacing.requirementsToRewards).toBeGreaterThan(12);
+  expect(resultSpacing.rewardsToAction).toBeGreaterThan(8);
+  expect(resultSpacing.markerRatio).toBeCloseTo(1, 1);
+  expect(resultSpacing.missedColor).not.toBe(resultSpacing.earnedColor);
+
+  const bonusMessageGap = await page.evaluate(async () => {
+    const message = document.querySelector<HTMLElement>('#resultText')!;
+    message.innerHTML = '<strong>⚡ RUSH SURVIVED!</strong><br>15% GOLD BONUS CLAIMED';
+    await new Promise(requestAnimationFrame);
+    const messageRect = message.getBoundingClientRect();
+    const actionRect = document.querySelector('.resultButtons')!.getBoundingClientRect();
+    const gap = actionRect.top - messageRect.bottom;
+    message.replaceChildren();
+    return gap;
+  });
+  expect(bonusMessageGap).toBeGreaterThan(8);
+
+  // Match the compact in-app browser viewport where reward labels have the
+  // least horizontal room and must remain on one line.
+  await page.setViewportSize({ width: 355, height: 547 });
+  await page.evaluate(() => new Promise(requestAnimationFrame));
+  const compactCoinTitle = await page.locator('.rewardBucketTitle').evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return {
+      height: rect.height,
+      lineHeight: parseFloat(style.lineHeight),
+      overflow: element.scrollWidth - element.clientWidth,
+      whiteSpace: style.whiteSpace,
+    };
+  });
+  expect(compactCoinTitle.height).toBeLessThan(compactCoinTitle.lineHeight * 1.5);
+  expect(compactCoinTitle.overflow).toBeLessThanOrEqual(1);
+  expect(compactCoinTitle.whiteSpace).toBe('nowrap');
+
   const totalShape = await page.locator('#levelGoal').evaluate(element => {
     const rect = element.getBoundingClientRect();
     const style = getComputedStyle(element);
@@ -233,4 +371,10 @@ test('completion explains a two-star run and shows consistent reward visuals', a
   });
   expect(totalShape.width).toBeGreaterThan(totalShape.height * 1.5);
   expect(parseFloat(totalShape.radius)).toBeGreaterThan(totalShape.height / 2);
+
+  const completedLevel = await page.locator('#level').textContent();
+  await page.locator('#replayLevel').click();
+  await expect(page.locator('#overlay')).toBeHidden();
+  await expect(page.locator('#level')).toHaveText(completedLevel ?? '');
+  await expect(page.locator('#balls')).toHaveText('10');
 });

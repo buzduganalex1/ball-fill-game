@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { liveStarCount, measureCoverage } from '../../src/game/systems/CoverageSystem';
-import { followPointerTarget, growBallIntoAvailableSpace } from '../../src/game/systems/GrowthSystem';
+import { ballFitsAt, followPointerTarget, growBallIntoAvailableSpace } from '../../src/game/systems/GrowthSystem';
 
 describe('growth system', () => {
   it('smoothly follows a touch target while respecting arena bounds', () => {
@@ -25,6 +25,12 @@ describe('growth system', () => {
     expect(result).toEqual({ grew: true, shifted: true });
     expect(ball.r).toBe(14);
     expect(ball.x).toBeGreaterThanOrEqual(14);
+  });
+
+  it('rejects a new ball that would overlap a placed ball', () => {
+    const placed = [{ x: 50, y: 50, r: 24 }];
+    expect(ballFitsAt(50, 50, 10, placed, 100, 100)).toBe(false);
+    expect(ballFitsAt(88, 50, 10, placed, 100, 100)).toBe(true);
   });
 });
 

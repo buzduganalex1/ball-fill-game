@@ -1,6 +1,6 @@
 import type { BallId } from '../data/balls';
 import type { BoosterId } from '../data/boosters';
-import type { SaveDataV1 } from './SaveData';
+import type { SaveData } from './SaveData';
 
 export interface AppStateSnapshot {
   currentLevel: number;
@@ -16,7 +16,7 @@ export interface AppStateSnapshot {
   reducedMotion: boolean;
 }
 
-export function appStateFromSave(save: SaveDataV1): AppStateSnapshot {
+export function appStateFromSave(save: SaveData): AppStateSnapshot {
   return {
     currentLevel: save.currentLevel,
     highestCompletedLevel: save.highestCompletedLevel,

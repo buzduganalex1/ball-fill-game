@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { LegacyEnemyState, LegacyRenderFrame } from '../GameBridge';
 import { BallRenderer } from './BallRenderer';
 import { colorNumber, WORLD_COLORS } from './colors';
+import { buildEnemyTrailWedge, type EnemyTrailVertex } from './EnemyTrailGeometry';
 
 export class ArenaRenderer {
   private readonly background: Phaser.GameObjects.Graphics;
@@ -55,17 +56,35 @@ export class ArenaRenderer {
     const trail = enemy.trail ?? [];
     if (trail.length < 2) return;
     const palette = WORLD_COLORS[Math.max(0, Math.min(9, (enemy.worldIndex ?? 1) - 1))];
-    for (let index = 1; index < trail.length; index += 1) {
-      const from = trail[index - 1];
-      const to = trail[index];
-      const progress = index / (trail.length - 1);
-      const life = Math.min(from.life ?? 1, to.life ?? 1);
-      const width = Math.max(2, enemy.r * (enemy.boss ? 0.72 : 0.4) * progress);
-      this.trails.lineStyle(width * 1.5, colorNumber(palette.glow), life * progress * (enemy.boss ? 0.2 : 0.1));
-      this.trails.lineBetween(from.x, from.y, to.x, to.y);
-      this.trails.lineStyle(width, colorNumber(palette.trail), life * progress * (enemy.boss ? 0.48 : 0.28));
-      this.trails.lineBetween(from.x, from.y, to.x, to.y);
+    const leader = enemy.boss || enemy.miniBoss;
+    const halfWidth = enemy.r * (leader ? 1.28 : (enemy.minion ? 0.92 : 0.82));
+    this.fillTrailWedge(
+      buildEnemyTrailWedge(trail, halfWidth * 1.48),
+      colorNumber(palette.glow),
+      leader ? 0.18 : 0.13,
+    );
+    this.fillTrailWedge(
+      buildEnemyTrailWedge(trail, halfWidth),
+      colorNumber(palette.trail),
+      leader ? 0.54 : (enemy.minion ? 0.43 : 0.38),
+    );
+    this.fillTrailWedge(
+      buildEnemyTrailWedge(trail, halfWidth * 0.32),
+      0xfff6d3,
+      leader ? 0.58 : 0.38,
+    );
+  }
+
+  private fillTrailWedge(points: readonly EnemyTrailVertex[], color: number, alpha: number): void {
+    if (points.length < 3) return;
+    this.trails.fillStyle(color, alpha);
+    this.trails.beginPath();
+    this.trails.moveTo(points[0].x, points[0].y);
+    for (let index = 1; index < points.length; index += 1) {
+      this.trails.lineTo(points[index].x, points[index].y);
     }
+    this.trails.closePath();
+    this.trails.fillPath();
   }
 
   private drawEnemy(enemy: LegacyEnemyState, frozen: boolean, enlarged: boolean): void {

@@ -41,3 +41,7 @@ body.phaserRenderer .boardWrap.defeatSlowdown #phaserArena {
   filter: saturate(0.35) contrast(1.14) brightness(0.72);
   transition: filter 0.28s ease-out;
 }
+
+body.phaserRenderer .boardWrap.victorySlowdown #phaserArena {
+  animation: victoryArenaLift 0.9s cubic-bezier(0.12, 0.78, 0.2, 1) both;
+}

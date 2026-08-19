@@ -276,7 +276,7 @@ test('starter progress, wallet, and inventory survive reload', async ({ page }) 
   await page.reload();
 
   await expect(page.locator('#homeGold')).toHaveText('5000');
-  await page.locator('#homeCollectionCard').click();
+  await page.locator('#quickCollection').click();
   await expect(page.locator('#collectionScreen .ballCard:not(.lockedCard)')).toHaveCount(11);
 });
 

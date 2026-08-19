@@ -1,5 +1,5 @@
 import { Preferences } from '@capacitor/preferences';
-import { DEFAULT_SAVE_DATA, SAVE_KEY, type SaveDataV1 } from './SaveData';
+import { DEFAULT_SAVE_DATA, SAVE_KEY, type SaveData } from './SaveData';
 import { normalizeSaveData } from './migrations';
 
 const LEGACY_TUTORIAL_KEY = 'ballFillTutorialSeenV2';
@@ -12,7 +12,7 @@ function legacyTutorialSeen(): boolean {
   }
 }
 
-export async function loadSaveData(): Promise<SaveDataV1> {
+export async function loadSaveData(): Promise<SaveData> {
   try {
     const { value } = await Preferences.get({ key: SAVE_KEY });
     const parsed: unknown = value ? JSON.parse(value) : DEFAULT_SAVE_DATA;
@@ -25,7 +25,7 @@ export async function loadSaveData(): Promise<SaveDataV1> {
   }
 }
 
-export async function saveSaveData(save: SaveDataV1): Promise<void> {
+export async function saveSaveData(save: SaveData): Promise<void> {
   const normalized = normalizeSaveData(save);
   try {
     await Preferences.set({ key: SAVE_KEY, value: JSON.stringify(normalized) });

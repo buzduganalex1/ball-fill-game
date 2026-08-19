@@ -1,0 +1,1933 @@
+/* ============================================================
+   STORE + PACK JUICE — LARGE, LAYERED REWARD PAYOFFS
+   ============================================================ */
+#storeScreen.purchaseScreenShake{
+  animation:purchaseScreenKick .72s cubic-bezier(.16,.82,.22,1) both;
+}
+#storeScreen .purchaseBoom{
+  z-index:8;
+  animation:purchaseCardBoom .92s cubic-bezier(.16,.9,.22,1.25) both!important;
+}
+.storeFxLayer.purchaseFlash{
+  background:
+    radial-gradient(circle at var(--purchase-x,50%) var(--purchase-y,50%),rgba(255,244,176,.95) 0,rgba(80,211,120,.38) 12%,rgba(80,211,120,.1) 31%,transparent 58%);
+  animation:purchaseMegaFlash 1.25s ease-out both;
+}
+.purchaseSuccessBanner{
+  position:fixed;
+  left:50%;
+  top:43%;
+  z-index:30;
+  width:max-content;
+  max-width:88vw;
+  padding:.78rem 1.3rem;
+  border:.15rem solid #c88d1c;
+  border-radius:999rem;
+  color:#5e430c;
+  background:linear-gradient(180deg,#fffde9,#f4cf58);
+  box-shadow:inset 0 .14rem 0 #fff,0 .3rem 0 #a87516,0 .7rem 2rem rgba(69,52,16,.3),0 0 2rem rgba(245,194,55,.36);
+  font-size:clamp(.9rem,4.2vw,1.25rem);
+  font-weight:1000;
+  letter-spacing:.025em;
+  line-height:1;
+  text-align:center;
+  text-shadow:0 .08rem 0 rgba(255,255,255,.75);
+  pointer-events:none;
+  animation:purchaseBannerSlam 1.35s cubic-bezier(.16,.9,.24,1.22) both;
+}
+.purchaseBurstParticle,
+.packMegaSpark{
+  position:fixed;
+  left:var(--burst-x,50%);
+  top:var(--burst-y,50%);
+  z-index:24;
+  width:.72rem;
+  height:.72rem;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:var(--particle-color,#f4bd37);
+  background:currentColor;
+  box-shadow:0 0 .8rem currentColor;
+  font-size:.72rem;
+  font-weight:1000;
+  line-height:1;
+  pointer-events:none;
+  animation:purchaseParticleBurst var(--particle-duration,1.05s) cubic-bezier(.12,.72,.22,1) var(--particle-delay,0ms) both;
+}
+.purchaseBurstParticle.coinParticle{
+  width:1rem;
+  height:1rem;
+  color:#9b6708;
+  background:radial-gradient(circle at 34% 28%,#fff6a7,#ffc93b 42%,#e39712 78%);
+  border:.08rem solid #bd7810;
+  box-shadow:inset 0 0 0 .08rem rgba(255,250,171,.72),0 0 .85rem rgba(244,183,45,.6);
+}
+.purchaseBurstParticle.coinParticle::after{
+  content:'★';
+  color:#fff2a1;
+  font-size:.46rem;
+  text-shadow:0 .05rem 0 #b36d0b;
+}
+@keyframes purchaseScreenKick{
+  0%,100%{transform:translate3d(0,0,0)}
+  18%{transform:translate3d(-.2rem,.08rem,0)}
+  34%{transform:translate3d(.16rem,-.06rem,0)}
+  52%{transform:translate3d(-.1rem,.03rem,0)}
+  70%{transform:translate3d(.06rem,0,0)}
+}
+@keyframes purchaseCardBoom{
+  0%{transform:scale(1);filter:brightness(1)}
+  20%{transform:scale(.96);filter:brightness(1.08)}
+  42%{transform:translateY(-.72rem) scale(1.045);filter:brightness(1.18) saturate(1.15)}
+  66%{transform:translateY(.08rem) scale(.99);filter:brightness(1.05)}
+  100%{transform:scale(1);filter:brightness(1)}
+}
+@keyframes purchaseMegaFlash{
+  0%{opacity:0}
+  12%{opacity:1}
+  42%{opacity:.8}
+  100%{opacity:0}
+}
+@keyframes purchaseBannerSlam{
+  0%{opacity:0;transform:translate(-50%,2rem) scale(.42) rotate(-5deg)}
+  28%{opacity:1;transform:translate(-50%,-.35rem) scale(1.12) rotate(1deg)}
+  45%,72%{opacity:1;transform:translate(-50%,0) scale(1) rotate(0)}
+  100%{opacity:0;transform:translate(-50%,-1.4rem) scale(.94)}
+}
+@keyframes purchaseParticleBurst{
+  0%{opacity:0;transform:translate(-50%,-50%) rotate(var(--particle-angle)) translateX(.2rem) scale(.15)}
+  14%{opacity:1}
+  72%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-50%) rotate(var(--particle-angle)) translateX(var(--particle-distance,7rem)) scale(.15) rotate(220deg)}
+}
+
+.packModal.packAnticipation{
+  box-shadow:0 1.5rem 4.375rem rgba(48,63,78,.2),0 0 2.8rem rgba(244,190,46,.4);
+  animation:packChargeFrame .88s cubic-bezier(.2,.72,.22,1) both;
+}
+.packFxLayer.preRevealCharge{
+  background:radial-gradient(circle at 50% 50%,rgba(255,245,170,.48),rgba(244,189,55,.1) 24%,transparent 52%);
+  animation:preRevealChargeFlash .38s ease-out both;
+}
+.bigPack.opening{
+  animation:packSuperShake .86s cubic-bezier(.2,.72,.22,1)!important;
+  filter:drop-shadow(0 0 1.5rem rgba(244,190,46,.7));
+}
+.packFxLayer.openingBurst{
+  --reveal-color:#f4bd37;
+  background:
+    radial-gradient(circle at var(--burst-x,50%) var(--burst-y,50%),#fff 0,rgba(255,247,181,.96) 6%,color-mix(in srgb,var(--reveal-color) 60%,transparent) 20%,color-mix(in srgb,var(--reveal-color) 18%,transparent) 42%,transparent 67%);
+  animation:packMegaFlash 1.65s ease-out both;
+}
+.packFxLayer.openingBurst .packRays,
+.packFxLayer.openingBurst .packLightBurst,
+.packFxLayer.openingBurst .packLightRing,
+.packFxLayer.openingBurst .packBurstStar{display:block}
+.packRays{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:96vmax;
+  height:96vmax;
+  margin:-48vmax 0 0 -48vmax;
+  opacity:.38;
+  background:repeating-conic-gradient(from 0deg,transparent 0 7deg,color-mix(in srgb,var(--reveal-color) 54%,transparent) 7deg 12deg,transparent 12deg 21deg);
+  animation:packRaysExplode 2.1s cubic-bezier(.12,.7,.22,1) both;
+}
+.packLightBurst{
+  position:absolute;
+  left:var(--burst-x,50%);
+  top:var(--burst-y,50%);
+  width:8rem;
+  height:8rem;
+  margin:-4rem 0 0 -4rem;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 2rem #fff,0 0 5rem var(--reveal-color),0 0 9rem var(--reveal-color);
+  animation:packCoreBlast 1.25s ease-out both;
+}
+.packLightRing{
+  position:absolute;
+  left:var(--burst-x,50%);
+  top:var(--burst-y,50%);
+  width:7rem;
+  height:7rem;
+  margin:-3.5rem 0 0 -3.5rem;
+  border:.3rem solid color-mix(in srgb,var(--reveal-color) 74%,white);
+  border-radius:50%;
+  box-shadow:0 0 1.4rem var(--reveal-color),inset 0 0 1rem var(--reveal-color);
+  animation:packRingBlast 1.25s cubic-bezier(.12,.72,.22,1) both;
+}
+.packLightRing.ringB{animation-delay:.14s}
+.packBurstStar{
+  position:absolute;
+  color:#fff7b2;
+  font-size:2rem;
+  text-shadow:0 0 1rem var(--reveal-color),0 0 2rem var(--reveal-color);
+  animation:packStarPop 1.4s ease-out both;
+}
+.packBurstStar.pbs1{left:14%;top:20%}
+.packBurstStar.pbs2{right:12%;top:24%;animation-delay:.08s}
+.packBurstStar.pbs3{left:20%;bottom:19%;animation-delay:.14s}
+.packBurstStar.pbs4{right:17%;bottom:16%;animation-delay:.2s}
+.packBurstStar.pbs5{left:50%;top:10%;animation-delay:.25s}
+.packModal.revealBoom{
+  animation:packModalRevealBoom 1.12s cubic-bezier(.15,.82,.24,1.15) both;
+}
+.rewardReveal.megaReveal{
+  position:relative;
+  z-index:210;
+  animation:rewardStageMega 1.2s cubic-bezier(.14,.88,.2,1.18) both!important;
+}
+.rewardReveal.megaReveal .rewardBall{
+  animation:rewardBallMega 1.35s cubic-bezier(.12,.9,.22,1.24) both!important;
+  filter:drop-shadow(0 0 1.1rem var(--reveal-color)) drop-shadow(0 .8rem 1rem rgba(31,55,64,.22));
+}
+.rewardReveal.megaReveal .rewardName{
+  animation:rewardNameSlam .82s cubic-bezier(.15,.88,.2,1.22) .18s both;
+}
+.packDropBanner{
+  position:fixed;
+  left:50%;
+  top:max(7.75rem,17dvh);
+  z-index:32;
+  width:max-content;
+  max-width:90vw;
+  padding:.68rem 1.15rem;
+  border:.15rem solid color-mix(in srgb,var(--reveal-color) 72%,#76500b);
+  border-radius:999rem;
+  color:#fff;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--reveal-color) 78%,white),color-mix(in srgb,var(--reveal-color) 78%,#2c3640));
+  box-shadow:inset 0 .13rem 0 rgba(255,255,255,.5),0 .3rem 0 color-mix(in srgb,var(--reveal-color) 55%,#343434),0 .65rem 2rem color-mix(in srgb,var(--reveal-color) 44%,transparent);
+  font-size:clamp(.88rem,4.4vw,1.3rem);
+  font-weight:1000;
+  letter-spacing:.035em;
+  line-height:1;
+  text-align:center;
+  text-shadow:0 .11rem 0 rgba(29,35,40,.45);
+  pointer-events:none;
+  transform:translateX(-50%);
+  animation:packBannerDrop 1.85s cubic-bezier(.16,.88,.22,1.2) both;
+}
+.packMegaSpark{
+  --particle-duration:1.45s;
+  width:.66rem;
+  height:.66rem;
+  color:var(--particle-color,var(--reveal-color));
+}
+@keyframes packChargeFrame{
+  0%{transform:scale(1)}
+  45%{transform:scale(.985)}
+  75%{transform:scale(1.015)}
+  100%{transform:scale(.99)}
+}
+@keyframes preRevealChargeFlash{
+  0%{opacity:0;transform:scale(.9)}
+  38%{opacity:.8;transform:scale(1)}
+  100%{opacity:0;transform:scale(1.08)}
+}
+@keyframes packSuperShake{
+  0%{transform:translate(0) rotate(0) scale(1)}
+  12%{transform:translate(-.18rem,.04rem) rotate(-4deg) scale(1.03)}
+  24%{transform:translate(.22rem,-.04rem) rotate(5deg) scale(1.055)}
+  38%{transform:translate(-.28rem,.02rem) rotate(-6deg) scale(1.075)}
+  52%{transform:translate(.3rem,-.05rem) rotate(7deg) scale(1.1)}
+  66%{transform:translate(-.35rem,.03rem) rotate(-8deg) scale(1.13)}
+  79%{transform:translate(.32rem,-.06rem) rotate(8deg) scale(1.16)}
+  92%{transform:translate(-.2rem,0) rotate(-4deg) scale(1.2)}
+  100%{transform:translate(0) rotate(0) scale(.92)}
+}
+@keyframes packMegaFlash{
+  0%{opacity:0}
+  7%{opacity:1}
+  18%{opacity:.72}
+  36%{opacity:1}
+  100%{opacity:0}
+}
+@keyframes packRaysExplode{
+  0%{opacity:0;transform:scale(.12) rotate(-22deg)}
+  16%{opacity:.55}
+  100%{opacity:0;transform:scale(1.08) rotate(22deg)}
+}
+@keyframes packCoreBlast{
+  0%{opacity:0;transform:scale(.08)}
+  14%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(4.5)}
+}
+@keyframes packRingBlast{
+  0%{opacity:0;transform:scale(.1)}
+  16%{opacity:1}
+  100%{opacity:0;transform:scale(5.7)}
+}
+@keyframes packStarPop{
+  0%{opacity:0;transform:scale(.1) rotate(-35deg)}
+  28%{opacity:1;transform:scale(1.45) rotate(10deg)}
+  100%{opacity:0;transform:translateY(-2.5rem) scale(.55) rotate(95deg)}
+}
+@keyframes packModalRevealBoom{
+  0%{transform:scale(.94)}
+  16%{transform:scale(1.035)}
+  34%{transform:scale(.985)}
+  58%{transform:scale(1.012)}
+  100%{transform:scale(1)}
+}
+@keyframes rewardStageMega{
+  0%{opacity:0;transform:scale(.5) translateY(2rem)}
+  34%{opacity:1;transform:scale(1.08) translateY(-.35rem)}
+  58%{transform:scale(.98) translateY(.08rem)}
+  100%{transform:scale(1) translateY(0)}
+}
+@keyframes rewardBallMega{
+  0%{opacity:0;transform:scale(.15) rotate(-24deg)}
+  28%{opacity:1;transform:scale(1.24) rotate(8deg)}
+  48%{transform:scale(.92) rotate(-3deg)}
+  70%{transform:scale(1.07) rotate(1deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+@keyframes rewardNameSlam{
+  0%{opacity:0;transform:translateY(1rem) scale(.65)}
+  52%{opacity:1;transform:translateY(-.15rem) scale(1.1)}
+  100%{transform:scale(1)}
+}
+@keyframes packBannerDrop{
+  0%{opacity:0;transform:translate(-50%,-2rem) scale(.45) rotate(-4deg)}
+  22%{opacity:1;transform:translate(-50%,.25rem) scale(1.12) rotate(1deg)}
+  38%,72%{opacity:1;transform:translate(-50%,0) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-1rem) scale(.94)}
+}
+
+/* A short visual bridge from the purchased card into the opening room. */
+#storeScreen.packTransitionOut .menuApp{
+  animation:storeCatalogToPack .58s cubic-bezier(.3,.02,.2,1) both;
+}
+.storeFxLayer.packPortalTransition{
+  z-index:190;
+}
+.storeFxLayer.packPortalTransition::after{
+  content:'';
+  position:fixed;
+  left:50%;
+  top:50%;
+  width:12rem;
+  height:12rem;
+  margin:-6rem 0 0 -6rem;
+  border-radius:50%;
+  background:
+    radial-gradient(circle,#fff 0 28%,#fff4b3 29% 42%,rgba(91,196,142,.88) 43% 57%,rgba(91,196,142,.32) 58% 67%,transparent 68%);
+  box-shadow:0 0 3rem #fff,0 0 6rem rgba(84,192,137,.55);
+  animation:storePackPortalCover .58s cubic-bezier(.2,.68,.2,1) both;
+}
+.packOverlay.packTransitionIn{
+  animation:packRoomFadeIn .58s ease-out both;
+}
+.packOverlay.packTransitionIn .packModal{
+  animation:packRoomLand .68s cubic-bezier(.16,.86,.24,1.15) both;
+}
+@keyframes storeCatalogToPack{
+  0%{opacity:1;transform:scale(1);filter:blur(0)}
+  55%{opacity:.72;transform:scale(.975);filter:blur(.08rem)}
+  100%{opacity:0;transform:scale(.92);filter:blur(.35rem)}
+}
+@keyframes storePackPortalCover{
+  0%{opacity:0;transform:scale(.08) rotate(-15deg)}
+  18%{opacity:1}
+  100%{opacity:1;transform:scale(10) rotate(18deg)}
+}
+@keyframes packRoomFadeIn{
+  0%{opacity:0}
+  100%{opacity:1}
+}
+@keyframes packRoomLand{
+  0%{opacity:0;transform:translateY(2rem) scale(.9)}
+  58%{opacity:1;transform:translateY(-.2rem) scale(1.015)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Collection-style reward card inside the pack-opening room. */
+.packModal:has(.rewardReveal.show){
+  justify-content:flex-start;
+  gap:.45rem;
+  padding:1rem;
+  background:linear-gradient(180deg,#f8fbfc,#edf3f5);
+}
+.packModal:has(.rewardReveal.show) .packTitle{
+  margin:.2rem 0 0;
+  color:#314840;
+  font-size:1.75rem;
+  line-height:1;
+}
+.packModal:has(.rewardReveal.show) .packSub{
+  margin:0 0 .15rem;
+}
+.rewardReveal.show{
+  --reward-accent:#85a9ba;
+  position:relative;
+  isolation:isolate;
+  flex:1 1 auto;
+  width:100%;
+  max-width:22rem;
+  min-height:0;
+  padding:.85rem;
+  gap:.48rem;
+  justify-content:center;
+  overflow:visible;
+  border:.18rem solid var(--reward-accent);
+  border-radius:1.45rem;
+  background:
+    radial-gradient(circle at 50% 20%,color-mix(in srgb,var(--reward-accent) 15%,transparent),transparent 42%),
+    linear-gradient(150deg,#fff,color-mix(in srgb,var(--reward-accent) 7%,#f7fafb));
+  box-shadow:
+    inset 0 0 0 .12rem color-mix(in srgb,var(--reward-accent) 30%,#e4ecef),
+    0 .3rem 0 color-mix(in srgb,var(--reward-accent) 58%,#8799a1),
+    0 .8rem 1.6rem rgba(42,63,72,.16),
+    0 0 1.1rem color-mix(in srgb,var(--reward-accent) 28%,transparent);
+}
+.rewardReveal.show::before{
+  content:'';
+  position:absolute;
+  inset:.38rem;
+  z-index:-1;
+  border:.07rem solid color-mix(in srgb,var(--reward-accent) 46%,white);
+  border-radius:1.05rem;
+  pointer-events:none;
+}
+.rewardReveal.show .rewardBall{
+  width:clamp(7.6rem,31vw,9.4rem);
+  height:clamp(7.6rem,31vw,9.4rem);
+  border-width:0;
+  filter:drop-shadow(0 0 .8rem color-mix(in srgb,var(--reward-accent) 52%,transparent)) drop-shadow(0 .55rem .55rem rgba(40,65,76,.2));
+}
+.rewardReveal.show .rewardName{
+  color:#304854;
+  font-size:1.62rem;
+  line-height:1;
+}
+.rewardReveal.show .rewardCopy{gap:.3rem}
+.rewardReveal.show .rewardRarity{
+  color:color-mix(in srgb,var(--reward-accent) 72%,#304854);
+  background:color-mix(in srgb,var(--reward-accent) 12%,white);
+  border:.07rem solid color-mix(in srgb,var(--reward-accent) 52%,white);
+  font-size:.78rem;
+}
+.rewardReveal.show .rewardDesc{
+  max-width:95%;
+  color:#5a707c;
+  font-size:.88rem;
+  line-height:1.25;
+}
+.packRewardBenefit{
+  width:100%;
+  min-height:2.8rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.65rem;
+  padding:.58rem .72rem;
+  border:.11rem solid color-mix(in srgb,var(--reward-accent) 42%,#cedbe0);
+  border-radius:.75rem;
+  color:#6a7f8a;
+  background:color-mix(in srgb,var(--reward-accent) 7%,#f7fafb);
+  font-size:.7rem;
+  line-height:1.1;
+  font-weight:1000;
+}
+.packRewardBenefit span{letter-spacing:.06em}
+.packRewardBenefit strong{
+  color:color-mix(in srgb,var(--reward-accent) 72%,#304854);
+  text-align:right;
+}
+.packEquipReward{
+  width:100%;
+  min-height:3.15rem;
+  flex:none;
+  color:white;
+  background:linear-gradient(180deg,#5bd078 0,#35b75a 58%,#238d43 100%);
+  border:.14rem solid #247c3e;
+  border-radius:.8rem;
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.45),0 .24rem 0 #1d6d35,0 0 .75rem rgba(47,178,86,.24);
+  font-size:.92rem;
+  text-shadow:0 .1rem 0 #1e7037;
+}
+.packEquipReward.equippedButton{
+  color:#65480d;
+  background:linear-gradient(180deg,#fff8cf,#f7d76b 58%,#e6ad2f);
+  border-color:#c78c1c;
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.72),0 .22rem 0 #a97515,0 0 .8rem rgba(231,177,46,.3);
+  text-shadow:0 .08rem 0 rgba(255,255,255,.62);
+  opacity:1;
+}
+.packModal:has(.rewardReveal.show) .packAfterActions{
+  flex:none;
+  flex-wrap:nowrap;
+  width:100%;
+  margin-top:.25rem;
+  gap:.55rem;
+}
+.packModal:has(.rewardReveal.show) .packContinue,
+.packModal:has(.rewardReveal.show) .buyAnotherPack{
+  flex:1 1 0;
+  width:auto;
+  min-width:0;
+  min-height:3.2rem;
+  padding:.55rem .5rem;
+  font-size:.82rem;
+  line-height:1.05;
+}
+.packEquipConfirmation{
+  position:absolute;
+  left:50%;
+  top:50%;
+  z-index:25;
+  width:max-content;
+  max-width:90%;
+  padding:.68rem 1rem;
+  border:.13rem solid #c88d1c;
+  border-radius:999rem;
+  color:#60430c;
+  background:linear-gradient(180deg,#fffde8,#f4cf58);
+  box-shadow:inset 0 .12rem 0 #fff,0 .28rem 0 #a87516,0 .6rem 1.4rem rgba(78,57,13,.25);
+  font-size:.84rem;
+  font-weight:1000;
+  text-align:center;
+  pointer-events:none;
+  animation:packEquipConfirmationPop 1s cubic-bezier(.16,.88,.22,1.2) both;
+}
+.packEquipSpark{
+  position:fixed;
+  left:var(--burst-x,50%);
+  top:var(--burst-y,50%);
+  z-index:230;
+  width:.62rem;
+  height:.62rem;
+  border-radius:40%;
+  color:var(--particle-color,#4fcf79);
+  background:currentColor;
+  box-shadow:0 0 .75rem currentColor;
+  pointer-events:none;
+  animation:purchaseParticleBurst var(--particle-duration,.82s) cubic-bezier(.12,.72,.22,1) var(--particle-delay,0ms) both;
+}
+@keyframes packEquipConfirmationPop{
+  0%{opacity:0;transform:translate(-50%,30%) scale(.52) rotate(-4deg)}
+  28%,70%{opacity:1;transform:translate(-50%,-50%) scale(1.06) rotate(0)}
+  100%{opacity:0;transform:translate(-50%,-80%) scale(.95)}
+}
+@media(max-height:43.75rem) and (orientation:portrait){
+  .packModal:has(.rewardReveal.show){padding:.62rem;gap:.25rem}
+  .packModal:has(.rewardReveal.show) .packTitle{font-size:1.3rem}
+  .packModal:has(.rewardReveal.show) .packSub{
+    padding:.3rem .75rem;
+    font-size:.82rem;
+  }
+  .rewardReveal.show{padding:.58rem;gap:.3rem}
+  .rewardReveal.show .rewardBall{
+    width:clamp(5.6rem,22dvh,7.25rem);
+    height:clamp(5.6rem,22dvh,7.25rem);
+  }
+  .rewardReveal.show .rewardName{font-size:1.25rem}
+  .rewardReveal.show .rewardRarity{font-size:.66rem}
+  .rewardReveal.show .rewardDesc{font-size:.72rem;line-height:1.15}
+  .packRewardBenefit{min-height:2.3rem;padding:.4rem .58rem;font-size:.62rem}
+  .packEquipReward{min-height:2.7rem;font-size:.8rem}
+  .packModal:has(.rewardReveal.show) .packContinue,
+  .packModal:has(.rewardReveal.show) .buyAnotherPack{
+    min-height:2.8rem;
+    font-size:.72rem;
+  }
+}
+
+/* Defeat has its own red slow-motion beat before the result card. */
+.defeatPrelude{
+  display:none;
+  position:absolute;
+  inset:0;
+  z-index:18;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  border-radius:inherit;
+  pointer-events:none;
+}
+.defeatPrelude.show{display:flex}
+.defeatPrelude::before{
+  content:'';
+  position:absolute;
+  inset:-12%;
+  background:
+    radial-gradient(circle at 50% 48%,transparent 0 20%,rgba(145,10,25,.16) 46%,rgba(78,4,16,.82) 82%),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 .08rem,transparent .08rem .34rem),
+    rgba(214,38,55,.16);
+  animation:defeatRedCollapse 1.15s cubic-bezier(.12,.75,.2,1) both;
+}
+.defeatImpact{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.2rem;
+  color:white;
+  text-align:center;
+  text-shadow:0 .18rem 0 #73101e,0 0 1.3rem #ff3e51;
+  animation:defeatImpactHit 1.15s cubic-bezier(.12,.78,.2,1) both;
+}
+.defeatImpact strong{
+  font-size:clamp(2.7rem,15vw,6.5rem);
+  line-height:.82;
+  font-weight:1000;
+  letter-spacing:.03em;
+}
+.defeatImpact span{
+  padding:.36rem .72rem;
+  border:.1rem solid rgba(255,255,255,.55);
+  border-radius:999rem;
+  color:#ffe8e8;
+  background:rgba(91,8,20,.72);
+  font-size:.72rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.12em;
+}
+.boardWrap.defeatSlowdown #game{
+  animation:defeatArenaCrunch 1.15s cubic-bezier(.12,.75,.2,1) both;
+}
+.boardWrap.victorySlowdown #game{
+  animation:victoryArenaLift .9s cubic-bezier(.12,.78,.2,1) both;
+}
+.overlay.defeatResult{
+  background:radial-gradient(circle at 50% 44%,rgba(214,65,77,.28),rgba(58,12,22,.84));
+  backdrop-filter:blur(.4rem) saturate(.72);
+}
+.overlay.victoryResult{
+  background:
+    radial-gradient(circle at 50% 42%,rgba(245,255,239,.72) 0 28%,rgba(82,204,111,.35) 62%,rgba(18,101,51,.72) 100%),
+    rgba(49,177,82,.28);
+  backdrop-filter:blur(.32rem) saturate(1.16);
+  box-shadow:inset 0 0 3rem rgba(91,239,125,.48),inset 0 0 .7rem rgba(236,255,219,.68);
+  animation:victoryOverlayBloom .72s cubic-bezier(.16,.8,.24,1) both;
+}
+.resultCard.defeat{
+  --result-accent:#c93e4b;
+  border-color:#c93e4b;
+  background:linear-gradient(160deg,#fff7f5,#f8d8d9 58%,#eab6ba);
+  box-shadow:inset 0 0 0 .12rem rgba(255,255,255,.72),0 .42rem 0 #922b38,0 1.2rem 3rem rgba(62,7,18,.42),0 0 1.8rem rgba(218,49,66,.3);
+}
+.resultCard.defeat.celebrate{animation:defeatCardSlam .55s cubic-bezier(.12,.8,.22,1.16)}
+.resultCard.defeat .completionBadge{
+  border-color:#c93b48;
+  color:#7c1622;
+  background:#ffb9bd;
+  box-shadow:0 .18rem 0 #a92f3b;
+}
+.resultCard.defeat .result{color:#a51f2d;text-shadow:0 .1rem 0 white}
+.resultCard.defeat .celebrationStars{color:#9f5960;text-shadow:0 .1rem 0 #fff}
+.resultCard.defeat .rewardBucket{
+  border-color:#d7a9ac;
+  background:#f9e7e7;
+  filter:saturate(.72);
+}
+.resultCard.defeat .rewardFormula{color:#b22d3b}
+.resultCard.defeat .transferArrow{
+  color:#c93e4b;
+  filter:drop-shadow(0 .12rem 0 white) drop-shadow(0 .18rem .12rem rgba(143,38,51,.32));
+}
+.resultCard.defeat .resultContinue{
+  border-color:#8f2633;
+  background:linear-gradient(180deg,#ef6972,#cc3d4b 58%,#a42635);
+  box-shadow:inset 0 .14rem 0 rgba(255,255,255,.35),0 .28rem 0 #761c28,0 .55rem 1rem rgba(112,23,36,.2);
+  text-shadow:0 .1rem 0 #7e1d2a;
+}
+@keyframes defeatRedCollapse{
+  0%{opacity:0;transform:scale(1.3)}
+  18%{opacity:1}
+  72%{opacity:.92;transform:scale(1)}
+  100%{opacity:1;transform:scale(.94)}
+}
+@keyframes victoryOverlayBloom{
+  0%{opacity:.25;box-shadow:inset 0 0 0 rgba(91,239,125,0),inset 0 0 0 rgba(236,255,219,0)}
+  38%{opacity:1;box-shadow:inset 0 0 5rem rgba(116,255,146,.72),inset 0 0 1.2rem rgba(244,255,226,.9)}
+  100%{opacity:1;box-shadow:inset 0 0 3rem rgba(91,239,125,.48),inset 0 0 .7rem rgba(236,255,219,.68)}
+}
+@keyframes defeatImpactHit{
+  0%{opacity:0;transform:scale(2.4) rotate(-6deg);filter:blur(.35rem)}
+  18%{opacity:1;transform:scale(.88) rotate(2deg);filter:blur(0)}
+  32%{transform:scale(1.12) rotate(-1deg)}
+  58%{transform:scale(1) rotate(0)}
+  100%{opacity:.72;transform:scale(.84) translateY(.5rem)}
+}
+@keyframes defeatArenaCrunch{
+  0%{transform:scale(1);filter:saturate(1) brightness(1)}
+  22%{transform:scale(1.018);filter:saturate(1.45) brightness(.88) contrast(1.1)}
+  100%{transform:scale(.975);filter:saturate(.48) brightness(.52) contrast(1.18)}
+}
+@keyframes victoryArenaLift{
+  0%{transform:scale(1);filter:saturate(1) brightness(1)}
+  26%{transform:scale(1.016);filter:saturate(1.5) brightness(1.18) contrast(1.04)}
+  100%{transform:scale(.985);filter:saturate(1.16) brightness(.92) contrast(1.06)}
+}
+@keyframes defeatCardSlam{
+  0%{opacity:0;transform:translateY(-2.5rem) scale(1.16) rotate(-2deg)}
+  52%{opacity:1;transform:translateY(.35rem) scale(.97) rotate(1deg)}
+  76%{transform:translateY(-.12rem) scale(1.015) rotate(0)}
+  100%{transform:translateY(0) scale(1)}
+}
+
+/* Home hub: one-tap continuation plus contextual store and collection paths. */
+#homeScreen{
+  position:relative;
+  height:100dvh;
+  justify-content:center;
+  padding:0 0 calc(5.35rem + env(safe-area-inset-bottom));
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% -8%,rgba(78,179,205,.2),transparent 28rem),
+    linear-gradient(180deg,#f7faf9 0,#e8efeb 100%);
+}
+#homeScreen::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:.48;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(52,76,87,.035) .0625rem,transparent .0625rem),
+    linear-gradient(90deg,rgba(52,76,87,.035) .0625rem,transparent .0625rem);
+  background-size:1.5rem 1.5rem;
+}
+.homeApp{
+  position:relative;
+  z-index:1;
+  width:min(100%,30rem);
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  gap:.72rem;
+  padding:max(.7rem,env(safe-area-inset-top)) .72rem 1.1rem;
+  overflow-x:hidden;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+.homeApp::-webkit-scrollbar{display:none}
+.homeHeader{
+  order:0;
+  min-height:3.65rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.7rem;
+  flex:none;
+  padding:.15rem .2rem;
+}
+.homeEyebrow,
+.homeNextLabel,
+.homeActionKicker,
+.homeJourneyHead span,
+.homeStat span{
+  display:block;
+  color:#6a8077;
+  font-size:.62rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.12em;
+}
+.homeHeader h1{
+  margin-top:.18rem;
+  color:#304940;
+  font-size:1.72rem;
+  line-height:.92;
+  letter-spacing:-.035em;
+  text-shadow:0 .1rem 0 white;
+}
+.homeWallet{
+  min-width:6.7rem;
+  min-height:3rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  padding:.42rem .72rem;
+  color:#584314;
+  background:linear-gradient(180deg,#fff,#fbf7e8);
+  border:.14rem solid #d7a52d;
+  border-radius:1rem;
+  box-shadow:inset 0 .12rem 0 #fff,0 .2rem 0 #a97a19,0 .36rem .7rem rgba(74,60,23,.12);
+  font-size:1.2rem;
+}
+.homeCoin{
+  width:1.9rem;
+  height:1.9rem;
+  display:grid;
+  place-items:center;
+  border:.12rem solid #bd7510;
+  border-radius:50%;
+  color:#fff3a0;
+  background:radial-gradient(circle at 34% 28%,#fff6a0,#ffc83c 44%,#e99713 78%);
+  box-shadow:inset 0 0 0 .1rem rgba(255,250,164,.68),0 .12rem 0 #a7670c;
+  font-size:.78rem;
+}
+.homeHero{
+  order:1;
+  position:relative;
+  isolation:isolate;
+  min-height:15.8rem;
+  display:grid;
+  grid-template-columns:7.9rem minmax(0,1fr);
+  align-items:center;
+  gap:.45rem;
+  flex:none;
+  padding:1rem .85rem;
+  overflow:hidden;
+  color:#2c463c;
+  background:
+    radial-gradient(circle at 18% 28%,rgba(255,255,255,.95),transparent 8rem),
+    linear-gradient(145deg,#fff 0,#f6fbf8 64%,#e4f0e9 100%);
+  border:.16rem solid #9eb9ac;
+  border-radius:1.45rem;
+  box-shadow:inset 0 0 0 .12rem #d9e6df,inset 0 .16rem 0 #fff,0 .3rem 0 #789a89,0 .7rem 1.25rem rgba(45,69,58,.16);
+}
+.homeHeroRays{
+  position:absolute;
+  z-index:-1;
+  width:21rem;
+  height:21rem;
+  left:-6.2rem;
+  top:-6.5rem;
+  opacity:.17;
+  border-radius:50%;
+  background:repeating-conic-gradient(from -12deg,#56b7cf 0 9deg,transparent 9deg 21deg);
+  animation:homeRaysDrift 22s linear infinite;
+}
+.homeBallStage{
+  position:relative;
+  min-width:0;
+  height:10.2rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.homeBallHalo{
+  position:absolute;
+  width:7.5rem;
+  height:7.5rem;
+  border:.12rem dashed rgba(69,161,190,.48);
+  border-radius:50%;
+  box-shadow:0 0 1.4rem rgba(78,179,205,.28),inset 0 0 1rem rgba(78,179,205,.12);
+  animation:homeHaloBreathe 2.6s ease-in-out infinite;
+}
+.homeBallPreview{
+  position:relative;
+  z-index:1;
+  width:6.55rem;
+  height:6.55rem;
+  filter:drop-shadow(0 .55rem .4rem rgba(38,77,91,.25));
+  animation:homeBallFloat 2.8s ease-in-out infinite;
+}
+.homeEquippedTag{
+  position:absolute;
+  z-index:2;
+  bottom:.15rem;
+  padding:.27rem .55rem;
+  color:#2d7453;
+  background:#f4fff8;
+  border:.08rem solid #75bd91;
+  border-radius:62rem;
+  box-shadow:0 .12rem 0 #5b9b73;
+  font-size:.55rem;
+  font-weight:1000;
+  letter-spacing:.1em;
+}
+.homeHeroCopy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:.38rem;
+}
+.homeNextLabel{color:#468f72}
+.homeHeroCopy h2{
+  color:#2b443a;
+  font-size:clamp(1.9rem,9vw,2.65rem);
+  line-height:.9;
+  letter-spacing:-.045em;
+  text-shadow:0 .11rem 0 white;
+}
+.homeHeroCopy p{
+  min-height:2.15rem;
+  color:#6b8077;
+  font-size:.76rem;
+  line-height:1.3;
+  font-weight:850;
+}
+.homePlayButton{
+  width:100%;
+  min-height:3.55rem;
+  margin-top:.25rem;
+  padding:.55rem .62rem;
+  color:white;
+  background:linear-gradient(180deg,#5bd37a 0,#36b75a 56%,#22853f 100%);
+  border:.15rem solid #247a3c;
+  border-radius:1rem;
+  box-shadow:inset 0 .16rem 0 rgba(255,255,255,.45),inset 0 0 0 .08rem #69dc86,0 .27rem 0 #1c6934,0 .5rem .8rem rgba(31,108,54,.2);
+  font-size:.94rem;
+  text-shadow:0 .1rem 0 #1d6c36;
+  animation:homePlayInvite 2.9s ease-in-out infinite;
+}
+.homePlayButton:active{transform:translateY(.2rem);box-shadow:inset 0 .1rem 0 rgba(255,255,255,.35),0 .06rem 0 #1c6934}
+.homeStats{
+  order:3;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:.5rem;
+  flex:none;
+}
+.homeStat{
+  min-width:0;
+  min-height:4.8rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.35rem;
+  color:#315045;
+  background:rgba(255,255,255,.86);
+  border:.12rem solid #c4d3cc;
+  border-radius:1rem;
+  box-shadow:inset 0 .1rem 0 white,0 .2rem 0 #a8bab1,0 .34rem .65rem rgba(48,70,60,.1);
+}
+.homeStat strong{font-size:1.45rem;line-height:1}
+.homeGoldStat strong{color:#a97713}
+.homeBallStat strong{color:#2e849e}
+.homeJourney{
+  flex:none;
+  padding:.8rem .9rem .72rem;
+  color:#344e44;
+  background:rgba(255,255,255,.82);
+  border:.12rem solid #c2d1ca;
+  border-radius:1rem;
+  box-shadow:inset 0 .1rem 0 #fff,0 .18rem 0 #a7b9b0;
+}
+.homeJourneyHead{display:flex;align-items:flex-end;justify-content:space-between;gap:.75rem}
+.homeJourneyHead>div{display:flex;flex-direction:column;gap:.22rem}
+.homeJourneyHead strong{font-size:.83rem}
+.homeJourneyTrack{
+  height:.72rem;
+  margin:.62rem 0 .48rem;
+  overflow:hidden;
+  background:#dbe5e0;
+  border:.08rem solid #b6c8bf;
+  border-radius:62rem;
+  box-shadow:inset 0 .1rem .2rem rgba(54,78,67,.13);
+}
+.homeJourneyTrack span{
+  width:5%;
+  height:100%;
+  display:block;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#57bad0,#4eae83);
+  box-shadow:inset 0 .08rem 0 rgba(255,255,255,.38),0 0 .5rem rgba(78,179,205,.28);
+  transition:width .35s ease;
+}
+.homeJourney p{color:#647b71;font-size:.66rem;line-height:1.25;font-weight:950;letter-spacing:.04em}
+.homeWorldMap{
+  --world-fill:#9f263d;
+  --world-edge:#ff6c78;
+  --world-glow:#ff4d62;
+  order:2;
+  position:relative;
+  flex:none;
+  padding:.76rem;
+  overflow:hidden;
+  color:#30473f;
+  background:
+    radial-gradient(circle at 50% -12%,color-mix(in srgb,var(--world-glow) 22%,transparent),transparent 12rem),
+    linear-gradient(160deg,#fff 0,#f6faf8 58%,color-mix(in srgb,var(--world-fill) 8%,#eef5f1) 100%);
+  border:.14rem solid color-mix(in srgb,var(--world-edge) 48%,#aebfb7);
+  border-radius:1.25rem;
+  box-shadow:inset 0 .12rem 0 white,0 .24rem 0 color-mix(in srgb,var(--world-fill) 36%,#82978d),0 .55rem 1rem rgba(42,62,54,.14);
+  transition:border-color .2s ease,background .2s ease;
+}
+.homeWorldMap::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.14;
+  background:repeating-conic-gradient(from 0deg at 50% 0,var(--world-glow) 0 7deg,transparent 7deg 19deg);
+  mask-image:linear-gradient(#000,transparent 42%);
+}
+.homeWorldMapHead{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:2.85rem minmax(0,1fr) 2.85rem;
+  align-items:center;
+  gap:.5rem;
+}
+.homeWorldArrow{
+  width:2.85rem;
+  height:3.25rem;
+  display:grid;
+  place-items:center;
+  padding:0 0 .18rem;
+  color:#fff;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--world-edge) 78%,#fff),var(--world-fill));
+  border:.12rem solid color-mix(in srgb,var(--world-fill) 78%,#273b33);
+  border-radius:.9rem;
+  box-shadow:inset 0 .12rem 0 rgba(255,255,255,.42),0 .2rem 0 color-mix(in srgb,var(--world-fill) 68%,#263a32);
+  font-family:Arial,sans-serif;
+  font-size:2.15rem;
+  font-weight:900;
+  line-height:1;
+}
+.homeWorldArrow:active:not(:disabled){transform:translateY(.14rem);box-shadow:inset 0 .08rem 0 rgba(255,255,255,.3),0 .06rem 0 var(--world-fill)}
+.homeWorldArrow:disabled{opacity:.3;filter:grayscale(.75)}
+.homeWorldIdentity{min-width:0;text-align:center}
+.homeWorldIdentity>span{
+  display:block;
+  color:color-mix(in srgb,var(--world-fill) 76%,#31473e);
+  font-size:.59rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.18em;
+}
+.homeWorldIdentity h2{
+  margin:.22rem 0 .16rem;
+  overflow:hidden;
+  color:#293f37;
+  font-size:1.18rem;
+  line-height:1;
+  letter-spacing:.025em;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  text-shadow:0 .09rem 0 white;
+}
+.homeWorldIdentity small{
+  display:block;
+  overflow:hidden;
+  color:#6d7e77;
+  font-size:.54rem;
+  line-height:1.15;
+  font-weight:950;
+  letter-spacing:.055em;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.homeWorldStars{
+  position:relative;
+  z-index:1;
+  margin:.72rem 0 .64rem;
+  padding:.58rem .65rem .52rem;
+  background:rgba(255,255,255,.78);
+  border:.09rem solid color-mix(in srgb,var(--world-edge) 35%,#c2d0c9);
+  border-radius:.78rem;
+  box-shadow:inset 0 .08rem 0 white;
+}
+.homeWorldStarsTop{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.homeWorldStarsTop strong{color:#9f6b0c;font-size:.78rem;line-height:1}
+.homeWorldStarsTop strong span:first-child{color:#f6b51f;text-shadow:0 .06rem 0 #a7690c}
+.homeWorldStarsTop>span{color:#71817a;font-size:.5rem;font-weight:1000;letter-spacing:.07em;text-align:right}
+.homeWorldStarTrack{
+  position:relative;
+  height:.62rem;
+  margin:.46rem 0 .38rem;
+  background:#dfe7e3;
+  border:.07rem solid #bdcbc4;
+  border-radius:62rem;
+  box-shadow:inset 0 .08rem .14rem rgba(52,73,64,.12);
+}
+.homeWorldStarTrack>span{
+  width:0;
+  height:100%;
+  display:block;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#f1a91e,#ffd95c);
+  box-shadow:inset 0 .08rem 0 rgba(255,255,255,.48),0 0 .55rem rgba(245,179,35,.35);
+  transition:width .32s ease;
+}
+.homeWorldStarTrack>i{
+  position:absolute;
+  top:-.22rem;
+  width:.16rem;
+  height:1rem;
+  margin-left:-.08rem;
+  border-radius:62rem;
+  background:#99630c;
+  box-shadow:0 0 0 .1rem #fff3b0,0 .08rem .18rem rgba(71,48,8,.28);
+}
+.homeWorldStars p{
+  color:#6b7b74;
+  font-size:.55rem;
+  line-height:1.2;
+  font-weight:1000;
+  letter-spacing:.035em;
+  text-align:center;
+}
+.homeLevelGrid{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:.42rem;
+}
+.homeLevelTile{
+  position:relative;
+  min-width:0;
+  min-height:3.9rem;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.2rem;
+  padding:.28rem .12rem .22rem;
+  color:#476058;
+  background:linear-gradient(180deg,#fff,#edf2ef);
+  border:.1rem solid #b9c8c1;
+  border-radius:.75rem;
+  box-shadow:inset 0 .08rem 0 white,0 .16rem 0 #9cafa6;
+}
+.homeLevelTile strong{font-size:1.08rem;line-height:1}
+.homeLevelTileStars{
+  min-height:.75rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.055rem;
+  color:#536a60;
+  font-family:Arial,sans-serif;
+  font-size:.7rem;
+  line-height:1;
+  white-space:nowrap;
+}
+.homeLevelTileStar{font-style:normal}
+.homeLevelTileStar.earned{color:#efad19;text-shadow:0 .045rem 0 #9b6207,0 0 .22rem rgba(255,194,50,.42)}
+.homeLevelTileStar.missing{color:#61776d;font-weight:900;text-shadow:0 .045rem 0 #fff,-.02rem 0 #61776d,.02rem 0 #61776d}
+.homeLevelTileEvent{position:absolute;top:.18rem;right:.2rem;color:#c38815;font-size:.48rem;font-style:normal}
+.homeLevelTile[data-state="completed"]{
+  color:#315646;
+  background:linear-gradient(180deg,#fbfffc,#e6f4eb);
+  border-color:#8ebc9d;
+  box-shadow:inset 0 .08rem 0 white,0 .16rem 0 #649277;
+}
+.homeLevelTile[data-state="completed"] .homeLevelTileStars{color:#536a60}
+.homeLevelTile[data-state="available"]{
+  color:#fff;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--world-edge) 76%,#fff),var(--world-fill));
+  border-color:color-mix(in srgb,var(--world-fill) 72%,#24372f);
+  box-shadow:inset 0 .1rem 0 rgba(255,255,255,.38),0 .18rem 0 color-mix(in srgb,var(--world-fill) 70%,#263a32),0 0 .55rem color-mix(in srgb,var(--world-glow) 24%,transparent);
+  text-shadow:0 .07rem 0 color-mix(in srgb,var(--world-fill) 72%,#24372f);
+}
+.homeLevelTile[data-state="available"] .homeLevelTileStar.earned{color:#ffe378;text-shadow:0 .05rem 0 rgba(66,42,7,.72),0 0 .26rem rgba(255,236,131,.55)}
+.homeLevelTile[data-state="available"] .homeLevelTileStar.missing{color:#fff;text-shadow:0 .05rem 0 rgba(30,53,43,.8),0 0 .24rem rgba(255,255,255,.46)}
+.homeLevelTile[data-state="locked"]{opacity:.6;filter:saturate(.35);background:linear-gradient(180deg,#eef1ef,#d8dfdb)}
+.homeLevelTile.selected{outline:.16rem solid #ffd452;outline-offset:.09rem;z-index:2}
+.homeLevelTile.current::before{
+  content:'CURRENT';
+  position:absolute;
+  left:50%;
+  bottom:-.28rem;
+  padding:.1rem .24rem;
+  transform:translateX(-50%);
+  color:#684207;
+  background:#ffd95b;
+  border:.06rem solid #ad7010;
+  border-radius:62rem;
+  font-size:.35rem;
+  font-weight:1000;
+  letter-spacing:.04em;
+}
+.homeLevelTile.bossLevel{border-radius:50%;border-color:#d59a17}
+.homeLevelTile.bossLevel .homeLevelTileEvent{color:#f1a914}
+.homeLevelDetail{
+  position:relative;
+  z-index:1;
+  margin-top:.72rem;
+  padding:.7rem;
+  background:rgba(255,255,255,.88);
+  border:.1rem solid color-mix(in srgb,var(--world-edge) 38%,#bdcbc4);
+  border-radius:.9rem;
+  box-shadow:inset 0 .09rem 0 white,0 .16rem 0 rgba(102,124,113,.45);
+}
+.homeLevelDetailHead{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem}
+.homeLevelDetailHead>div{min-width:0}
+.homeLevelDetailHead span{display:block;color:#efa917;font-family:Arial,sans-serif;font-size:1rem;line-height:1;letter-spacing:.035em}
+.homeLevelDetailHead h3{margin:.18rem 0 .12rem;color:#30483f;font-size:1.16rem;line-height:1}
+.homeLevelDetailHead p{color:#596e64;font-size:.68rem;line-height:1.2;font-weight:950;letter-spacing:.045em}
+.homeLevelDetailHead>small{
+  flex:none;
+  padding:.27rem .38rem;
+  color:#397359;
+  background:#edf8f1;
+  border:.06rem solid #9cc6ad;
+  border-radius:62rem;
+  font-size:.57rem;
+  font-weight:1000;
+}
+.homeLevelBestStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;margin:.65rem 0}
+.homeLevelBestStats>span{min-width:0;padding:.48rem .2rem;text-align:center;background:#f2f6f4;border:.06rem solid #d1ddd7;border-radius:.58rem}
+.homeLevelBestStats small{display:block;color:#667a70;font-size:.5rem;line-height:1.12;font-weight:1000;letter-spacing:.035em}
+.homeLevelBestStats strong{display:block;margin-top:.2rem;color:#263f35;font-size:1rem;line-height:1}
+.homeLevelPlay{
+  width:100%;
+  min-height:2.65rem;
+  color:#fff;
+  background:linear-gradient(180deg,#58d176,#31ad51);
+  border:.11rem solid #23783b;
+  border-radius:.72rem;
+  box-shadow:inset 0 .1rem 0 rgba(255,255,255,.42),0 .18rem 0 #1d6933;
+  font-size:.72rem;
+  text-shadow:0 .07rem 0 #1f6c35;
+}
+.homeLevelPlay:disabled{color:#77857f;background:linear-gradient(180deg,#e9eeeb,#ced7d2);border-color:#aebbb5;box-shadow:inset 0 .08rem 0 white,0 .13rem 0 #99a9a1;text-shadow:none}
+.homeLevelDetail[data-state="locked"],.homeLevelDetail[data-state="world-locked"]{filter:saturate(.55)}
+.homeLevelDetail[data-state="locked"] .homeLevelDetailHead>small,.homeLevelDetail[data-state="world-locked"] .homeLevelDetailHead>small{color:#7b4d55;background:#faedef;border-color:#d9a7ad}
+.homeWorldMap.lockedWorld .homeWorldIdentity h2::before{content:'🔒 '}
+.homeActionStack{order:3;display:flex;flex-direction:column;gap:.65rem;flex:none}
+.homePackCard,
+.homeLoadoutCard{
+  width:100%;
+  min-height:6.45rem;
+  display:grid;
+  grid-template-columns:4.15rem minmax(0,1fr) auto;
+  align-items:center;
+  gap:.68rem;
+  padding:.68rem .72rem;
+  color:#344b42;
+  background:linear-gradient(145deg,#fff,#f5f8f6);
+  border:.13rem solid #bdccc5;
+  border-radius:1.15rem;
+  box-shadow:inset 0 .12rem 0 white,0 .22rem 0 #9eafa7,0 .45rem .8rem rgba(48,70,60,.12);
+  text-align:left;
+}
+.homeActionCopy{min-width:0;display:flex;flex-direction:column;gap:.25rem}
+.homeActionCopy strong{font-size:.92rem;line-height:1.05}
+.homeActionCopy>span:not(.homeActionKicker):not(.homePackTrack){color:#71827b;font-size:.68rem;line-height:1.22;font-weight:750}
+.homeActionCta{
+  align-self:center;
+  padding:.38rem .48rem;
+  color:#397660;
+  background:#edf8f1;
+  border:.08rem solid #9bc5ab;
+  border-radius:.62rem;
+  font-size:.58rem;
+  line-height:1.05;
+  font-weight:1000;
+  text-align:center;
+}
+.homePackIcon{
+  position:relative;
+  width:3.55rem;
+  height:4.35rem;
+  display:grid;
+  place-items:center;
+  color:white;
+  background:linear-gradient(150deg,#ffdb59,#f6a725 54%,#d7751c);
+  border:.14rem solid #a65318;
+  border-radius:.48rem .48rem .72rem .72rem;
+  box-shadow:inset .25rem 0 .35rem rgba(255,255,255,.3),inset -.2rem 0 .3rem rgba(127,53,17,.16),0 .24rem .35rem rgba(95,53,20,.22);
+  transform:rotate(-3deg);
+}
+.homePackIcon::before,
+.homePackIcon::after{content:'';position:absolute;left:-.14rem;right:-.14rem;height:.42rem;background:#bd4b34;border:.11rem solid #8c2e27}
+.homePackIcon::before{top:.18rem}.homePackIcon::after{bottom:.22rem}
+.homePackIcon span{
+  width:1.85rem;
+  height:1.85rem;
+  display:grid;
+  place-items:center;
+  border:.12rem solid #fff3ac;
+  border-radius:50%;
+  background:#d84d47;
+  box-shadow:0 0 .55rem rgba(255,244,164,.5);
+  font-size:1rem;
+}
+.homePackTrack{
+  width:100%;
+  height:.42rem;
+  margin-top:.12rem;
+  overflow:hidden;
+  background:#e3ded0;
+  border-radius:62rem;
+}
+.homePackTrack span{width:0;height:100%;display:block;border-radius:inherit;background:linear-gradient(90deg,#f2ad28,#ffd955);transition:width .35s ease}
+.homePackCard.nearReady{border-color:#d4aa42;box-shadow:inset 0 .12rem 0 #fff,0 .22rem 0 #ab8126,0 0 .9rem rgba(240,177,42,.2)}
+.homePackCard.purchaseReady{
+  border-color:#d99d1c;
+  background:linear-gradient(145deg,#fffdf2,#fff1ba);
+  box-shadow:inset 0 .12rem 0 white,0 .24rem 0 #aa7214,0 0 1.1rem rgba(245,183,40,.38);
+}
+.homePackCard.purchaseReady .homeActionCta{color:white;background:linear-gradient(180deg,#58ca72,#2eaa4f);border-color:#23783b}
+.homePackCard.purchaseReady .homePackIcon{animation:homePackBounce 1.8s ease-in-out infinite}
+.homeLoadoutBall{
+  width:3.85rem;
+  height:3.85rem;
+  filter:drop-shadow(0 .28rem .25rem rgba(42,83,96,.24));
+  animation:homeBallFloat 3.1s ease-in-out -.5s infinite;
+}
+@keyframes homeRaysDrift{to{transform:rotate(360deg)}}
+@keyframes homeHaloBreathe{50%{transform:scale(1.08);opacity:.65}}
+@keyframes homeBallFloat{0%,100%{transform:translateY(.14rem) scale(.98)}50%{transform:translateY(-.3rem) scale(1.025)}}
+@keyframes homePlayInvite{0%,72%,100%{filter:brightness(1);scale:1}80%{filter:brightness(1.08);scale:1.018}}
+@keyframes homePackBounce{0%,70%,100%{transform:translateY(0) rotate(-3deg)}78%{transform:translateY(-.25rem) rotate(2deg)}86%{transform:translateY(0) rotate(-1deg)}}
+
+/* The same four destinations stay in the same place on every non-game screen. */
+body:has(#homeScreen.active) .quickNav{
+  left:50%;
+  right:auto;
+  bottom:0;
+  z-index:80;
+  width:min(100%,30rem);
+  height:5.35rem;
+  padding:.34rem .46rem max(.3rem,env(safe-area-inset-bottom));
+  gap:.3rem;
+  transform:translateX(-50%);
+  border:0;
+  border-top:.2rem solid #bdcdc5;
+  border-radius:0;
+  background:linear-gradient(180deg,rgba(252,252,249,.99),rgba(232,239,235,.99));
+  box-shadow:0 -.14rem 0 #9eb3a9,0 -.4rem .75rem rgba(45,66,57,.16);
+}
+body:has(#homeScreen.active) .quickNavButton{
+  min-width:0;
+  min-height:4.45rem;
+  gap:.18rem;
+  padding:.3rem .3rem .24rem;
+  color:#667a71;
+  background:rgba(255,255,255,.72);
+  border:.1rem solid #ccd8d2;
+  border-radius:.75rem;
+  box-shadow:inset 0 .1rem 0 #fff,0 .12rem 0 #afc0b8;
+  font-size:.68rem;
+}
+body:has(#homeScreen.active) #quickHome.active{
+  color:#3e7561;
+  background:linear-gradient(180deg,#fff,#ebf5ef);
+  border-color:#78b495;
+  box-shadow:inset 0 .14rem 0 #fff,0 .18rem 0 #4f8d6f,0 0 .6rem rgba(67,141,105,.2);
+  transform:translateY(-.12rem);
+}
+.quickStoreBadge{
+  display:none;
+  position:absolute;
+  z-index:6;
+  top:-.3rem;
+  right:.18rem;
+  padding:.18rem .3rem;
+  color:#653b08;
+  background:#ffd756;
+  border:.07rem solid #b87912;
+  border-radius:62rem;
+  box-shadow:0 .1rem 0 #9c6410,0 0 .5rem rgba(255,200,48,.35);
+  font-size:.48rem;
+  line-height:1;
+  font-weight:1000;
+}
+#quickStore.purchaseReady .quickStoreBadge{display:block;animation:storeBadgePop 1.5s ease-in-out infinite}
+@keyframes storeBadgePop{0%,65%,100%{transform:scale(1)}76%{transform:scale(1.13) rotate(2deg)}}
+
+@media(max-width:22rem){
+  .homeApp{padding-left:.5rem;padding-right:.5rem}
+  .homeHero{grid-template-columns:6.8rem minmax(0,1fr);padding:.8rem .62rem}
+  .homeBallStage{height:9rem}
+  .homeBallHalo{width:6.5rem;height:6.5rem}
+  .homeBallPreview{width:5.75rem;height:5.75rem}
+  .homeHeroCopy h2{font-size:1.85rem}
+  .homePackCard,.homeLoadoutCard{grid-template-columns:3.7rem minmax(0,1fr);gap:.5rem}
+  .homePackCard .homeActionCta,.homeLoadoutCard .homeActionCta{grid-column:2;justify-self:start}
+  .homePackIcon{width:3.3rem;height:4rem}
+  .homeLoadoutBall{width:3.5rem;height:3.5rem}
+}
+
+/* Quiet invitation on every enabled tap target; stronger when a purchase is ready. */
+button:not(:disabled){isolation:isolate}
+button:not(:disabled):not(.bigPack):not(.gameUtilityBackdrop):not(.firstPackMilestoneBackdrop)::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:4;
+  border-radius:inherit;
+  background:linear-gradient(108deg,transparent 32%,rgba(255,255,255,.08) 42%,rgba(255,255,255,.74) 50%,rgba(255,255,255,.08) 58%,transparent 68%);
+  background-position:135% 0;
+  background-size:250% 100%;
+  opacity:0;
+  pointer-events:none;
+  animation:tapTargetGlint 5.6s ease-in-out var(--tap-glint-delay,0s) infinite;
+}
+button:nth-of-type(3n+2){--tap-glint-delay:.9s}
+button:nth-of-type(3n){--tap-glint-delay:1.8s}
+button:not(:disabled):not(.bigPack):not(.gameUtilityBackdrop):not(.firstPackMilestoneBackdrop):active::after{
+  animation:none;
+  background-position:50% 0;
+  opacity:.42;
+}
+button.purchaseReady:not(:disabled)::before{
+  content:'';
+  position:absolute;
+  inset:.08rem;
+  z-index:3;
+  border:.1rem solid rgba(255,244,157,.72);
+  border-radius:inherit;
+  box-shadow:0 0 0 rgba(255,197,44,0);
+  opacity:.35;
+  pointer-events:none;
+  animation:purchaseReadyHalo 1.9s ease-in-out infinite;
+}
+button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
+
+/* Store CTAs get a brighter, staggered sparkle without making the whole shop blink at once. */
+#storeScreen .shopBuyInvite:not(:disabled):not(.shopBuyOwned){
+  --shop-invite-delay:0s;
+  translate:0 0;
+  will-change:translate;
+  animation:shopBuyNudge 3.4s ease-in-out var(--shop-invite-delay) infinite;
+}
+#storeScreen #buyApexBall{--shop-invite-delay:.55s}
+#storeScreen #buyCataclysmBall{--shop-invite-delay:1.1s}
+#storeScreen #buyGaiaBall{--shop-invite-delay:1.65s}
+#storeScreen .shopBuyInvite:not(:disabled):not(.shopBuyOwned)::after{
+  background:
+    radial-gradient(circle at 16% 27%,#fff 0 .08rem,transparent .17rem),
+    radial-gradient(circle at 83% 70%,#fff3a0 0 .1rem,transparent .2rem),
+    linear-gradient(108deg,transparent 29%,rgba(255,248,177,.12) 40%,rgba(255,255,255,.95) 50%,rgba(255,232,91,.16) 60%,transparent 71%);
+  background-repeat:no-repeat;
+  background-position:0 0,0 0,135% 0;
+  background-size:100% 100%,100% 100%,250% 100%;
+  animation:shopBuyTwinkle 2.8s ease-in-out var(--shop-invite-delay) infinite;
+}
+#storeScreen .shopBuyInvite.purchaseReady:not(:disabled)::before{
+  border-color:rgba(255,248,170,.95);
+  animation-duration:1.25s;
+}
+#storeScreen .shopBuyInvite:not(:disabled):not(.shopBuyOwned):active{
+  translate:0 .08rem;
+  animation:none;
+}
+#storeScreen .shopBuyInvite:not(:disabled):not(.shopBuyOwned):active::after{animation:none}
+#storeScreen .shopBuyInvite.shopBuyOwned,
+#storeScreen .shopBuyInvite.shopBuyOwned::after{animation:none;opacity:.72}
+@keyframes tapTargetGlint{
+  0%,66%{background-position:135% 0;opacity:0}
+  70%{opacity:.7}
+  84%{background-position:-135% 0;opacity:.42}
+  88%,100%{background-position:-135% 0;opacity:0}
+}
+@keyframes purchaseReadyHalo{
+  0%,100%{opacity:.28;box-shadow:0 0 0 rgba(255,197,44,0)}
+  50%{opacity:1;box-shadow:0 0 1rem rgba(255,197,44,.72),inset 0 0 .7rem rgba(255,248,186,.42)}
+}
+@keyframes shopBuyNudge{
+  0%,66%,100%{translate:0 0}
+  70%{translate:0 -.1rem}
+  74%{translate:-.07rem 0}
+  78%{translate:.07rem 0}
+  82%{translate:0 0}
+}
+@keyframes shopBuyTwinkle{
+  0%,56%{background-position:0 0,0 0,135% 0;opacity:0}
+  62%{opacity:.95}
+  79%{background-position:0 0,0 0,-135% 0;opacity:.6}
+  86%,100%{background-position:0 0,0 0,-135% 0;opacity:0}
+}
+
+/* First paid-pack milestone. */
+.firstPackMilestoneOverlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:420;
+  place-items:center;
+  padding:max(1rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));
+  overflow:hidden;
+  background:radial-gradient(circle at 50% 42%,rgba(255,220,83,.26),transparent 42%),rgba(32,49,57,.72);
+  backdrop-filter:blur(.55rem);
+}
+.firstPackMilestoneOverlay[aria-hidden="false"]{display:grid}
+.firstPackMilestoneBackdrop{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+  border-radius:0;
+  background:transparent;
+}
+.firstPackMilestoneFx{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  overflow:hidden;
+  pointer-events:none;
+}
+.firstPackMilestoneCard{
+  position:relative;
+  isolation:isolate;
+  z-index:2;
+  width:min(92vw,24rem);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:.72rem;
+  padding:1.15rem 1.05rem 1.25rem;
+  overflow:hidden;
+  border:.2rem solid #e6a91d;
+  border-radius:1.65rem;
+  background:linear-gradient(160deg,#fffef2 0,#fff5c8 56%,#f5d96b 100%);
+  box-shadow:inset 0 0 0 .14rem rgba(255,255,255,.84),0 .42rem 0 #b77c12,0 1.5rem 3.5rem rgba(25,37,42,.4),0 0 2.2rem rgba(255,206,45,.46);
+  text-align:center;
+  animation:firstPackMilestoneBoom .78s cubic-bezier(.16,.88,.22,1.22) both;
+}
+.firstPackMilestoneCard::before{
+  content:'';
+  position:absolute;
+  z-index:-2;
+  width:34rem;
+  height:34rem;
+  top:-16rem;
+  left:50%;
+  transform:translateX(-50%);
+  opacity:.24;
+  background:repeating-conic-gradient(from 8deg,#f0b821 0 8deg,transparent 8deg 18deg);
+  animation:firstPackRays 9s linear infinite;
+}
+.firstPackMilestoneCard::after{
+  content:'';
+  position:absolute;
+  inset:.4rem;
+  z-index:-1;
+  border:.08rem solid rgba(190,133,20,.34);
+  border-radius:1.18rem;
+  pointer-events:none;
+}
+.firstPackBoomWord{
+  margin-bottom:-.28rem;
+  color:#9d5f08;
+  font-size:.72rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.17em;
+}
+.firstPackCoin{
+  position:relative;
+  width:7.25rem;
+  height:7.25rem;
+  display:grid;
+  place-items:center;
+  border:.38rem solid #e69a0d;
+  border-radius:50%;
+  color:#a96708;
+  background:radial-gradient(circle at 34% 27%,#fffbd5 0 8%,#ffe46f 9% 35%,#ffc52e 62%,#eda00d 100%);
+  box-shadow:inset 0 0 0 .34rem #ffe97b,inset 0 -.5rem .65rem rgba(166,92,0,.18),0 .45rem 0 #ad6d08,0 .8rem 1.2rem rgba(137,82,0,.27),0 0 1.6rem rgba(255,196,24,.7);
+  animation:firstPackCoinFloat 1.8s ease-in-out infinite;
+}
+.firstPackCoinStar{
+  font-size:3.7rem;
+  line-height:1;
+  text-shadow:0 .16rem 0 #d58e0a,0 0 .45rem #fff9b0;
+}
+.firstPackCoinAmount{
+  position:absolute;
+  right:-.7rem;
+  bottom:-.2rem;
+  min-width:3.15rem;
+  padding:.35rem .48rem;
+  border:.14rem solid #fff8bd;
+  border-radius:999rem;
+  color:white;
+  background:linear-gradient(180deg,#e75e4e,#bd3032);
+  box-shadow:0 .22rem 0 #8f2225,0 .35rem .65rem rgba(84,28,21,.25);
+  font-size:1.1rem;
+  line-height:1;
+  font-weight:1000;
+}
+.firstPackMilestoneEyebrow{
+  color:#a66b0b;
+  font-size:.7rem;
+  line-height:1;
+  font-weight:1000;
+  letter-spacing:.12em;
+}
+.firstPackMilestoneTitle{
+  max-width:19rem;
+  color:#3a4f58;
+  font-size:clamp(1.55rem,7vw,2.05rem);
+  line-height:.96;
+  font-weight:1000;
+}
+.firstPackMilestoneCopy{
+  max-width:19rem;
+  color:#62747a;
+  font-size:.88rem;
+  line-height:1.3;
+  font-weight:850;
+}
+.firstPackMilestoneStore{
+  width:100%;
+  min-height:3.8rem;
+  border:.16rem solid #23763c;
+  border-radius:.95rem;
+  color:white;
+  background:linear-gradient(180deg,#62d67e,#36b75a 58%,#258b43);
+  box-shadow:inset 0 .16rem 0 rgba(255,255,255,.48),0 .3rem 0 #1c6c34,0 .75rem 1.2rem rgba(34,116,56,.22);
+  font-size:1.05rem;
+  text-shadow:0 .1rem 0 #1c7137;
+}
+.firstPackMilestoneLater{
+  min-height:2.5rem;
+  padding:.45rem 1rem;
+  color:#6d7475;
+  background:transparent;
+  font-size:.74rem;
+  letter-spacing:.04em;
+}
+@keyframes firstPackMilestoneBoom{
+  0%{opacity:0;transform:scale(.28) rotate(-7deg);filter:brightness(1.8)}
+  48%{opacity:1;transform:scale(1.08) rotate(2deg);filter:brightness(1.16)}
+  72%{transform:scale(.975) rotate(-1deg);filter:brightness(1)}
+  100%{transform:scale(1) rotate(0)}
+}
+@keyframes firstPackCoinFloat{
+  0%,100%{transform:translateY(0) rotate(-2deg)}
+  50%{transform:translateY(-.35rem) rotate(2deg)}
+}
+@keyframes firstPackRays{to{transform:translateX(-50%) rotate(360deg)}}
+
+/* Compact reward summary: information reads first, with one obvious level CTA. */
+.packOverlay:has(.rewardReveal.show){
+  align-items:flex-end;
+  background:
+    radial-gradient(circle at 50% 20%,rgba(255,224,115,.22),transparent 28%),
+    radial-gradient(circle at 20% 82%,rgba(101,204,227,.16),transparent 32%),
+    rgba(237,242,246,.97);
+}
+.packModal:has(.rewardReveal.show){
+  width:min(calc(100vw - 1.25rem),27rem);
+  height:min(90dvh,50rem);
+  max-height:calc(100dvh - 1.25rem);
+  min-height:0;
+  container-type:normal;
+  justify-content:flex-start;
+  gap:.9rem;
+  padding:1.3rem 1.15rem 1.15rem;
+  overflow-x:hidden;
+  overflow-y:auto;
+  border-color:#cad9df;
+  border-radius:1.55rem;
+  background:
+    linear-gradient(115deg,rgba(255,255,255,.95),rgba(247,251,252,.95)),
+    #f8fbfc;
+  box-shadow:0 1.35rem 3.5rem rgba(42,63,72,.22),inset 0 .1rem 0 white;
+  scrollbar-width:none;
+}
+.packModal:has(.rewardReveal.show)::-webkit-scrollbar{display:none}
+.packModal:has(.rewardReveal.show) .packTitle{
+  margin:.08rem 0 .08rem;
+  color:#29453d;
+  font-size:clamp(1.7rem,8vw,2.15rem);
+  line-height:1;
+  letter-spacing:.025em;
+  white-space:normal;
+  text-shadow:0 .12rem 0 rgba(255,255,255,.9);
+}
+.packModal:has(.rewardReveal.show) .packSub{
+  margin:0 0 .65rem;
+  min-height:1.9rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:.35rem .8rem;
+  border:.08rem solid color-mix(in srgb,var(--reveal-color,#85a9ba) 54%,#c8d8de);
+  border-radius:999rem;
+  color:color-mix(in srgb,var(--reveal-color,#85a9ba) 72%,#284854);
+  background:color-mix(in srgb,var(--reveal-color,#85a9ba) 9%,white);
+  box-shadow:none;
+  font-size:.68rem;
+  line-height:1;
+  letter-spacing:.09em;
+}
+.rewardReveal.show{
+  position:relative;
+  isolation:isolate;
+  flex:none;
+  width:100%;
+  max-width:none;
+  min-height:17.5rem;
+  display:grid;
+  grid-template-columns:minmax(6.8rem,7.6rem) minmax(0,1fr);
+  grid-template-areas:
+    "ball identity"
+    "power power"
+    "status status";
+  align-items:center;
+  align-content:space-between;
+  justify-content:stretch;
+  gap:1.12rem 1rem;
+  padding:1.3rem 1.1rem;
+  overflow:hidden;
+  border:.15rem solid var(--reward-accent,#85a9ba);
+  border-radius:1.25rem;
+  background:
+    radial-gradient(circle at 17% 23%,color-mix(in srgb,var(--reward-accent,#85a9ba) 19%,transparent),transparent 30%),
+    linear-gradient(150deg,#fff 0 56%,color-mix(in srgb,var(--reward-accent,#85a9ba) 8%,#f7fafb) 100%);
+  box-shadow:
+    inset 0 0 0 .08rem color-mix(in srgb,var(--reward-accent,#85a9ba) 30%,#e4ecef),
+    0 .25rem 0 color-mix(in srgb,var(--reward-accent,#85a9ba) 56%,#8799a1),
+    0 .75rem 1.55rem rgba(42,63,72,.15),
+    0 0 1.15rem color-mix(in srgb,var(--reward-accent,#85a9ba) 25%,transparent);
+}
+.rewardReveal.show::before{
+  inset:.34rem;
+  border:.06rem solid color-mix(in srgb,var(--reward-accent,#85a9ba) 40%,white);
+  border-radius:.9rem;
+}
+.rewardReveal.show::after{
+  content:'✦';
+  position:absolute;
+  top:.5rem;
+  right:.65rem;
+  z-index:2;
+  color:color-mix(in srgb,var(--reward-accent,#85a9ba) 74%,white);
+  font-size:1.2rem;
+  line-height:1;
+  text-shadow:0 0 .55rem var(--reward-accent,#85a9ba);
+  pointer-events:none;
+}
+.rewardReveal.show .rewardBall{
+  grid-area:ball;
+  justify-self:center;
+  width:clamp(6.8rem,29vw,7.6rem);
+  height:clamp(6.8rem,29vw,7.6rem);
+  margin:0;
+  border-width:0;
+  filter:drop-shadow(0 0 .8rem color-mix(in srgb,var(--reward-accent,#85a9ba) 48%,transparent)) drop-shadow(0 .48rem .5rem rgba(40,65,76,.2));
+}
+.rewardIdentity{
+  grid-area:identity;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:.68rem;
+  text-align:left;
+}
+.rewardReveal.show .rewardRarity{
+  order:0;
+  padding:.28rem .52rem;
+  border:.08rem solid color-mix(in srgb,var(--reward-accent,#85a9ba) 55%,white);
+  border-radius:999rem;
+  color:color-mix(in srgb,var(--reward-accent,#85a9ba) 76%,#294754);
+  background:color-mix(in srgb,var(--reward-accent,#85a9ba) 12%,white);
+  font-size:.65rem;
+  line-height:1;
+  letter-spacing:.08em;
+}
+.rewardReveal.show .rewardName{
+  order:1;
+  color:#293f49;
+  font-size:clamp(1.15rem,5vw,1.55rem);
+  line-height:.96;
+  text-align:left;
+  white-space:nowrap;
+}
+.rewardReveal.show .rewardDesc{
+  order:2;
+  max-width:100%;
+  color:#596d77;
+  font-size:.83rem;
+  line-height:1.38;
+  font-weight:800;
+  text-align:left;
+}
+.packRewardBenefit{
+  grid-area:power;
+  min-height:3.85rem;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:.25rem .8rem;
+  padding:.78rem .85rem;
+  border:.08rem solid color-mix(in srgb,var(--reward-accent,#85a9ba) 38%,#c9d7dc);
+  border-left:.28rem solid var(--reward-accent,#85a9ba);
+  border-radius:.75rem;
+  color:#6a7e87;
+  background:color-mix(in srgb,var(--reward-accent,#85a9ba) 6%,#f8fbfc);
+  font-size:.65rem;
+  line-height:1.1;
+  text-align:left;
+  box-shadow:none;
+}
+.packRewardBenefit span{letter-spacing:.09em}
+.packRewardBenefit strong{
+  color:color-mix(in srgb,var(--reward-accent,#85a9ba) 76%,#294650);
+  font-size:.8rem;
+  line-height:1.15;
+  text-align:right;
+}
+.packLoadoutStatus{
+  grid-area:status;
+  min-height:3.55rem;
+  display:grid;
+  grid-template-columns:2rem minmax(0,1fr);
+  align-items:center;
+  gap:.75rem;
+  padding:.62rem .75rem;
+  border:.08rem solid #ccd9dd;
+  border-radius:.72rem;
+  color:#52676f;
+  background:#f1f5f6;
+  text-align:left;
+  pointer-events:none;
+  cursor:default;
+  user-select:none;
+}
+.packLoadoutStatus.isEquipped{
+  border-color:#a9d5b6;
+  background:linear-gradient(90deg,#edf8f0,#f6faf7);
+}
+.packLoadoutStatusIcon{
+  width:2rem;
+  height:2rem;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  color:white;
+  background:#72a081;
+  font-size:1rem;
+  font-weight:1000;
+}
+.packLoadoutStatus.isEquipped .packLoadoutStatusIcon{background:#42aa63}
+.packLoadoutStatusCopy{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:.2rem;
+}
+.packLoadoutStatusCopy strong{
+  color:#344e44;
+  font-size:.75rem;
+  line-height:1.05;
+  letter-spacing:.045em;
+}
+.packLoadoutStatusCopy small{
+  overflow:hidden;
+  color:#687a73;
+  font-size:.65rem;
+  line-height:1.25;
+  font-weight:750;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.packModal:has(.rewardReveal.show) .packAfterActions{
+  flex:none;
+  width:100%;
+  margin:auto 0 0;
+  gap:.7rem;
+}
+.packModal:has(.rewardReveal.show) .packContinue,
+.packModal:has(.rewardReveal.show) .buyAnotherPack{
+  width:auto;
+  min-width:0;
+  min-height:4.2rem;
+  padding:.65rem .75rem;
+  border-radius:.9rem;
+  font-size:.94rem;
+  line-height:1.05;
+}
+.packModal:has(.rewardReveal.show) .packContinue{flex:1.35 1 0}
+.packModal:has(.rewardReveal.show) .buyAnotherPack{flex:.85 1 0}
+.packModal:has(.rewardReveal.show) .packContinue.packPlayButton{
+  border:.15rem solid #20723a;
+  background:linear-gradient(180deg,#62dc83 0,#35b95b 55%,#238942 100%);
+  box-shadow:inset 0 .15rem 0 rgba(255,255,255,.5),0 .3rem 0 #1b6934,0 .75rem 1.15rem rgba(32,118,58,.24);
+  font-size:1rem;
+  letter-spacing:.025em;
+  animation:packStartLevelInvite 2s ease-in-out infinite;
+}
+@keyframes packStartLevelInvite{
+  0%,64%,100%{transform:translateY(0) scale(1);filter:brightness(1)}
+  74%{transform:translateY(-.08rem) scale(1.018);filter:brightness(1.08)}
+  84%{transform:translateY(0) scale(1);filter:brightness(1)}
+}
+@media(max-width:22.5rem){
+  .packModal:has(.rewardReveal.show){padding:.85rem;gap:.65rem}
+  .rewardReveal.show{
+    grid-template-columns:6rem minmax(0,1fr);
+    gap:.78rem .72rem;
+    padding:.9rem;
+  }
+  .rewardReveal.show .rewardBall{width:5.9rem;height:5.9rem}
+  .rewardReveal.show .rewardName{font-size:1.12rem}
+  .rewardReveal.show .rewardDesc{font-size:.72rem}
+  .packRewardBenefit{min-height:3.25rem;padding:.58rem .62rem}
+  .packRewardBenefit strong{font-size:.7rem}
+  .packLoadoutStatus{min-height:3.05rem;padding:.5rem .58rem}
+  .packModal:has(.rewardReveal.show) .packContinue,
+  .packModal:has(.rewardReveal.show) .buyAnotherPack{min-height:3.75rem;font-size:.82rem}
+}
+@media(max-height:38rem) and (orientation:portrait){
+  .packModal:has(.rewardReveal.show){padding:.55rem;gap:.3rem}
+  .packModal:has(.rewardReveal.show) .packTitle{font-size:1.2rem}
+  .packModal:has(.rewardReveal.show) .packSub{min-height:1.55rem;padding:.25rem .65rem;font-size:.58rem}
+  .rewardReveal.show{grid-template-columns:5.2rem minmax(0,1fr);gap:.42rem .6rem;padding:.62rem}
+  .rewardReveal.show .rewardBall{width:5.1rem;height:5.1rem}
+  .rewardReveal.show .rewardName{font-size:1.05rem}
+  .rewardReveal.show .rewardRarity{font-size:.55rem}
+  .rewardReveal.show .rewardDesc{font-size:.66rem}
+  .packRewardBenefit{min-height:2.55rem;padding:.4rem .5rem;font-size:.56rem}
+  .packRewardBenefit strong{font-size:.66rem}
+  .packLoadoutStatus{min-height:2.55rem;padding:.35rem .5rem}
+  .packLoadoutStatusIcon{width:1.7rem;height:1.7rem}
+  .packLoadoutStatusCopy strong{font-size:.66rem}
+  .packLoadoutStatusCopy small{font-size:.55rem}
+  .packModal:has(.rewardReveal.show) .packContinue,
+  .packModal:has(.rewardReveal.show) .buyAnotherPack{min-height:3.4rem;font-size:.74rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  #storeScreen.purchaseScreenShake,
+  #storeScreen .purchaseBoom,
+  .storeFxLayer.purchaseFlash,
+  .purchaseSuccessBanner,
+  .purchaseBurstParticle,
+  .packModal.packAnticipation,
+  .packFxLayer.preRevealCharge,
+  .bigPack.opening,
+  .packFxLayer.openingBurst,
+  .packRays,
+  .packLightBurst,
+  .packLightRing,
+  .packBurstStar,
+  .packModal.revealBoom,
+  .rewardReveal.megaReveal,
+  .rewardReveal.megaReveal .rewardBall,
+  .rewardReveal.megaReveal .rewardName,
+  .packDropBanner,
+  .packMegaSpark,
+  #storeScreen.packTransitionOut .menuApp,
+  .storeFxLayer.packPortalTransition::after,
+  .packOverlay.packTransitionIn,
+  .packOverlay.packTransitionIn .packModal,
+  .packEquipConfirmation,
+  .packEquipSpark,
+  .homeHeroRays,
+  .homeBallHalo,
+  .homeBallPreview,
+  .homeLoadoutBall,
+  .homePlayButton,
+  .homePackCard.purchaseReady .homePackIcon,
+  #quickStore.purchaseReady .quickStoreBadge,
+  #storeScreen .shopBuyInvite,
+  button::before,
+  button::after,
+  .firstPackMilestoneCard,
+  .firstPackMilestoneCard::before,
+  .firstPackCoin,
+  .packContinue.packPlayButton,
+  .defeatPrelude::before,
+  .defeatImpact,
+  .overlay.victoryResult,
+  .boardWrap.speedRushLevel #game,
+  .boardWrap.miniBossLevel #game,
+  .boardWrap.defeatSlowdown #game,
+  .boardWrap.victorySlowdown #game,
+  .boardWrap.victorySlowdown #phaserArena,
+  .resultCard.defeat.celebrate{animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
