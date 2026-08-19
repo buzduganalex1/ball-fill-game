@@ -4770,6 +4770,15 @@ body.packOpen{overflow:hidden!important}
   0%,100%{background-color:rgba(20,37,48,.04)}
   50%{background-color:color-mix(in srgb,var(--rarity-color) 9%,rgba(20,37,48,.12))}
 }
+.ballCard.collectionPerformancePaused,
+.ballCard.collectionPerformancePaused::before,
+.ballCard.collectionPerformancePaused::after,
+.ballCard.collectionPerformancePaused .collectionBall,
+.ballCard.collectionPerformancePaused .collectionBall::before,
+.ballCard.collectionPerformancePaused .collectionBall::after,
+.ballCard.collectionPerformancePaused .apexInnerGlow{
+  animation-play-state:paused!important;
+}
 @media(prefers-reduced-motion:reduce){
   .ballCard,
   .collectionBall,
@@ -8312,6 +8321,10 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   const ctx = canvas.getContext('2d');
   const hudFxCanvas = document.getElementById('hudFxCanvas');
   const hudFxCtx = hudFxCanvas.getContext('2d');
+  const arenaGridCanvas=document.createElement('canvas');
+  const arenaGridCtx=arenaGridCanvas.getContext('2d');
+  let hudFxHasVisuals=false;
+  let gameFrameDirty=true;
   const ui = {
     homeScreen: document.getElementById('homeScreen'),
     gameScreen: document.getElementById('gameScreen'),
@@ -8842,6 +8855,31 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
   const TARGET = 30;
 
+  function rebuildArenaGrid(){
+    if(arenaGridCanvas.width!==W || arenaGridCanvas.height!==H){
+      arenaGridCanvas.width=W;
+      arenaGridCanvas.height=H;
+    }else{
+      arenaGridCtx.clearRect(0,0,W,H);
+    }
+
+    arenaGridCtx.save();
+    arenaGridCtx.globalAlpha=.2;
+    arenaGridCtx.strokeStyle='#cbd5df';
+    arenaGridCtx.lineWidth=1;
+    arenaGridCtx.beginPath();
+    for(let x=50;x<W;x+=50){
+      arenaGridCtx.moveTo(x,0);
+      arenaGridCtx.lineTo(x,H);
+    }
+    for(let y=50;y<H;y+=50){
+      arenaGridCtx.moveTo(0,y);
+      arenaGridCtx.lineTo(W,y);
+    }
+    arenaGridCtx.stroke();
+    arenaGridCtx.restore();
+  }
+
   function configureArenaForViewport(){
     const board=canvas.parentElement;
     const cssW=Math.max(1,canvas.clientWidth || board?.clientWidth || 600);
@@ -8868,6 +8906,10 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
     W=canvas.width;
     H=canvas.height;
+    if(changed || arenaGridCanvas.width!==W || arenaGridCanvas.height!==H){
+      rebuildArenaGrid();
+      gameFrameDirty=true;
+    }
     return changed;
   }
   const START_TIME = 45;
@@ -9045,6 +9087,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   function setBallAssetBackground(element,type){
     const path=BALL_ASSET_PATHS[type] || BALL_ASSET_PATHS.normal;
     if(!element) return;
+    if(element.dataset.ballAsset===path) return;
     element.style.backgroundImage=`url("${path}")`;
     element.style.backgroundPosition='center';
     element.style.backgroundRepeat='no-repeat';
@@ -9571,6 +9614,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     configureArenaForViewport();
     syncHudFxCanvas();
     stopGrowSound(true);
+    gameFrameDirty=true;
+    hudFxHasVisuals=false;
     if(state) state.rewardAnimToken=(state.rewardAnimToken||0)+1;
     clearConfetti();
     ui.coinTransfer?.classList.remove('transferring');
@@ -9593,6 +9638,8 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
       enemies:[],
       coverage:0,
       liveCoverage:0,
+      liveCoverageTimer:0,
+      uiSyncTimer:0,
       last:performance.now(),
       freezeLeft:0,
       destroyMode:false,
@@ -10098,6 +10145,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     }
 
     if(name==='game'){
+      gameFrameDirty=true;
       // Home keeps the game screen at display:none. Measure only after making
       // it visible so the canvas buffer matches the tall mobile arena instead
       // of stretching the hidden-screen 600 × 600 fallback.
@@ -11284,6 +11332,7 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     hudFxCtx.setTransform(1,0,0,1,0,0);
     hudFxCtx.clearRect(0,0,hudFxCanvas.width,hudFxCanvas.height);
     hudFxCtx.restore();
+    hudFxHasVisuals=false;
   }
 
   function beginDefeatSequence(){
@@ -11481,12 +11530,20 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
       updateGrowSound(b,limit,growthResult.grew);
       collectCoins(b);
-      state.liveCoverage=measureCoverage([...state.placed,b],72);
-      if(state.liveCoverage>=TARGET){
-        state.liveCoverage=measureCoverage([...state.placed,b]);
-        if(state.liveCoverage>=TARGET){
-          finish(true);
-          return;
+      state.liveCoverageTimer=Math.max(0,(state.liveCoverageTimer||0)-dt);
+      if(state.liveCoverageTimer<=0){
+        state.liveCoverageTimer=.075;
+        const liveBalls=[...state.placed,b];
+        state.liveCoverage=measureCoverage(liveBalls,64);
+
+        // Keep the inexpensive preview most of the time, then confirm a
+        // possible win with the established high-resolution measurement.
+        if(state.liveCoverage>=TARGET-.8){
+          state.liveCoverage=measureCoverage(liveBalls);
+          if(state.liveCoverage>=TARGET){
+            finish(true);
+            return;
+          }
         }
       }
 
@@ -11641,7 +11698,11 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     }
 
     if(state.messageT>0) state.messageT-=dt;
-    syncUI();
+    state.uiSyncTimer=(state.uiSyncTimer||0)+dt;
+    if(state.uiSyncTimer>=.08){
+      state.uiSyncTimer%=.08;
+      syncUI();
+    }
   }
 
   function measureCoverage(balls,n=110){
@@ -11894,7 +11955,12 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     ui.hudCollectionButton.setAttribute('aria-label',hudCollectionLabel);
     ui.hudCollectionButton.title=`${equippedBall.name} equipped • Open collection`;
     ui.coins.textContent=formatCoinAmount(state.scoreCoins);
-    syncEconomyUI();
+    if(currentScreen==='game'){
+      const pendingCoins=!state.settled ? state.scoreCoins : 0;
+      ui.walletCoins.textContent=formatCoinAmount(walletCoins+pendingCoins);
+    }else{
+      syncEconomyUI();
+    }
     const displayedCoverage=state.active ? state.liveCoverage : state.coverage;
     ui.coverage.textContent=displayedCoverage.toFixed(1);
     const progressPct=Math.max(0,Math.min(100,displayedCoverage/TARGET*100));
@@ -12029,10 +12095,21 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
   }
 
   function renderHudCoinFx(){
+    const hasCoinFlights=!!state?.coinFx?.some(effect=>effect.type==='coin');
+    if(!hasCoinFlights){
+      if(!hudFxHasVisuals) return;
+      hudFxCtx.save();
+      hudFxCtx.setTransform(1,0,0,1,0,0);
+      hudFxCtx.clearRect(0,0,hudFxCanvas.width,hudFxCanvas.height);
+      hudFxCtx.restore();
+      hudFxHasVisuals=false;
+      return;
+    }
+
+    hudFxHasVisuals=true;
     syncHudFxCanvas();
     const rect=ui.gameScreen.getBoundingClientRect();
     hudFxCtx.clearRect(0,0,rect.width,rect.height);
-    if(!state || !state.coinFx?.length) return;
 
     for(const f of state.coinFx){
       if(f.type!=='coin') continue;
@@ -12107,11 +12184,9 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
 
     ctx.fillStyle=COLORS.bg;ctx.fillRect(-20,-20,W+40,H+40);
 
-    // Subtle grid
-    ctx.save();ctx.globalAlpha=.2;ctx.strokeStyle='#cbd5df';ctx.lineWidth=1;
-    for(let x=50;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
-    for(let y=50;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-    ctx.restore();
+    // The arena grid is static, so render its cached layer in one draw call.
+    if(arenaGridCanvas.width!==W || arenaGridCanvas.height!==H) rebuildArenaGrid();
+    ctx.drawImage(arenaGridCanvas,0,0);
 
     // Locked balls
     for(const b of state.placed) drawBall(b,false);
@@ -12924,13 +12999,49 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     ctx.restore();
   }
 
+  const GAME_FRAME_INTERVAL=1000/60;
+  let lastRenderedGameFrame=0;
+
   function loop(ts){
-    const dt=Math.min(.035,(ts-state.last)/1000);
+    requestAnimationFrame(loop);
+    if(!state) return;
+
+    // Keep menus and backgrounded Capacitor WebViews cool. A dirty frame is
+    // still drawn once when entering gameplay or resetting a paused board.
+    if(document.hidden || currentScreen!=='game'){
+      state.last=ts;
+      lastRenderedGameFrame=ts;
+      return;
+    }
+
+    const needsAnimation=!!(
+      state.running ||
+      state.defeatSequence ||
+      gameFrameDirty ||
+      state.screenFlashT>0 ||
+      state.shakeT>0 ||
+      state.impactRings.length
+    );
+    if(!needsAnimation){
+      state.last=ts;
+      lastRenderedGameFrame=ts;
+      return;
+    }
+
+    const elapsed=ts-lastRenderedGameFrame;
+    if(lastRenderedGameFrame && elapsed<GAME_FRAME_INTERVAL-.75) return;
+    if(!lastRenderedGameFrame || elapsed>GAME_FRAME_INTERVAL*4){
+      lastRenderedGameFrame=ts;
+    }else{
+      lastRenderedGameFrame+=GAME_FRAME_INTERVAL;
+    }
+
+    const dt=Math.min(.035,Math.max(0,(ts-state.last)/1000));
     state.last=ts;
     update(dt);
     draw();
     renderHudCoinFx();
-    requestAnimationFrame(loop);
+    gameFrameDirty=false;
   }
 
   canvas.addEventListener('pointerdown',startBall);
@@ -13356,6 +13467,18 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     if(soundEnabled) ensureAudio();
   },{once:true});
 
+  document.addEventListener('visibilitychange',()=>{
+    lastRenderedGameFrame=0;
+    gameFrameDirty=true;
+    if(state) state.last=performance.now();
+
+    if(document.hidden){
+      stopGrowSound(true);
+    }else if(currentScreen==='game' && state?.running && state.active && soundEnabled){
+      startGrowSound();
+    }
+  });
+
   // ADMIN / TESTING CONTROLS
   function goToAdminLevel(){
     const requested=Math.max(1,Math.min(MAX_LEVEL,Math.floor(Number(ui.adminLevel.value)||1)));
@@ -13406,6 +13529,21 @@ button.purchaseReady:not(:disabled)::after{animation-duration:2.5s}
     updateBoosterUI();
     syncUI();
   });
+
+  // Collection cards outside the scroll viewport keep their layout but pause
+  // decorative glow/float work until they are close to being visible.
+  const collectionScroller=ui.collectionScreen.querySelector('.menuApp');
+  if('IntersectionObserver' in window && collectionScroller){
+    const collectionAnimationObserver=new IntersectionObserver(entries=>{
+      for(const entry of entries){
+        entry.target.classList.toggle('collectionPerformancePaused',!entry.isIntersecting);
+      }
+    },{root:collectionScroller,rootMargin:'140px 0px',threshold:.01});
+
+    document.querySelectorAll('#collectionScreen .ballCard').forEach(card=>{
+      collectionAnimationObserver.observe(card);
+    });
+  }
 
   // Prevent right-click menu from interrupting the toy.
   canvas.addEventListener('contextmenu',e=>e.preventDefault());
